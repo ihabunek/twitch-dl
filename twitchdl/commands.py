@@ -2,6 +2,7 @@ import re
 import subprocess
 import tempfile
 
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from urllib.request import urlretrieve
@@ -24,20 +25,40 @@ def read_int(msg, min, max, default):
             pass
 
 
-def format_length(seconds):
-    hours = seconds // 3600
-    remainder = seconds % 3600
+def format_size(bytes_):
+    if bytes_ < 1024:
+        return str(bytes_)
+
+    kilo = bytes_ / 1024
+    if kilo < 1024:
+        return "{:.1f}K".format(kilo)
+
+    mega = kilo / 1024
+    if mega < 1024:
+        return "{:.1f}M".format(mega)
+
+    return "{:.1f}G".format(mega / 1024)
+
+
+def format_duration(total_seconds):
+    total_seconds = int(total_seconds)
+    hours = total_seconds // 3600
+    remainder = total_seconds % 3600
     minutes = remainder // 60
+    seconds = total_seconds % 60
 
     if hours:
-        return "{}h {}min".format(hours, minutes)
+        return "{} h {} min".format(hours, minutes)
 
-    return "{}min".format(minutes)
+    if minutes:
+        return "{} min {} sec".format(minutes, seconds)
+
+    return "{} sec".format(seconds)
 
 
 def _print_video(video):
     published_at = video['published_at'].replace('T', ' @ ').replace('Z', '')
-    length = format_length(video['length'])
+    length = format_duration(video['length'])
     name = video['channel']['display_name']
 
     print_out("\n<bold>{}</bold>".format(video['_id'][1:]))
@@ -69,10 +90,21 @@ def _select_playlist_by_quality(playlists):
 def _print_progress(futures):
     counter = 1
     total = len(futures)
+    total_size = 0
+    start_time = datetime.now()
 
     for future in as_completed(futures):
-        msg = "Downloaded {}/{} ({}%)".format(counter, total, 100 * counter // total)
-        print("\r" + msg, end='')
+        file, headers = future.result()
+        percentage = 100 * counter // total
+        total_size += int(headers.get("Content-Length"))
+        duration = (datetime.now() - start_time).seconds
+        speed = total_size // duration if duration else 0
+        remaining = (total - counter) * duration / counter
+
+        msg = "Downloaded VOD {}/{} ({}%) total <cyan>{}B</cyan> at <cyan>{}B/s</cyan> remaining <cyan>{}</cyan>".format(
+            counter, total, percentage, format_size(total_size), format_size(speed), format_duration(remaining))
+
+        print_out("\r" + msg.ljust(80), end='')
         counter += 1
 
 
@@ -131,7 +163,7 @@ def download(video_id, max_workers, format='mkv', **kwargs):
     target = _video_target_filename(video, format)
 
     with tempfile.TemporaryDirectory() as directory:
-        print("Downloading...")
+        print("Downloading with {} workers...".format(max_workers))
         _download_files(base_url, directory, filenames, max_workers)
 
         print("\n\nJoining files...")
