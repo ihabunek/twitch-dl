@@ -23,6 +23,6 @@ def parse_playlists(data):
 def parse_playlist(url, data):
     base_url = re.sub("/[^/]+$", "/{}", url)
 
-    filenames = [line for line in data.split() if re.match(r"\d+\.ts", line)]
+    filenames = [line for line in data.split() if str(line).endswith('.ts')]
 
     return base_url, filenames
