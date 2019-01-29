@@ -1,3 +1,5 @@
+import os
+import pathlib
 import re
 import subprocess
 import tempfile
@@ -5,10 +7,11 @@ import tempfile
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
-from urllib.request import urlretrieve
 
 from twitchdl import twitch
+from twitchdl.download import download_file
 from twitchdl.output import print_out
+from twitchdl.utils import slugify
 
 
 def read_int(msg, min, max, default):
@@ -76,7 +79,7 @@ def videos(channel_name, **kwargs):
         _print_video(video)
 
 
-def _select_playlist_by_quality(playlists):
+def _select_quality(playlists):
     print("\nAvailable qualities:")
     for no, v in playlists.items():
         print("{}) {}".format(no, v[0]))
@@ -84,7 +87,7 @@ def _select_playlist_by_quality(playlists):
     keys = list(playlists.keys())
     no = read_int("Choose quality", min=min(keys), max=max(keys), default=keys[0])
 
-    return playlists[no][1]
+    return playlists[no]
 
 
 def _print_progress(futures):
@@ -94,9 +97,9 @@ def _print_progress(futures):
     start_time = datetime.now()
 
     for future in as_completed(futures):
-        file, headers = future.result()
+        size = future.result()
         percentage = 100 * counter // total
-        total_size += int(headers.get("Content-Length"))
+        total_size += size
         duration = (datetime.now() - start_time).seconds
         speed = total_size // duration if duration else 0
         remaining = (total - counter) * duration / counter
@@ -109,23 +112,23 @@ def _print_progress(futures):
 
 
 def _download_files(base_url, directory, filenames, max_workers):
-    args = [(base_url.format(f), "/".join([directory, f])) for f in filenames]
-
-    fns = [partial(urlretrieve, url, path) for url, path in args]
+    urls = [base_url.format(f) for f in filenames]
+    paths = ["/".join([directory, f]) for f in filenames]
+    partials = (partial(download_file, url, path) for url, path in zip(urls, paths))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(fn) for fn in fns]
+        futures = [executor.submit(fn) for fn in partials]
         _print_progress(futures)
 
-    return [f.result()[0] for f in futures]
+    return paths
 
 
-def _join_vods(directory, filenames, target):
+def _join_vods(directory, paths, target):
     input_path = "{}/files.txt".format(directory)
 
     with open(input_path, 'w') as f:
-        for filename in filenames:
-            f.write('file {}\n'.format(filename))
+        for path in paths:
+            f.write('file {}\n'.format(os.path.basename(path)))
 
     result = subprocess.run([
         "ffmpeg",
@@ -141,9 +144,17 @@ def _join_vods(directory, filenames, target):
 
 
 def _video_target_filename(video, format):
-    dttm = re.sub(r'\D+', '-', video['published_at'][:16])
-    name = " - ".join([dttm, video['channel']['display_name'], video['game']])
-    return "{}.{}".format(name, format)
+    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", video['published_at'])
+    date = "".join(match.groups())
+
+    name = "_".join([
+        date,
+        video['_id'][1:],
+        video['channel']['name'],
+        slugify(video['title']),
+    ])
+
+    return name + "." + format
 
 
 def download(video_id, max_workers, format='mkv', **kwargs):
@@ -155,18 +166,25 @@ def download(video_id, max_workers, format='mkv', **kwargs):
 
     print("Fetching playlists...")
     playlists = twitch.get_playlists(video_id, access_token)
-    playlist_url = _select_playlist_by_quality(playlists)
+    quality, playlist_url = _select_quality(playlists)
 
     print("\nFetching playlist...")
     base_url, filenames = twitch.get_playlist_urls(playlist_url)
 
+    # Create a temp dir to store downloads if it doesn't exist
+    directory = '{}/twitch-dl/{}/{}'.format(tempfile.gettempdir(), video_id, quality)
+    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+    print("Download dir: {}".format(directory))
+
+    print("Downloading VODs with {} workers...".format(max_workers))
+    paths = _download_files(base_url, directory, filenames, max_workers)
+
+    print("\n\nJoining files...")
     target = _video_target_filename(video, format)
+    _join_vods(directory, paths, target)
 
-    with tempfile.TemporaryDirectory() as directory:
-        print("Downloading with {} workers...".format(max_workers))
-        _download_files(base_url, directory, filenames, max_workers)
-
-        print("\n\nJoining files...")
-        _join_vods(directory, filenames, target)
+    print("\nDeleting vods...")
+    for path in paths:
+        os.unlink(path)
 
     print("\nDownloaded: {}".format(target))
