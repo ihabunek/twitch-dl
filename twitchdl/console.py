@@ -3,6 +3,8 @@
 from argparse import ArgumentParser
 from collections import namedtuple
 
+from twitchdl.exceptions import ConsoleError
+from twitchdl.output import print_err
 from . import commands
 
 
@@ -27,7 +29,7 @@ COMMANDS = [
         arguments=[
             (["video_id"], {
                 "help": "video ID",
-                "type": int,
+                "type": str,
             }),
             (["-w", "--max_workers"], {
                 "help": "maximal number of threads for downloading vods concurrently (default 5)",
@@ -78,4 +80,7 @@ def main():
         parser.print_help()
         return
 
-    args.func(**args.__dict__)
+    try:
+        args.func(**args.__dict__)
+    except ConsoleError as e:
+        print_err(e)

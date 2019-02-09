@@ -10,6 +10,7 @@ from functools import partial
 
 from twitchdl import twitch
 from twitchdl.download import download_file
+from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out
 from twitchdl.utils import slugify
 
@@ -157,7 +158,21 @@ def _video_target_filename(video, format):
     return name + "." + format
 
 
+def parse_video_id(video_id):
+    """This can be either a integer ID or an URL to the video on twitch."""
+    if re.search(r"^\d+$", video_id):
+        return int(video_id)
+
+    match = re.search(r"^https://www.twitch.tv/videos/(\d+)$", video_id)
+    if match:
+        return int(match.group(1))
+
+    raise ConsoleError("Invalid video ID given, expected integer ID or Twitch URL")
+
+
 def download(video_id, max_workers, format='mkv', **kwargs):
+    video_id = parse_video_id(video_id)
+
     print("Looking up video...")
     video = twitch.get_video(video_id)
 
