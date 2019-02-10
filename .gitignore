@@ -9,4 +9,5 @@ tmp/
 /.env
 /.coverage
 /htmlcov
-/toot-*.tar.gz
+/twitch-dl-*.tar.gz
+/twitch-dl.1.man
