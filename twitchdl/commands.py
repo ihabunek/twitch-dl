@@ -163,7 +163,7 @@ def parse_video_id(video_id):
     if re.search(r"^\d+$", video_id):
         return int(video_id)
 
-    match = re.search(r"^https://www.twitch.tv/videos/(\d+)$", video_id)
+    match = re.search(r"^https://www.twitch.tv/videos/(\d+)(\?.+)?$", video_id)
     if match:
         return int(match.group(1))
 
