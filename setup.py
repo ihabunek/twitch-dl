@@ -21,6 +21,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     packages=['twitchdl'],
+    python_requires='>=3.5',
     install_requires=[
         "requests>=2.13,<3.0",
     ],
