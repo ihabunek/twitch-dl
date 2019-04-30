@@ -81,9 +81,9 @@ def videos(channel_name, **kwargs):
 
 
 def _select_quality(playlists):
-    print("\nAvailable qualities:")
+    print_out("\nAvailable qualities:")
     for no, v in playlists.items():
-        print("{}) {}".format(no, v[0]))
+        print_out("{}) {}".format(no, v[0]))
 
     keys = list(playlists.keys())
     no = read_int("Choose quality", min=min(keys), max=max(keys), default=keys[0])
@@ -173,33 +173,36 @@ def parse_video_id(video_id):
 def download(video_id, max_workers, format='mkv', **kwargs):
     video_id = parse_video_id(video_id)
 
-    print("Looking up video...")
+    print_out("Looking up video...")
     video = twitch.get_video(video_id)
 
-    print("Fetching access token...")
+    print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
+        video['title'], video['channel']['display_name']))
+
+    print_out("Fetching access token...")
     access_token = twitch.get_access_token(video_id)
 
-    print("Fetching playlists...")
+    print_out("Fetching playlists...")
     playlists = twitch.get_playlists(video_id, access_token)
     quality, playlist_url = _select_quality(playlists)
 
-    print("\nFetching playlist...")
+    print_out("\nFetching playlist...")
     base_url, filenames = twitch.get_playlist_urls(playlist_url)
 
     # Create a temp dir to store downloads if it doesn't exist
     directory = '{}/twitch-dl/{}/{}'.format(tempfile.gettempdir(), video_id, quality)
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-    print("Download dir: {}".format(directory))
+    print_out("Download dir: {}".format(directory))
 
-    print("Downloading VODs with {} workers...".format(max_workers))
+    print_out("Downloading VODs with {} workers...".format(max_workers))
     paths = _download_files(base_url, directory, filenames, max_workers)
 
-    print("\n\nJoining files...")
+    print_out("\n\nJoining files...")
     target = _video_target_filename(video, format)
     _join_vods(directory, paths, target)
 
-    print("\nDeleting vods...")
+    print_out("\nDeleting vods...")
     for path in paths:
         os.unlink(path)
 
-    print("\nDownloaded: {}".format(target))
+    print_out("\nDownloaded: {}".format(target))
