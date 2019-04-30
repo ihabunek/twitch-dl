@@ -9,9 +9,9 @@ connections to make the download faster.
 Resources
 ---------
 
-Homepage: https://github.com/ihabunek/twitch-dl
-Issues: https://github.com/ihabunek/twitch-dl/issues
-Python package: https://pypi.org/project/twitch-dl/
+* Homepage: https://github.com/ihabunek/twitch-dl
+* Issues: https://github.com/ihabunek/twitch-dl/issues
+* Python package: https://pypi.org/project/twitch-dl/
 
 Usage
 -----
