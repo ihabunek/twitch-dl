@@ -5,9 +5,9 @@ from setuptools import setup
 
 setup(
     name='twitch-dl',
-    version='0.1.0',
+    version='1.0.0',
     description='Twitch downloader',
-    long_description="A simple script for downloading videos from Twitch",
+    long_description="Quickly download videos from Twitch",
     author='Ivan Habunek',
     author_email='ivan@habunek.com',
     url='https://github.com/ihabunek/twitch-dl/',
@@ -19,6 +19,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=['twitchdl'],
     python_requires='>=3.5',
