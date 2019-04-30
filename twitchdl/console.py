@@ -34,7 +34,7 @@ COMMANDS = [
             (["-w", "--max_workers"], {
                 "help": "maximal number of threads for downloading vods concurrently (default 5)",
                 "type": int,
-                "default": 10,
+                "default": 20,
             }),
         ],
     ),
