@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 from collections import namedtuple
 
 from twitchdl.exceptions import ConsoleError
@@ -11,6 +11,24 @@ from . import commands
 Command = namedtuple("Command", ["name", "description", "arguments"])
 
 CLIENT_WEBSITE = 'https://github.com/ihabunek/twitch-dl'
+
+
+def time(value):
+    """Parse a time string (hh:mm or hh:mm:ss) to number of seconds."""
+    parts = [int(p) for p in value.split(":")]
+
+    if not 2 <= len(parts) <= 3:
+        raise ArgumentTypeError()
+
+    hours = parts[0]
+    minutes = parts[1]
+    seconds = parts[2] if len(parts) > 2 else 0
+
+    if hours < 0 or not (0 <= minutes <= 59) or not (0 <= seconds <= 59):
+        raise ArgumentTypeError()
+
+    return hours * 3600 + minutes * 60 + seconds
+
 
 COMMANDS = [
     Command(
@@ -35,6 +53,16 @@ COMMANDS = [
                 "help": "maximal number of threads for downloading vods concurrently (default 5)",
                 "type": int,
                 "default": 20,
+            }),
+            (["-s", "--start"], {
+                "help": "Download video from this time (hh:mm or hh:mm:ss)",
+                "type": time,
+                "default": None,
+            }),
+            (["-e", "--end"], {
+                "help": "Download video up to this time (hh:mm or hh:mm:ss)",
+                "type": time,
+                "default": None,
             }),
         ],
     ),

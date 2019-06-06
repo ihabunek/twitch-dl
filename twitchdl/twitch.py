@@ -56,10 +56,9 @@ def get_playlists(video_id, access_token):
     return parse_playlists(data)
 
 
-def get_playlist_urls(url):
+def get_playlist_urls(url, start, end):
     response = requests.get(url)
     response.raise_for_status()
 
     data = response.content.decode('utf-8')
-
-    return parse_playlist(url, data)
+    return parse_playlist(url, data, start, end)

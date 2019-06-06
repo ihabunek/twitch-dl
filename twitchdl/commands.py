@@ -170,8 +170,11 @@ def parse_video_id(video_id):
     raise ConsoleError("Invalid video ID given, expected integer ID or Twitch URL")
 
 
-def download(video_id, max_workers, format='mkv', **kwargs):
+def download(video_id, max_workers, format='mkv', start=None, end=None, **kwargs):
     video_id = parse_video_id(video_id)
+
+    if start and end and end <= start:
+        raise ConsoleError("End time must be greater than start time")
 
     print_out("Looking up video...")
     video = twitch.get_video(video_id)
@@ -187,14 +190,17 @@ def download(video_id, max_workers, format='mkv', **kwargs):
     quality, playlist_url = _select_quality(playlists)
 
     print_out("\nFetching playlist...")
-    base_url, filenames = twitch.get_playlist_urls(playlist_url)
+    base_url, filenames = twitch.get_playlist_urls(playlist_url, start, end)
+
+    if not filenames:
+        raise ConsoleError("No vods matched, check your start and end times")
 
     # Create a temp dir to store downloads if it doesn't exist
     directory = '{}/twitch-dl/{}/{}'.format(tempfile.gettempdir(), video_id, quality)
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
     print_out("Download dir: {}".format(directory))
 
-    print_out("Downloading VODs with {} workers...".format(max_workers))
+    print_out("Downloading {} VODs using {} workers...".format(len(filenames), max_workers))
     paths = _download_files(base_url, directory, filenames, max_workers)
 
     print_out("\n\nJoining files...")
