@@ -5,7 +5,7 @@ from collections import namedtuple
 
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_err
-from . import commands
+from . import commands, __version__
 
 
 Command = namedtuple("Command", ["name", "description", "arguments"])
@@ -93,6 +93,8 @@ def get_parser():
     description = "A script for downloading videos from Twitch"
 
     parser = ArgumentParser(prog='twitch-dl', description=description, epilog=CLIENT_WEBSITE)
+    parser.add_argument("--version", help="show version number", action='store_true')
+
     subparsers = parser.add_subparsers(title="commands")
 
     for command in COMMANDS:
@@ -110,6 +112,10 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
+    if args.version:
+        print("twitch-dl v{}".format(__version__))
+        return
 
     if "func" not in args:
         parser.print_help()
