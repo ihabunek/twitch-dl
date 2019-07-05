@@ -50,7 +50,8 @@ COMMANDS = [
                 "type": str,
             }),
             (["-w", "--max_workers"], {
-                "help": "maximal number of threads for downloading vods concurrently (default 5)",
+                "help": "maximal number of threads for downloading vods "
+                        "concurrently (default 5)",
                 "type": int,
                 "default": 20,
             }),
@@ -63,6 +64,12 @@ COMMANDS = [
                 "help": "Download video up to this time (hh:mm or hh:mm:ss)",
                 "type": time,
                 "default": None,
+            }),
+            (["-f", "--format"], {
+                "help": "Video format to convert into, passed to ffmpeg as the "
+                        "target file extension (default: mkv)",
+                "type": str,
+                "default": "mkv",
             }),
         ],
     ),

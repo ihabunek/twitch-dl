@@ -36,6 +36,18 @@ Download by ID:
 twitch-dl download 377220226
 ```
 
+Specify output format:
+
+```
+twitch-dl download --format=avi 377220226
+```
+
+Partial download by setting start and end time (hh:mm or hh:mm:ss):
+
+```
+twitch-dl download --start=00:10 --end=02:15 377220226
+```
+
 # SEE ALSO
 
 youtube-dl(1)
