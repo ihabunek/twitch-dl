@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='twitch-dl',
-    version='1.1.0',
+    version='1.2.0',
     description='Twitch downloader',
     long_description="Quickly download videos from Twitch",
     author='Ivan Habunek',
