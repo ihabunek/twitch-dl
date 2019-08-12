@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 from argparse import ArgumentParser, ArgumentTypeError
 from collections import namedtuple
 
@@ -125,3 +127,4 @@ def main():
         args.func(**args.__dict__)
     except ConsoleError as e:
         print_err(e)
+        sys.exit(1)
