@@ -1,6 +1,7 @@
 import requests
 
 from twitchdl import CLIENT_ID
+from twitchdl.exceptions import ConsoleError
 from twitchdl.parse import parse_playlists, parse_playlist
 
 
@@ -8,6 +9,10 @@ def authenticated_get(url, params={}):
     headers = {'Client-ID': CLIENT_ID}
 
     response = requests.get(url, params, headers=headers)
+    if response.status_code == 400:
+        data = response.json()
+        raise ConsoleError(data["message"])
+
     response.raise_for_status()
 
     return response
