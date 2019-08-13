@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.3.1 (2019-08-13)
+------------------
+
+* No changes, bumped to fix issue with pypi
+
 1.3.0 (2019-08-13)
 ------------------
 

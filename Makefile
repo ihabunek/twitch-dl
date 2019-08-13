@@ -2,7 +2,7 @@ default : clean dist
 
 dist :
 	python setup.py sdist --formats=gztar,zip
-	python setup.py bdist_wheel
+	python setup.py bdist_wheel --python-tag=py3
 
 clean :
 	find . -name "*pyc" | xargs rm -rf $1
