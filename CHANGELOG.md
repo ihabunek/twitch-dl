@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.3.0 (2019-08-13)
+------------------
+
+* Add `--sort` and `--offset` options to `videos` command, allows paging (#7)
+* Show video URL in `videos` command output
+
 1.2.0 (2019-07-05)
 ------------------
 
