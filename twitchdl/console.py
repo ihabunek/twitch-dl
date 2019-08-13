@@ -41,6 +41,22 @@ COMMANDS = [
                 "help": "channel name",
                 "type": str,
             }),
+            (["-l", "--limit"], {
+                "help": "Number of videos to fetch (default 10, max 100)",
+                "type": int,
+                "default": 10,
+            }),
+            (["-o", "--offset"], {
+                "help": "Offset for pagination of results. (default 0)",
+                "type": int,
+                "default": 0,
+            }),
+            (["-s", "--sort"], {
+                "help": "Sorting order of videos. (default: time)",
+                "type": str,
+                "choices": ["views", "time"],
+                "default": "time",
+            }),
         ],
     ),
     Command(

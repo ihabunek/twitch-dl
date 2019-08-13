@@ -27,7 +27,7 @@ def get_video(video_id):
     return authenticated_get(url).json()
 
 
-def get_channel_videos(channel_name, limit=20):
+def get_channel_videos(channel_name, limit, offset, sort):
     """
     https://dev.twitch.tv/docs/v5/reference/channels#get-channel-videos
     """
@@ -36,6 +36,8 @@ def get_channel_videos(channel_name, limit=20):
     return authenticated_get(url, {
         "broadcast_type": "archive",
         "limit": limit,
+        "offset": offset,
+        "sort": sort,
     }).json()
 
 

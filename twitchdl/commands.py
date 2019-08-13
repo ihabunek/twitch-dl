@@ -72,10 +72,18 @@ def _print_video(video):
     print_out(video["url"])
 
 
-def videos(channel_name, **kwargs):
-    videos = twitch.get_channel_videos(channel_name)
+def videos(channel_name, limit, offset, sort, **kwargs):
+    videos = twitch.get_channel_videos(channel_name, limit, offset, sort)
 
-    print("Found {} videos".format(videos["_total"]))
+    count = len(videos['videos'])
+    if not count:
+        print_out("No videos found")
+        return
+
+    first = offset + 1
+    last = offset + len(videos['videos'])
+    total = videos["_total"]
+    print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
 
     for video in videos['videos']:
         _print_video(video)
