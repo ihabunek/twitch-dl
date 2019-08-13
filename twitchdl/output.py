@@ -5,6 +5,8 @@ import re
 
 START_CODES = {
     'bold': '\033[1m',
+    'i': '\033[3m',
+    'u': '\033[4m',
     'red': '\033[31m',
     'green': '\033[32m',
     'yellow': '\033[33m',

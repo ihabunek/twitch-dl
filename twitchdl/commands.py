@@ -69,7 +69,7 @@ def _print_video(video):
     print_out("<green>{}</green>".format(video["title"]))
     print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(name, video['game']))
     print_out("Published <cyan>{}</cyan>  Length: <cyan>{}</cyan> ".format(published_at, length))
-    print_out(video["url"])
+    print_out("<i>{}</i>".format(video["url"]))
 
 
 def videos(channel_name, limit, offset, sort, **kwargs):
