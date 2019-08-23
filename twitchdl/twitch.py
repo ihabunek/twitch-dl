@@ -6,7 +6,6 @@ import requests
 
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
-from twitchdl.parse import parse_playlists, parse_playlist
 
 
 def authenticated_get(url, params={}, headers={}):
@@ -73,6 +72,9 @@ def get_access_token(video_id):
 
 
 def get_playlists(video_id, access_token):
+    """
+    For a given video return a playlist which contains possible video qualities.
+    """
     url = "http://usher.twitch.tv/vod/{}".format(video_id)
 
     response = requests.get(url, params={
@@ -82,15 +84,4 @@ def get_playlists(video_id, access_token):
         "player": "twitchweb",
     })
     response.raise_for_status()
-
-    data = response.content.decode('utf-8')
-
-    return parse_playlists(data)
-
-
-def get_playlist_urls(url, start, end):
-    response = requests.get(url)
-    response.raise_for_status()
-
-    data = response.content.decode('utf-8')
-    return parse_playlist(url, data, start, end)
+    return response.content.decode('utf-8')

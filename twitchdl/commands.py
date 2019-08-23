@@ -1,12 +1,16 @@
+import m3u8
 import os
 import pathlib
 import re
+import requests
+import shutil
 import subprocess
 import tempfile
 
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from functools import partial
+from urllib.parse import urlparse
 
 from twitchdl import twitch
 from twitchdl.download import download_file
@@ -96,13 +100,14 @@ def videos(channel_name, limit, offset, sort, **kwargs):
 
 def _select_quality(playlists):
     print_out("\nAvailable qualities:")
-    for no, v in playlists.items():
-        print_out("{}) {}".format(no, v[0]))
+    for n, p in enumerate(playlists):
+        name = p.media[0].name if p.media else ""
+        resolution = "x".join(str(r) for r in p.stream_info.resolution)
+        print_out("{}) {} [{}]".format(n + 1, name, resolution))
 
-    keys = list(playlists.keys())
-    no = read_int("Choose quality", min=min(keys), max=max(keys), default=keys[0])
+    no = read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
 
-    return playlists[no]
+    return playlists[no - 1]
 
 
 def _print_progress(futures):
@@ -127,7 +132,7 @@ def _print_progress(futures):
 
 
 def _download_files(base_url, directory, filenames, max_workers):
-    urls = [base_url.format(f) for f in filenames]
+    urls = [base_url + f for f in filenames]
     paths = ["/".join([directory, f]) for f in filenames]
     partials = (partial(download_file, url, path) for url, path in zip(urls, paths))
 
@@ -172,7 +177,7 @@ def _video_target_filename(video, format):
     return name + "." + format
 
 
-def parse_video_id(video_id):
+def _parse_video_id(video_id):
     """This can be either a integer ID or an URL to the video on twitch."""
     if re.search(r"^\d+$", video_id):
         return int(video_id)
@@ -184,8 +189,33 @@ def parse_video_id(video_id):
     raise ConsoleError("Invalid video ID given, expected integer ID or Twitch URL")
 
 
+def _get_files(playlist, start, end):
+    """Extract files for download from playlist."""
+    vod_start = 0
+    for segment in playlist.segments:
+        vod_end = vod_start + segment.duration
+
+        # `vod_end > start` is used here becuase it's better to download a bit
+        # more than a bit less, similar for the end condition
+        start_condition = not start or vod_end > start
+        end_condition = not end or vod_start < end
+
+        if start_condition and end_condition:
+            yield segment.uri
+
+        vod_start = vod_end
+
+
+def _crete_temp_dir(base_uri):
+    """Create a temp dir to store downloads if it doesn't exist."""
+    path = urlparse(base_uri).path
+    directory = '{}/twitch-dl{}'.format(tempfile.gettempdir(), path)
+    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+    return directory
+
+
 def download(video_id, max_workers, format='mkv', start=None, end=None, keep=False, **kwargs):
-    video_id = parse_video_id(video_id)
+    video_id = _parse_video_id(video_id)
 
     if start and end and end <= start:
         raise ConsoleError("End time must be greater than start time")
@@ -199,33 +229,34 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, keep=Fal
     print_out("Fetching access token...")
     access_token = twitch.get_access_token(video_id)
 
+    # TODO: save playlists for debugging purposes
+
     print_out("Fetching playlists...")
     playlists = twitch.get_playlists(video_id, access_token)
-    quality, playlist_url = _select_quality(playlists)
+    playlists = m3u8.loads(playlists)
+    selected = _select_quality(playlists.playlists)
 
     print_out("\nFetching playlist...")
-    base_url, filenames = twitch.get_playlist_urls(playlist_url, start, end)
+    response = requests.get(selected.uri)
+    response.raise_for_status()
+    playlist = m3u8.loads(response.text)
 
-    if not filenames:
-        raise ConsoleError("No vods matched, check your start and end times")
+    base_uri = re.sub("/[^/]+$", "/", selected.uri)
+    target_dir = _crete_temp_dir(base_uri)
+    filenames = list(_get_files(playlist, start, end))
 
-    # Create a temp dir to store downloads if it doesn't exist
-    directory = '{}/twitch-dl/{}/{}'.format(tempfile.gettempdir(), video_id, quality)
-    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-    print_out("Download dir: {}".format(directory))
-
-    print_out("Downloading {} VODs using {} workers...".format(len(filenames), max_workers))
-    paths = _download_files(base_url, directory, filenames, max_workers)
+    print_out("\nDownloading {} VODs using {} workers to {}".format(
+        len(filenames), max_workers, target_dir))
+    _download_files(base_uri, target_dir, filenames, max_workers)
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, format)
-    _join_vods(directory, paths, target)
+    _join_vods(target_dir, filenames, target)
 
     if keep:
-        print_out("\nTemporary files not deleted: {}".format(directory))
+        print_out("\nTemporary files not deleted: {}".format(target_dir))
     else:
-        print_out("\nDeleting vods...")
-        for path in paths:
-            os.unlink(path)
+        print_out("\nDeleting temporary files...")
+        shutil.rmtree(target_dir)
 
     print_out("Downloaded: {}".format(target))

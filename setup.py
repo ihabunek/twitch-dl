@@ -24,6 +24,7 @@ setup(
     packages=['twitchdl'],
     python_requires='>=3.5',
     install_requires=[
+        "m3u8>=0.3.12,<0.4",
         "requests>=2.13,<3.0",
     ],
     entry_points={
