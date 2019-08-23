@@ -184,7 +184,7 @@ def parse_video_id(video_id):
     raise ConsoleError("Invalid video ID given, expected integer ID or Twitch URL")
 
 
-def download(video_id, max_workers, format='mkv', start=None, end=None, **kwargs):
+def download(video_id, max_workers, format='mkv', start=None, end=None, keep=False, **kwargs):
     video_id = parse_video_id(video_id)
 
     if start and end and end <= start:
@@ -221,8 +221,11 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, **kwargs
     target = _video_target_filename(video, format)
     _join_vods(directory, paths, target)
 
-    print_out("\nDeleting vods...")
-    for path in paths:
-        os.unlink(path)
+    if keep:
+        print_out("\nTemporary files not deleted: {}".format(directory))
+    else:
+        print_out("\nDeleting vods...")
+        for path in paths:
+            os.unlink(path)
 
-    print_out("\nDownloaded: {}".format(target))
+    print_out("Downloaded: {}".format(target))

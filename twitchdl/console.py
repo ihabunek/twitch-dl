@@ -89,6 +89,11 @@ COMMANDS = [
                 "type": str,
                 "default": "mkv",
             }),
+            (["-k", "--keep"], {
+                "help": "Don't delete downloaded VODs and playlists after merging.",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
 ]
