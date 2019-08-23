@@ -1,3 +1,7 @@
+"""
+Twitch API access.
+"""
+
 import requests
 
 from twitchdl import CLIENT_ID
@@ -5,8 +9,8 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.parse import parse_playlists, parse_playlist
 
 
-def authenticated_get(url, params={}):
-    headers = {'Client-ID': CLIENT_ID}
+def authenticated_get(url, params={}, headers={}):
+    headers['Client-ID'] = CLIENT_ID
 
     response = requests.get(url, params, headers=headers)
     if response.status_code == 400:
@@ -18,22 +22,43 @@ def authenticated_get(url, params={}):
     return response
 
 
+def kraken_get(url, params={}, headers={}):
+    """
+    Add accept header required by kraken API v5.
+    see: https://discuss.dev.twitch.tv/t/change-in-access-to-deprecated-kraken-twitch-apis/22241
+    """
+    headers["Accept"] = "application/vnd.twitchtv.v5+json"
+    return authenticated_get(url, params, headers)
+
+
+def get_user(login):
+    """
+    https://dev.twitch.tv/docs/api/reference/#get-users
+    """
+    response = authenticated_get("https://api.twitch.tv/helix/users", {
+        "login": login
+    })
+
+    users = response.json()["data"]
+    return users[0] if users else None
+
+
 def get_video(video_id):
     """
     https://dev.twitch.tv/docs/v5/reference/videos#get-video
     """
     url = "https://api.twitch.tv/kraken/videos/%d" % video_id
 
-    return authenticated_get(url).json()
+    return kraken_get(url).json()
 
 
-def get_channel_videos(channel_name, limit, offset, sort):
+def get_channel_videos(channel_id, limit, offset, sort):
     """
     https://dev.twitch.tv/docs/v5/reference/channels#get-channel-videos
     """
-    url = "https://api.twitch.tv/kraken/channels/%s/videos" % channel_name
+    url = "https://api.twitch.tv/kraken/channels/{}/videos".format(channel_id)
 
-    return authenticated_get(url, {
+    return kraken_get(url, {
         "broadcast_type": "archive",
         "limit": limit,
         "offset": offset,

@@ -73,8 +73,13 @@ def _print_video(video):
 
 
 def videos(channel_name, limit, offset, sort, **kwargs):
-    videos = twitch.get_channel_videos(channel_name, limit, offset, sort)
+    print_out("Looking up user...")
+    user = twitch.get_user(channel_name)
+    if not user:
+        raise ConsoleError("User {} not found.".format(channel_name))
 
+    print_out("Loading videos...")
+    videos = twitch.get_channel_videos(user["id"], limit, offset, sort)
     count = len(videos['videos'])
     if not count:
         print_out("No videos found")
