@@ -229,12 +229,10 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, keep=Fal
     print_out("Fetching access token...")
     access_token = twitch.get_access_token(video_id)
 
-    # TODO: save playlists for debugging purposes
-
     print_out("Fetching playlists...")
     playlists = twitch.get_playlists(video_id, access_token)
-    playlists = m3u8.loads(playlists)
-    selected = _select_quality(playlists.playlists)
+    parsed = m3u8.loads(playlists)
+    selected = _select_quality(parsed.playlists)
 
     print_out("\nFetching playlist...")
     response = requests.get(selected.uri)
@@ -244,6 +242,12 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, keep=Fal
     base_uri = re.sub("/[^/]+$", "/", selected.uri)
     target_dir = _crete_temp_dir(base_uri)
     filenames = list(_get_files(playlist, start, end))
+
+    # Save playlists for debugging purposes
+    with open(target_dir + "playlists.m3u8", "w") as f:
+        f.write(playlists)
+    with open(target_dir + "playlist.m3u8", "w") as f:
+        f.write(response.text)
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
         len(filenames), max_workers, target_dir))
