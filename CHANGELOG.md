@@ -1,6 +1,13 @@
 Twitch Downloader change log
 ============================
 
+1.4.0 (2019-08-23)
+------------------
+
+* Fix usage of deprecated v3 API
+* Use m3u8 lib for parsing playlists
+* Add `--keep` option not preserve downloaded VODs
+
 1.3.1 (2019-08-13)
 ------------------
 
