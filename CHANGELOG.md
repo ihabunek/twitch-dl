@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.5.0 (2020-04-10)
+------------------
+
+* Fix video downloads after Twitch deprecated access token access
+* Don't print errors when retrying download, only if all fails
+
 1.4.0 (2019-08-23)
 ------------------
 
