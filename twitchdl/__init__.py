@@ -1,3 +1,3 @@
 __version__ = "1.4.0"
 
-CLIENT_ID = "miwy5zk23vh2he94san0bzj5ks1r0p"
+CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko"
