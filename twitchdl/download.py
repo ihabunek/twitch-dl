@@ -6,6 +6,7 @@ from requests.exceptions import RequestException
 
 CHUNK_SIZE = 1024
 CONNECT_TIMEOUT = 5
+RETRY_COUNT = 5
 
 
 class DownloadFailed(Exception):
@@ -25,14 +26,14 @@ def _download(url, path):
     return size
 
 
-def download_file(url, path, retries=3):
+def download_file(url, path, retries=RETRY_COUNT):
     if os.path.exists(path):
         return 0
 
     for _ in range(retries):
         try:
             return _download(url, path)
-        except RequestException as e:
-            print("Download failed: {}".format(e))
+        except RequestException:
+            pass
 
     raise DownloadFailed(":(")
