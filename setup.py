@@ -2,12 +2,18 @@
 
 from setuptools import setup
 
+long_description = """
+Quickly download videos from twitch.tv.
+
+Works simliarly to youtube-dl but downloads multiple VODs in parallel which
+makes it faster.
+"""
 
 setup(
     name='twitch-dl',
     version='1.5.0',
     description='Twitch downloader',
-    long_description="Quickly download videos from Twitch",
+    long_description=long_description.strip(),
     author='Ivan Habunek',
     author_email='ivan@habunek.com',
     url='https://github.com/ihabunek/twitch-dl/',
