@@ -63,13 +63,13 @@ COMMANDS = [
         name="download",
         description="Download a video",
         arguments=[
-            (["video_id"], {
-                "help": "video ID",
+            (["video"], {
+                "help": "video ID, clip slug, or URL",
                 "type": str,
             }),
             (["-w", "--max_workers"], {
                 "help": "maximal number of threads for downloading vods "
-                        "concurrently (default 5)",
+                        "concurrently (default 20)",
                 "type": int,
                 "default": 20,
             }),

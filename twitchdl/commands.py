@@ -7,10 +7,11 @@ import shutil
 import subprocess
 import tempfile
 
+from pathlib import Path
 from urllib.parse import urlparse
 
 from twitchdl import twitch, utils
-from twitchdl.download import download_files
+from twitchdl.download import download_file, download_files
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
 
@@ -83,18 +84,6 @@ def _video_target_filename(video, format):
     return name + "." + format
 
 
-def _parse_video_id(video_id):
-    """This can be either a integer ID or an URL to the video on twitch."""
-    if re.search(r"^\d+$", video_id):
-        return int(video_id)
-
-    match = re.search(r"^https://www.twitch.tv/videos/(\d+)(\?.+)?$", video_id)
-    if match:
-        return int(match.group(1))
-
-    raise ConsoleError("Invalid video ID given, expected integer ID or Twitch URL")
-
-
 def _get_files(playlist, start, end):
     """Extract files for download from playlist."""
     vod_start = 0
@@ -120,9 +109,69 @@ def _crete_temp_dir(base_uri):
     return directory
 
 
-def download(video_id, max_workers, format='mkv', start=None, end=None, keep=False, **kwargs):
-    video_id = _parse_video_id(video_id)
+VIDEO_PATTERNS = [
+    r"^(?P<id>\d+)?$",
+    r"^https://www.twitch.tv/videos/(?P<id>\d+)(\?.+)?$",
+]
 
+CLIP_PATTERNS = [
+    r"^(?P<slug>[A-Za-z]+)$",
+    r"^https://www.twitch.tv/\w+/clip/(?P<slug>[A-Za-z]+)(\?.+)?$",
+    r"^https://clips.twitch.tv/(?P<slug>[A-Za-z]+)(\?.+)?$",
+]
+
+
+def download(video, **kwargs):
+    for pattern in CLIP_PATTERNS:
+        match = re.match(pattern, video)
+        if match:
+            clip_slug = match.group('slug')
+            return _download_clip(clip_slug, **kwargs)
+
+    for pattern in VIDEO_PATTERNS:
+        match = re.match(pattern, video)
+        if match:
+            video_id = match.group('id')
+            return _download_video(video_id, **kwargs)
+
+    raise ConsoleError("Invalid video: {}".format(video_id))
+
+
+def _download_clip(slug, **kwargs):
+    print_out("Looking up clip...")
+    clip = twitch.get_clip(slug)
+
+    print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
+        clip["title"],
+        clip["broadcaster"]["displayName"],
+        clip["game"]["name"],
+        utils.format_duration(clip["durationSeconds"])
+    ))
+
+    print_out("\nAvailable qualities:")
+    qualities = clip["videoQualities"]
+    for n, q in enumerate(qualities):
+        print_out("{}) {} [{} fps]".format(n + 1, q["quality"], q["frameRate"]))
+
+    no = utils.read_int("Choose quality", min=1, max=len(qualities), default=1)
+    selected_quality = qualities[no - 1]
+    url = selected_quality["sourceURL"]
+
+    url_path = urlparse(url).path
+    extension = Path(url_path).suffix
+    filename = "{}_{}{}".format(
+        clip["broadcaster"]["login"],
+        utils.slugify(clip["title"]),
+        extension
+    )
+
+    print("Downloading clip...")
+    download_file(url, filename)
+
+    print("Downloaded: {}".format(filename))
+
+
+def _download_video(video_id, max_workers, format='mkv', start=None, end=None, keep=False, **kwargs):
     if start and end and end <= start:
         raise ConsoleError("End time must be greater than start time")
 

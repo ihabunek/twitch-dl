@@ -24,13 +24,13 @@ List recent videos from bananasaurus\_rex's channel:
 twitch-dl videos bananasaurus_rex
 ```
 
-Download by URL:
+Download video by URL:
 
 ```
 twitch-dl download https://www.twitch.tv/videos/377220226
 ```
 
-Download by ID:
+Download video by ID:
 
 ```
 twitch-dl download 377220226
@@ -47,6 +47,21 @@ Partial download by setting start and end time (hh:mm or hh:mm:ss):
 ```
 twitch-dl download --start=00:10 --end=02:15 377220226
 ```
+
+Download clip by URL:
+
+```
+twitch-dl download https://www.twitch.tv/bananasaurus_rex/clip/VenomousTameWormHumbleLife
+```
+
+Download clip by slug:
+
+```
+twitch-dl download VenomousTameWormHumbleLife
+```
+
+Note that clips are a single download, and don't benefit from the paralelism
+used when downloading videos.
 
 # SEE ALSO
 

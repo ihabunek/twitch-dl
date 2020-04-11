@@ -50,6 +50,13 @@ twitch-dl download 221837124
 twitch-dl download https://www.twitch.tv/videos/221837124
 ```
 
+Download a clip by slug or URL:
+
+```
+twitch-dl download VenomousTameWormHumbleLife
+twitch-dl download https://www.twitch.tv/bananasaurus_rex/clip/VenomousTameWormHumbleLife
+```
+
 Man page
 --------
 
