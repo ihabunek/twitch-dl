@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.5.1 (2020-04-11)
+------------------
+
+* Fix VOD naming issue (#12)
+* Nice console output while downloading
+
 1.5.0 (2020-04-10)
 ------------------
 
