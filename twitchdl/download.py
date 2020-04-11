@@ -33,7 +33,7 @@ def _download(url, path):
 
 def download_file(url, path, retries=RETRY_COUNT):
     if os.path.exists(path):
-        return 0
+        return os.path.getsize(path)
 
     for _ in range(retries):
         try:
@@ -45,24 +45,34 @@ def download_file(url, path, retries=RETRY_COUNT):
 
 
 def _print_progress(futures):
-    counter = 1
-    total = len(futures)
-    total_size = 0
+    downloaded_count = 0
+    downloaded_size = 0
+    max_msg_size = 0
     start_time = datetime.now()
+    total_count = len(futures)
 
     for future in as_completed(futures):
         size = future.result()
-        percentage = 100 * counter // total
-        total_size += size
+        downloaded_count += 1
+        downloaded_size += size
+
+        percentage = 100 * downloaded_count // total_count
+        est_total_size = int(total_count * downloaded_size / downloaded_count)
         duration = (datetime.now() - start_time).seconds
-        speed = total_size // duration if duration else 0
-        remaining = (total - counter) * duration / counter
+        speed = downloaded_size // duration if duration else 0
+        remaining = (total_count - downloaded_count) * duration / downloaded_count
 
-        msg = "Downloaded VOD {}/{} ({}%) total <cyan>{}B</cyan> at <cyan>{}B/s</cyan> remaining <cyan>{}</cyan>".format(
-            counter, total, percentage, format_size(total_size), format_size(speed), format_duration(remaining))
+        msg = " ".join([
+            "Downloaded VOD {}/{}".format(downloaded_count, total_count),
+            "({}%)".format(percentage),
+            "<cyan>{}</cyan>".format(format_size(downloaded_size)),
+            "of <cyan>~{}</cyan>".format(format_size(est_total_size)),
+            "at <cyan>{}/s</cyan>".format(format_size(speed)) if speed > 0 else "",
+            "remaining <cyan>~{}</cyan>".format(format_duration(remaining)) if speed > 0 else "",
+        ])
 
-        print_out("\r" + msg.ljust(80), end='')
-        counter += 1
+        max_msg_size = max(len(msg), max_msg_size)
+        print_out("\r" + msg.ljust(max_msg_size), end="")
 
 
 def download_files(base_url, directory, filenames, max_workers):

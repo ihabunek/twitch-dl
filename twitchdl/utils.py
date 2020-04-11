@@ -2,19 +2,26 @@ import re
 import unicodedata
 
 
-def format_size(bytes_):
+def _format_size(value, digits, unit):
+    if digits > 0:
+        return "{{:.{}f}}{}".format(digits, unit).format(value)
+    else:
+        return "{{:d}}{}".format(unit).format(value)
+
+
+def format_size(bytes_, digits=1):
     if bytes_ < 1024:
-        return str(bytes_)
+        return _format_size(bytes_, digits, "B")
 
     kilo = bytes_ / 1024
     if kilo < 1024:
-        return "{:.1f}K".format(kilo)
+        return _format_size(kilo, digits, "kB")
 
     mega = kilo / 1024
     if mega < 1024:
-        return "{:.1f}M".format(mega)
+        return _format_size(mega, digits, "MB")
 
-    return "{:.1f}G".format(mega / 1024)
+    return _format_size(mega / 1024, digits, "GB")
 
 
 def format_duration(total_seconds):
