@@ -7,73 +7,12 @@ import shutil
 import subprocess
 import tempfile
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
-from functools import partial
 from urllib.parse import urlparse
 
-from twitchdl import twitch
-from twitchdl.download import download_file
+from twitchdl import twitch, utils
+from twitchdl.download import download_files
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out
-from twitchdl.utils import slugify
-
-
-def read_int(msg, min, max, default):
-    msg = msg + " [default {}]: ".format(default)
-
-    while True:
-        try:
-            val = input(msg)
-            if not val:
-                return default
-            if min <= int(val) <= max:
-                return int(val)
-        except ValueError:
-            pass
-
-
-def format_size(bytes_):
-    if bytes_ < 1024:
-        return str(bytes_)
-
-    kilo = bytes_ / 1024
-    if kilo < 1024:
-        return "{:.1f}K".format(kilo)
-
-    mega = kilo / 1024
-    if mega < 1024:
-        return "{:.1f}M".format(mega)
-
-    return "{:.1f}G".format(mega / 1024)
-
-
-def format_duration(total_seconds):
-    total_seconds = int(total_seconds)
-    hours = total_seconds // 3600
-    remainder = total_seconds % 3600
-    minutes = remainder // 60
-    seconds = total_seconds % 60
-
-    if hours:
-        return "{} h {} min".format(hours, minutes)
-
-    if minutes:
-        return "{} min {} sec".format(minutes, seconds)
-
-    return "{} sec".format(seconds)
-
-
-def _print_video(video):
-    published_at = video['published_at'].replace('T', ' @ ').replace('Z', '')
-    length = format_duration(video['length'])
-    name = video['channel']['display_name']
-
-    print_out("\n<bold>{}</bold>".format(video['_id'][1:]))
-    print_out("<green>{}</green>".format(video["title"]))
-    print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(name, video['game']))
-    print_out("Published <cyan>{}</cyan>  Length: <cyan>{}</cyan> ".format(published_at, length))
-    print_out("<i>{}</i>".format(video["url"]))
+from twitchdl.output import print_out, print_video
 
 
 def videos(channel_name, limit, offset, sort, **kwargs):
@@ -95,7 +34,7 @@ def videos(channel_name, limit, offset, sort, **kwargs):
     print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
 
     for video in videos['videos']:
-        _print_video(video)
+        print_video(video)
 
 
 def _select_quality(playlists):
@@ -105,42 +44,9 @@ def _select_quality(playlists):
         resolution = "x".join(str(r) for r in p.stream_info.resolution)
         print_out("{}) {} [{}]".format(n + 1, name, resolution))
 
-    no = read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
+    no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
 
     return playlists[no - 1]
-
-
-def _print_progress(futures):
-    counter = 1
-    total = len(futures)
-    total_size = 0
-    start_time = datetime.now()
-
-    for future in as_completed(futures):
-        size = future.result()
-        percentage = 100 * counter // total
-        total_size += size
-        duration = (datetime.now() - start_time).seconds
-        speed = total_size // duration if duration else 0
-        remaining = (total - counter) * duration / counter
-
-        msg = "Downloaded VOD {}/{} ({}%) total <cyan>{}B</cyan> at <cyan>{}B/s</cyan> remaining <cyan>{}</cyan>".format(
-            counter, total, percentage, format_size(total_size), format_size(speed), format_duration(remaining))
-
-        print_out("\r" + msg.ljust(80), end='')
-        counter += 1
-
-
-def _download_files(base_url, directory, filenames, max_workers):
-    urls = [base_url + f for f in filenames]
-    paths = ["/".join([directory, f]) for f in filenames]
-    partials = (partial(download_file, url, path) for url, path in zip(urls, paths))
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(fn) for fn in partials]
-        _print_progress(futures)
-
-    return paths
 
 
 def _join_vods(directory, paths, target):
@@ -171,7 +77,7 @@ def _video_target_filename(video, format):
         date,
         video['_id'][1:],
         video['channel']['name'],
-        slugify(video['title']),
+        utils.slugify(video['title']),
     ])
 
     return name + "." + format
@@ -251,7 +157,7 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, keep=Fal
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
         len(filenames), max_workers, target_dir))
-    _download_files(base_uri, target_dir, filenames, max_workers)
+    download_files(base_uri, target_dir, filenames, max_workers)
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, format)
