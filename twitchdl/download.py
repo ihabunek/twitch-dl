@@ -67,7 +67,7 @@ def _print_progress(futures):
 
 def download_files(base_url, directory, filenames, max_workers):
     urls = [base_url + f for f in filenames]
-    paths = ["/".join([directory, f]) for f in filenames]
+    paths = ["{}{:05d}.vod".format(directory, k) for k, _ in enumerate(filenames)]
     partials = (partial(download_file, url, path) for url, path in zip(urls, paths))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

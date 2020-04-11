@@ -49,11 +49,11 @@ def _select_quality(playlists):
     return playlists[no - 1]
 
 
-def _join_vods(directory, paths, target):
+def _join_vods(directory, file_paths, target):
     input_path = "{}/files.txt".format(directory)
 
     with open(input_path, 'w') as f:
-        for path in paths:
+        for path in file_paths:
             f.write('file {}\n'.format(os.path.basename(path)))
 
     result = subprocess.run([
@@ -157,11 +157,11 @@ def download(video_id, max_workers, format='mkv', start=None, end=None, keep=Fal
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
         len(filenames), max_workers, target_dir))
-    download_files(base_uri, target_dir, filenames, max_workers)
+    file_paths = download_files(base_uri, target_dir, filenames, max_workers)
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, format)
-    _join_vods(target_dir, filenames, target)
+    _join_vods(target_dir, file_paths, target)
 
     if keep:
         print_out("\nTemporary files not deleted: {}".format(target_dir))
