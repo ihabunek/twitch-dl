@@ -134,7 +134,7 @@ def download(video, **kwargs):
             video_id = match.group('id')
             return _download_video(video_id, **kwargs)
 
-    raise ConsoleError("Invalid video: {}".format(video_id))
+    raise ConsoleError("Invalid video: {}".format(video))
 
 
 def _download_clip(slug, **kwargs):
