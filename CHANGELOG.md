@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.7.0 (2020-04-25)
+------------------
+
+* Support for specifying broadcast type when listing videos (#13)
+
 1.6.0 (2020-04-11)
 ------------------
 
