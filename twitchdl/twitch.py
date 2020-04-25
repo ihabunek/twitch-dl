@@ -93,14 +93,14 @@ def get_clip(slug):
     return data["data"]["clip"]
 
 
-def get_channel_videos(channel_id, limit, offset, sort):
+def get_channel_videos(channel_id, limit, offset, sort, type="archive"):
     """
     https://dev.twitch.tv/docs/v5/reference/channels#get-channel-videos
     """
     url = "https://api.twitch.tv/kraken/channels/{}/videos".format(channel_id)
 
     return kraken_get(url, {
-        "broadcast_type": "archive",
+        "broadcast_type": type,
         "limit": limit,
         "offset": offset,
         "sort": sort,

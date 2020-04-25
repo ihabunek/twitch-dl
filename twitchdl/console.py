@@ -57,6 +57,12 @@ COMMANDS = [
                 "choices": ["views", "time"],
                 "default": "time",
             }),
+            (["-t", "--type"], {
+                "help": "Broadcast type. (default: archive)",
+                "type": str,
+                "choices": ["archive", "highlight", "upload"],
+                "default": "archive",
+            }),
         ],
     ),
     Command(
