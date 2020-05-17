@@ -7,6 +7,7 @@ from collections import namedtuple
 
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_err
+from twitchdl.twitch import GQLError
 from . import commands, __version__
 
 
@@ -52,6 +53,11 @@ COMMANDS = [
         arguments=[
             (["channel_name"], {
                 "help": "channel name",
+                "type": str,
+            }),
+            (["-g", "--game"], {
+                "help": "Show videos of given game (can be given multiple times)",
+                "action": "append",
                 "type": str,
             }),
             (["-l", "--limit"], {
@@ -162,4 +168,9 @@ def main():
         args.func(**args.__dict__)
     except ConsoleError as e:
         print_err(e)
+        sys.exit(1)
+    except GQLError as e:
+        print_err(e)
+        for err in e.errors:
+            print_err("*", err["message"])
         sys.exit(1)

@@ -8,6 +8,7 @@ Twitch Downloader change log
 * **Breaking**: `videos` command no longer takes the `--offset` parameter due to
   API changes
 * Add paging to `videos` command to replace offset
+* Add `--game` option to `videos` command to filter by game
 
 1.7.0 (2020-04-25)
 ------------------

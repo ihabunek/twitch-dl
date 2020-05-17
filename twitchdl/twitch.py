@@ -8,6 +8,12 @@ from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
 
 
+class GQLError(Exception):
+    def __init__(self, errors):
+        super().__init__("GraphQL query failed")
+        self.errors = errors
+
+
 def authenticated_get(url, params={}, headers={}):
     headers['Client-ID'] = CLIENT_ID
 
@@ -46,7 +52,12 @@ def kraken_get(url, params={}, headers={}):
 def gql_query(query):
     url = "https://gql.twitch.tv/gql"
     payload = {"query": query}
-    return authenticated_post(url, json={"query": query}).json()
+    response = authenticated_post(url, json={"query": query}).json()
+
+    if "errors" in response:
+        raise GQLError(response["errors"])
+
+    return response
 
 
 def get_video(video_id):
@@ -86,13 +97,15 @@ def get_clip(slug):
     return response["data"]["clip"]
 
 
-def get_channel_videos(channel_id, limit, sort, type="archive", after=None):
+def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None):
     url = "https://gql.twitch.tv/gql"
 
     query = """
     {{
       user(login: "{channel_id}") {{
-        videos(options: {{ }}, first: {limit}, type: {type}, sort: {sort}, after: "{after}") {{
+        videos(options: {{
+            gameIDs: {game_ids}
+        }}, first: {limit}, type: {type}, sort: {sort}, after: "{after}") {{
           totalCount
           edges {{
             cursor
@@ -119,6 +132,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", after=None):
 
     query = query.format(**{
         "channel_id": channel_id,
+        "game_ids": game_ids,
         "after": after,
         "limit": limit,
         "sort": sort.upper(),
@@ -129,10 +143,15 @@ def get_channel_videos(channel_id, limit, sort, type="archive", after=None):
     return response["data"]["user"]["videos"]
 
 
-def channel_videos_generator(channel_id, limit, sort, type):
+def channel_videos_generator(channel_id, limit, sort, type, game_ids=None):
     cursor = None
     while True:
-        videos = get_channel_videos(channel_id, limit, sort, type, after=cursor)
+        videos = get_channel_videos(
+            channel_id, limit, sort, type, game_ids=game_ids, after=cursor)
+
+        if not videos["edges"]:
+            break
+
         cursor = videos["edges"][-1]["cursor"]
 
         yield videos, cursor is not None
@@ -161,3 +180,18 @@ def get_playlists(video_id, access_token):
     })
     response.raise_for_status()
     return response.content.decode('utf-8')
+
+
+def get_game_id(name):
+    query = """
+    {{
+        game(name: "{}") {{
+            id
+        }}
+    }}
+    """
+
+    response = gql_query(query.format(name.strip()))
+    game = response["data"]["game"]
+    if game:
+        return game["id"]

@@ -30,16 +30,32 @@ def _continue():
 
     return True
 
-def videos(channel_name, limit, sort, type, **kwargs):
-    print_out("Loading videos...")
-    generator = twitch.channel_videos_generator(channel_name, limit, sort, type)
+
+def _get_game_ids(names):
+    if not names:
+        return []
+
+    game_ids = []
+    for name in names:
+        print_out("<dim>Looking up game '{}'...</dim>".format(name))
+        game_id = twitch.get_game_id(name)
+        if not game_id:
+            raise ConsoleError("Game '{}' not found".format(name))
+        game_ids.append(int(game_id))
+
+    return game_ids
+
+
+def videos(channel_name, limit, sort, type, game, **kwargs):
+    game_ids = _get_game_ids(game)
+
+    print_out("<dim>Loading videos...</dim>")
+    generator = twitch.channel_videos_generator(
+        channel_name, limit, sort, type, game_ids=game_ids)
 
     first = 1
 
     for videos, has_more in generator:
-        if "edges" not in videos:
-            break
-
         count = len(videos["edges"]) if "edges" in videos else 0
         total = videos["totalCount"]
         last = first + count - 1
@@ -54,6 +70,8 @@ def videos(channel_name, limit, sort, type, **kwargs):
             break
 
         first += count
+    else:
+        print_out("<yellow>No videos found</yellow>")
 
 
 def _select_quality(playlists):
