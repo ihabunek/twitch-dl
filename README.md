@@ -43,6 +43,12 @@ Bananasaurus_Rex playing Dead Space
 Published 2018-01-21 @ 05:47:03  Length: 5h 7min
 ```
 
+Use the `--game` option to specify one or more games to show:
+
+```
+twitch-dl videos --game "doom eternal" --game "cave story" bananasaurus_rex
+```
+
 Download a stream by ID or URL:
 
 ```
