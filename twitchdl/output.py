@@ -7,7 +7,7 @@ from twitchdl import utils
 
 
 START_CODES = {
-    'bold': '\033[1m',
+    'b': '\033[1m',
     'i': '\033[3m',
     'u': '\033[4m',
     'red': '\033[91m',
@@ -65,7 +65,7 @@ def print_video(video):
     # Can't find URL in video object, strange
     url = "https://twitch.tv/{}".format(video["id"])
 
-    print_out("\n<bold>{}</bold>".format(video["id"]))
+    print_out("\n<b>{}</b>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
     print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(channel, game))
     print_out("Published <cyan>{}</cyan>  Length: <cyan>{}</cyan> ".format(published_at, length))

@@ -7,6 +7,7 @@ Twitch Downloader change log
 * Fix videos command (#18)
 * **Breaking**: `videos` command no longer takes the `--offset` parameter due to
   API changes
+* Add paging to `videos` command to replace offset
 
 1.7.0 (2020-04-25)
 ------------------

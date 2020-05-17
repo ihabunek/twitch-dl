@@ -16,23 +16,44 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
 
 
+def _continue():
+    print_out(
+        "\nThere are more videos. "
+        "Press <green><b>Enter</green> to continue, "
+        "<yellow><b>Ctrl+C</yellow> to break."
+    )
+
+    try:
+        input()
+    except KeyboardInterrupt:
+        return False
+
+    return True
+
 def videos(channel_name, limit, sort, type, **kwargs):
     print_out("Loading videos...")
-    videos = twitch.get_channel_videos(channel_name, limit, sort, type)
-    count = len(videos["edges"])
-    total = videos["totalCount"]
+    generator = twitch.channel_videos_generator(channel_name, limit, sort, type)
 
-    if not count:
-        print_out("No videos found")
-        return
-
-    # TODO: paging
     first = 1
-    last = count
-    print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
 
-    for video in videos["edges"]:
-        print_video(video["node"])
+    for videos, has_more in generator:
+        if "edges" not in videos:
+            break
+
+        count = len(videos["edges"]) if "edges" in videos else 0
+        total = videos["totalCount"]
+        last = first + count - 1
+
+        print_out("-" * 80)
+        print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
+
+        for video in videos["edges"]:
+            print_video(video["node"])
+
+        if not has_more or not _continue():
+            break
+
+        first += count
 
 
 def _select_quality(playlists):

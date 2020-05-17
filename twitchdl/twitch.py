@@ -81,13 +81,13 @@ def get_clip(slug):
     return data["data"]["clip"]
 
 
-def get_channel_videos(channel_id, limit, sort, type="archive"):
+def get_channel_videos(channel_id, limit, sort, type="archive", after=None):
     url = "https://gql.twitch.tv/gql"
 
     query = """
     {{
       user(login: "{channel_id}") {{
-        videos(options: {{ }}, first: {limit}, type: {type}, sort: {sort}, after: "opaqueCursor") {{
+        videos(options: {{ }}, first: {limit}, type: {type}, sort: {sort}, after: "{after}") {{
           totalCount
           edges {{
             cursor
@@ -114,13 +114,26 @@ def get_channel_videos(channel_id, limit, sort, type="archive"):
 
     query = query.format(**{
         "channel_id": channel_id,
+        "after": after,
         "limit": limit,
-        "type": type.upper(),
         "sort": sort.upper(),
+        "type": type.upper(),
     })
 
     response = authenticated_post(url, json={"query": query}).json()
     return response["data"]["user"]["videos"]
+
+
+def channel_videos_generator(channel_id, limit, sort, type):
+    cursor = None
+    while True:
+        videos = get_channel_videos(channel_id, limit, sort, type, after=cursor)
+        cursor = videos["edges"][-1]["cursor"]
+
+        yield videos, cursor is not None
+
+        if not cursor:
+            break
 
 
 def get_access_token(video_id):
