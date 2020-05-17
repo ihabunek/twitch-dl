@@ -102,31 +102,40 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
 
     query = """
     {{
-      user(login: "{channel_id}") {{
-        videos(options: {{
-            gameIDs: {game_ids}
-        }}, first: {limit}, type: {type}, sort: {sort}, after: "{after}") {{
-          totalCount
-          edges {{
-            cursor
-            node {{
-              id
-              title
-              publishedAt
-              broadcastType
-              lengthSeconds
-              game {{
-                name
-              }}
-              creator {{
-                channel {{
-                  displayName
+        user(login: "{channel_id}") {{
+            videos(
+                first: {limit},
+                type: {type},
+                sort: {sort},
+                after: "{after}",
+                options: {{
+                    gameIDs: {game_ids}
                 }}
-              }}
+            ) {{
+                totalCount
+                pageInfo {{
+                    hasNextPage
+                }}
+                edges {{
+                    cursor
+                    node {{
+                        id
+                        title
+                        publishedAt
+                        broadcastType
+                        lengthSeconds
+                        game {{
+                            name
+                        }}
+                        creator {{
+                            channel {{
+                                displayName
+                            }}
+                        }}
+                    }}
+                }}
             }}
-          }}
         }}
-      }}
     }}
     """
 
@@ -152,9 +161,10 @@ def channel_videos_generator(channel_id, limit, sort, type, game_ids=None):
         if not videos["edges"]:
             break
 
-        cursor = videos["edges"][-1]["cursor"]
+        has_next = videos["pageInfo"]["hasNextPage"]
+        cursor = videos["edges"][-1]["cursor"] if has_next else None
 
-        yield videos, cursor is not None
+        yield videos, has_next
 
         if not cursor:
             break
