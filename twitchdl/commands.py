@@ -156,7 +156,7 @@ def download(video, **kwargs):
 
 
 def _download_clip(slug, **kwargs):
-    print_out("Looking up clip...")
+    print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
 
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
@@ -193,21 +193,21 @@ def _download_video(video_id, max_workers, format='mkv', start=None, end=None, k
     if start and end and end <= start:
         raise ConsoleError("End time must be greater than start time")
 
-    print_out("Looking up video...")
+    print_out("<dim>Looking up video...</dim>")
     video = twitch.get_video(video_id)
 
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
         video['title'], video['channel']['display_name']))
 
-    print_out("Fetching access token...")
+    print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_access_token(video_id)
 
-    print_out("Fetching playlists...")
+    print_out("<dim>Fetching playlists...</dim>")
     playlists = twitch.get_playlists(video_id, access_token)
     parsed = m3u8.loads(playlists)
     selected = _select_quality(parsed.playlists)
 
-    print_out("\nFetching playlist...")
+    print_out("<dim>\nFetching playlist...</dim>")
     response = requests.get(selected.uri)
     response.raise_for_status()
     playlist = m3u8.loads(response.text)

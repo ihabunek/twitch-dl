@@ -8,6 +8,7 @@ from twitchdl import utils
 
 START_CODES = {
     'b': '\033[1m',
+    'dim': '\033[2m',
     'i': '\033[3m',
     'u': '\033[4m',
     'red': '\033[91m',
