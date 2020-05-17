@@ -67,6 +67,6 @@ def print_video(video):
 
     print_out("\n<b>{}</b>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
-    print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(channel, game))
-    print_out("Published <cyan>{}</cyan>  Length: <cyan>{}</cyan> ".format(published_at, length))
+    print_out("<blue>{}</blue> playing <blue>{}</blue>".format(channel, game))
+    print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
     print_out("<i>{}</i>".format(url))
