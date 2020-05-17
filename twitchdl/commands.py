@@ -16,26 +16,23 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
 
 
-def videos(channel_name, limit, offset, sort, type, **kwargs):
-    print_out("Looking up user...")
-    user = twitch.get_user(channel_name)
-    if not user:
-        raise ConsoleError("User {} not found.".format(channel_name))
-
+def videos(channel_name, limit, sort, type, **kwargs):
     print_out("Loading videos...")
-    videos = twitch.get_channel_videos(user["id"], limit, offset, sort, type)
-    count = len(videos['videos'])
+    videos = twitch.get_channel_videos(channel_name, limit, sort, type)
+    count = len(videos["edges"])
+    total = videos["totalCount"]
+
     if not count:
         print_out("No videos found")
         return
 
-    first = offset + 1
-    last = offset + len(videos['videos'])
-    total = videos["_total"]
+    # TODO: paging
+    first = 1
+    last = count
     print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
 
-    for video in videos['videos']:
-        print_video(video)
+    for video in videos["edges"]:
+        print_video(video["node"])
 
 
 def _select_quality(playlists):

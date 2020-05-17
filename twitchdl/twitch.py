@@ -43,18 +43,6 @@ def kraken_get(url, params={}, headers={}):
     return authenticated_get(url, params, headers)
 
 
-def get_user(login):
-    """
-    https://dev.twitch.tv/docs/api/reference/#get-users
-    """
-    response = authenticated_get("https://api.twitch.tv/helix/users", {
-        "login": login
-    })
-
-    users = response.json()["data"]
-    return users[0] if users else None
-
-
 def get_video(video_id):
     """
     https://dev.twitch.tv/docs/v5/reference/videos#get-video
@@ -93,18 +81,46 @@ def get_clip(slug):
     return data["data"]["clip"]
 
 
-def get_channel_videos(channel_id, limit, offset, sort, type="archive"):
-    """
-    https://dev.twitch.tv/docs/v5/reference/channels#get-channel-videos
-    """
-    url = "https://api.twitch.tv/kraken/channels/{}/videos".format(channel_id)
+def get_channel_videos(channel_id, limit, sort, type="archive"):
+    url = "https://gql.twitch.tv/gql"
 
-    return kraken_get(url, {
-        "broadcast_type": type,
+    query = """
+    {{
+      user(login: "{channel_id}") {{
+        videos(options: {{ }}, first: {limit}, type: {type}, sort: {sort}, after: "opaqueCursor") {{
+          totalCount
+          edges {{
+            cursor
+            node {{
+              id
+              title
+              publishedAt
+              broadcastType
+              lengthSeconds
+              game {{
+                name
+              }}
+              creator {{
+                channel {{
+                  displayName
+                }}
+              }}
+            }}
+          }}
+        }}
+      }}
+    }}
+    """
+
+    query = query.format(**{
+        "channel_id": channel_id,
         "limit": limit,
-        "offset": offset,
-        "sort": sort,
-    }).json()
+        "type": type.upper(),
+        "sort": sort.upper(),
+    })
+
+    response = authenticated_post(url, json={"query": query}).json()
+    return response["data"]["user"]["videos"]
 
 
 def get_access_token(video_id):

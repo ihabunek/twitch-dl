@@ -57,12 +57,16 @@ def print_err(*args, **kwargs):
 
 
 def print_video(video):
-    published_at = video['published_at'].replace('T', ' @ ').replace('Z', '')
-    length = utils.format_duration(video['length'])
-    name = video['channel']['display_name']
+    published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
+    length = utils.format_duration(video["lengthSeconds"])
+    channel = video["creator"]["channel"]["displayName"]
+    game = video["game"]["name"]
 
-    print_out("\n<bold>{}</bold>".format(video['_id'][1:]))
+    # Can't find URL in video object, strange
+    url = "https://twitch.tv/{}".format(video["id"])
+
+    print_out("\n<bold>{}</bold>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
-    print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(name, video['game']))
+    print_out("<cyan>{}</cyan> playing <cyan>{}</cyan>".format(channel, game))
     print_out("Published <cyan>{}</cyan>  Length: <cyan>{}</cyan> ".format(published_at, length))
-    print_out("<i>{}</i>".format(video["url"]))
+    print_out("<i>{}</i>".format(url))

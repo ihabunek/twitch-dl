@@ -32,6 +32,19 @@ def time(value):
     return hours * 3600 + minutes * 60 + seconds
 
 
+def limit(value):
+    """Validates the number of videos to fetch."""
+    try:
+        value = int(value)
+    except ValueError:
+        raise ArgumentTypeError("must be an integer")
+
+    if not 1 <= int(value) <= 100:
+        raise ArgumentTypeError("must be between 1 and 100")
+
+    return value
+
+
 COMMANDS = [
     Command(
         name="videos",
@@ -43,13 +56,8 @@ COMMANDS = [
             }),
             (["-l", "--limit"], {
                 "help": "Number of videos to fetch (default 10, max 100)",
-                "type": int,
+                "type": limit,
                 "default": 10,
-            }),
-            (["-o", "--offset"], {
-                "help": "Offset for pagination of results. (default 0)",
-                "type": int,
-                "default": 0,
             }),
             (["-s", "--sort"], {
                 "help": "Sorting order of videos. (default: time)",

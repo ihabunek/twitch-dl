@@ -1,6 +1,13 @@
 Twitch Downloader change log
 ============================
 
+1.8.0 (2020-05-17)
+------------------
+
+* Fix videos command (#18)
+* **Breaking**: `videos` command no longer takes the `--offset` parameter due to
+  API changes
+
 1.7.0 (2020-04-25)
 ------------------
 
