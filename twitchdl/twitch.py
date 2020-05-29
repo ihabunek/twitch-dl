@@ -51,7 +51,6 @@ def kraken_get(url, params={}, headers={}):
 
 def gql_query(query):
     url = "https://gql.twitch.tv/gql"
-    payload = {"query": query}
     response = authenticated_post(url, json={"query": query}).json()
 
     if "errors" in response:
@@ -70,8 +69,6 @@ def get_video(video_id):
 
 
 def get_clip(slug):
-    url = "https://gql.twitch.tv/gql"
-
     query = """
     {{
         clip(slug: "{}") {{
@@ -98,8 +95,6 @@ def get_clip(slug):
 
 
 def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None):
-    url = "https://gql.twitch.tv/gql"
-
     query = """
     {{
         user(login: "{channel_id}") {{
