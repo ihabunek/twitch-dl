@@ -13,6 +13,12 @@ Resources
 * Issues: https://github.com/ihabunek/twitch-dl/issues
 * Python package: https://pypi.org/project/twitch-dl/
 
+Requirements
+------------
+
+* Python 3.5+
+* [ffmpeg](https://ffmpeg.org/) must be installed and in the path
+
 Usage
 -----
 
