@@ -165,7 +165,7 @@ def main():
         return
 
     try:
-        args.func(**args.__dict__)
+        args.func(args)
     except ConsoleError as e:
         print_err(e)
         sys.exit(1)

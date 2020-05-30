@@ -46,12 +46,12 @@ def _get_game_ids(names):
     return game_ids
 
 
-def videos(channel_name, limit, sort, type, game, **kwargs):
-    game_ids = _get_game_ids(game)
+def videos(args):
+    game_ids = _get_game_ids(args.game)
 
     print_out("<dim>Loading videos...</dim>")
     generator = twitch.channel_videos_generator(
-        channel_name, limit, sort, type, game_ids=game_ids)
+        args.channel_name, args.limit, args.sort, args.type, game_ids=game_ids)
 
     first = 1
 
@@ -157,23 +157,23 @@ CLIP_PATTERNS = [
 ]
 
 
-def download(video, **kwargs):
+def download(args):
     for pattern in CLIP_PATTERNS:
-        match = re.match(pattern, video)
+        match = re.match(pattern, args.video)
         if match:
             clip_slug = match.group('slug')
-            return _download_clip(clip_slug, **kwargs)
+            return _download_clip(clip_slug, args)
 
     for pattern in VIDEO_PATTERNS:
-        match = re.match(pattern, video)
+        match = re.match(pattern, args.video)
         if match:
             video_id = match.group('id')
-            return _download_video(video_id, **kwargs)
+            return _download_video(video_id, args)
 
-    raise ConsoleError("Invalid video: {}".format(video))
+    raise ConsoleError("Invalid video: {}".format(args.video))
 
 
-def _download_clip(slug, **kwargs):
+def _download_clip(slug, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
 
@@ -207,8 +207,8 @@ def _download_clip(slug, **kwargs):
     print("Downloaded: {}".format(filename))
 
 
-def _download_video(video_id, max_workers, format='mkv', start=None, end=None, keep=False, **kwargs):
-    if start and end and end <= start:
+def _download_video(video_id, args):
+    if args.start and args.end and args.end <= args.start:
         raise ConsoleError("End time must be greater than start time")
 
     print_out("<dim>Looking up video...</dim>")
@@ -232,7 +232,7 @@ def _download_video(video_id, max_workers, format='mkv', start=None, end=None, k
 
     base_uri = re.sub("/[^/]+$", "/", selected.uri)
     target_dir = _crete_temp_dir(base_uri)
-    filenames = list(_get_files(playlist, start, end))
+    filenames = list(_get_files(playlist, args.start, args.end))
 
     # Save playlists for debugging purposes
     with open(target_dir + "playlists.m3u8", "w") as f:
@@ -241,14 +241,14 @@ def _download_video(video_id, max_workers, format='mkv', start=None, end=None, k
         f.write(response.text)
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
-        len(filenames), max_workers, target_dir))
-    file_paths = download_files(base_uri, target_dir, filenames, max_workers)
+        len(filenames), args.max_workers, target_dir))
+    file_paths = download_files(base_uri, target_dir, filenames, args.max_workers)
 
     print_out("\n\nJoining files...")
-    target = _video_target_filename(video, format)
+    target = _video_target_filename(video, args.format)
     _join_vods(target_dir, file_paths, target)
 
-    if keep:
+    if args.keep:
         print_out("\nTemporary files not deleted: {}".format(target_dir))
     else:
         print_out("\nDeleting temporary files...")
