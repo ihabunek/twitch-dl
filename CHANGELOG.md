@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.9.0 (TBA)
+------------------
+
+* **Breaking**: wrongly named `--max_workers` option changed to `--max-workers`.
+  The shorthand option `-w` remains the same.
+
 1.8.0 (2020-05-17)
 ------------------
 

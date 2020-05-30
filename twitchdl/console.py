@@ -87,7 +87,7 @@ COMMANDS = [
                 "help": "video ID, clip slug, or URL",
                 "type": str,
             }),
-            (["-w", "--max_workers"], {
+            (["-w", "--max-workers"], {
                 "help": "maximal number of threads for downloading vods "
                         "concurrently (default 20)",
                 "type": int,
