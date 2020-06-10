@@ -1,11 +1,13 @@
 Twitch Downloader change log
 ============================
 
-1.9.0 (TBA)
+1.9.0 (2020-06-10)
 ------------------
 
 * **Breaking**: wrongly named `--max_workers` option changed to `--max-workers`.
   The shorthand option `-w` remains the same.
+* Fix bug where `videos` command would crash if there was no game info (#21)
+* Allow unicode characters in filenames, no longer strips e.g. cyrillic script
 
 1.8.0 (2020-05-17)
 ------------------
