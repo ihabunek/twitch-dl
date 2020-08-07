@@ -1,6 +1,14 @@
 Twitch Downloader change log
 ============================
 
+1.10.0 (2020-08-07)
+-------------------
+
+* Add `--quality` option to `download` command, allows specifying the video
+  quality to download. In this case, twitch-dl will require no user input. (#22)
+* Fix download of clips which contain numbers in their slug (#24)
+* Fix URL to video displayed by `videos` command (it was missing /videos/)
+
 1.9.0 (2020-06-10)
 ------------------
 

@@ -62,12 +62,26 @@ twitch-dl download 221837124
 twitch-dl download https://www.twitch.tv/videos/221837124
 ```
 
+Specify video quality to download:
+
+```
+twitch-dl download -q 720p 221837124
+```
+
 Download a clip by slug or URL:
 
 ```
 twitch-dl download VenomousTameWormHumbleLife
 twitch-dl download https://www.twitch.tv/bananasaurus_rex/clip/VenomousTameWormHumbleLife
 ```
+
+Specify clip quality to download:
+
+```
+twitch-dl download -q 720 VenomousTameWormHumbleLife
+```
+
+Note that twitch names for clip qualities have no trailing "p".
 
 Man page
 --------
