@@ -67,7 +67,7 @@ def print_video(video):
     )
 
     # Can't find URL in video object, strange
-    url = "https://twitch.tv/{}".format(video["id"])
+    url = "https://twitch.tv/videos/{}".format(video["id"])
 
     print_out("\n<b>{}</b>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
