@@ -114,6 +114,10 @@ COMMANDS = [
                 "action": "store_true",
                 "default": False,
             }),
+            (["-q", "--quality"], {
+                "help": "Video quality.",
+                "type": str,
+            }),
         ],
     ),
 ]

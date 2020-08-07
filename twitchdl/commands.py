@@ -74,16 +74,33 @@ def videos(args):
         print_out("<yellow>No videos found</yellow>")
 
 
-def _select_quality(playlists):
-    print_out("\nAvailable qualities:")
-    for n, p in enumerate(playlists):
+def _parse_playlists(playlists_m3u8):
+    playlists = m3u8.loads(playlists_m3u8)
+
+    for p in playlists.playlists:
         name = p.media[0].name if p.media else ""
         resolution = "x".join(str(r) for r in p.stream_info.resolution)
+        yield name, resolution, p.uri
+
+
+def _get_playlist_by_name(playlists, quality):
+    for name, _, uri in playlists:
+        if name == quality:
+            return uri
+
+    available = ", ".join([name for (name, _, _) in playlists])
+    msg = "Quality '{}' not found. Available qualitites are: {}".format(quality, available)
+    raise ConsoleError(msg)
+
+
+def _select_playlist_interactive(playlists):
+    print_out("\nAvailable qualities:")
+    for n, (name, resolution, uri) in enumerate(playlists):
         print_out("{}) {} [{}]".format(n + 1, name, resolution))
 
     no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
-
-    return playlists[no - 1]
+    _, _, uri = playlists[no - 1]
+    return uri
 
 
 def _join_vods(directory, file_paths, target):
@@ -186,6 +203,7 @@ def _download_clip(slug, args):
 
     print_out("\nAvailable qualities:")
     qualities = clip["videoQualities"]
+
     for n, q in enumerate(qualities):
         print_out("{}) {} [{} fps]".format(n + 1, q["quality"], q["frameRate"]))
 
@@ -201,10 +219,10 @@ def _download_clip(slug, args):
         extension
     )
 
-    print("Downloading clip...")
+    print_out("Downloading clip...")
     download_file(url, filename)
 
-    print("Downloaded: {}".format(filename))
+    print_out("Downloaded: {}".format(filename))
 
 
 def _download_video(video_id, args):
@@ -221,22 +239,23 @@ def _download_video(video_id, args):
     access_token = twitch.get_access_token(video_id)
 
     print_out("<dim>Fetching playlists...</dim>")
-    playlists = twitch.get_playlists(video_id, access_token)
-    parsed = m3u8.loads(playlists)
-    selected = _select_quality(parsed.playlists)
+    playlists_m3u8 = twitch.get_playlists(video_id, access_token)
+    playlists = list(_parse_playlists(playlists_m3u8))
+    playlist_uri = (_get_playlist_by_name(playlists, args.quality) if args.quality
+            else _select_playlist_interactive(playlists))
 
-    print_out("<dim>\nFetching playlist...</dim>")
-    response = requests.get(selected.uri)
+    print_out("<dim>Fetching playlist...</dim>")
+    response = requests.get(playlist_uri)
     response.raise_for_status()
     playlist = m3u8.loads(response.text)
 
-    base_uri = re.sub("/[^/]+$", "/", selected.uri)
+    base_uri = re.sub("/[^/]+$", "/", playlist_uri)
     target_dir = _crete_temp_dir(base_uri)
     filenames = list(_get_files(playlist, args.start, args.end))
 
     # Save playlists for debugging purposes
     with open(target_dir + "playlists.m3u8", "w") as f:
-        f.write(playlists)
+        f.write(playlists_m3u8)
     with open(target_dir + "playlist.m3u8", "w") as f:
         f.write(response.text)
 
