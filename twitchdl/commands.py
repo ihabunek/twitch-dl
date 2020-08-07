@@ -89,7 +89,7 @@ def _get_playlist_by_name(playlists, quality):
             return uri
 
     available = ", ".join([name for (name, _, _) in playlists])
-    msg = "Quality '{}' not found. Available qualitites are: {}".format(quality, available)
+    msg = "Quality '{}' not found. Available qualities are: {}".format(quality, available)
     raise ConsoleError(msg)
 
 
@@ -190,6 +190,31 @@ def download(args):
     raise ConsoleError("Invalid video: {}".format(args.video))
 
 
+def _get_clip_url(clip, args):
+    qualities = clip["videoQualities"]
+
+    # Quality given as an argument
+    if args.quality:
+        selected_quality = args.quality.rstrip("p")  # allow 720p as well as 720
+        for q in qualities:
+            if q["quality"] == selected_quality:
+                return q["sourceURL"]
+
+        available = ", ".join([str(q["quality"]) for q in qualities])
+        msg = "Quality '{}' not found. Available qualities are: {}".format(args.quality, available)
+        raise ConsoleError(msg)
+
+    # Ask user to select quality
+    print_out("\nAvailable qualities:")
+    for n, q in enumerate(qualities):
+        print_out("{}) {} [{} fps]".format(n + 1, q["quality"], q["frameRate"]))
+    print_out()
+
+    no = utils.read_int("Choose quality", min=1, max=len(qualities), default=1)
+    selected_quality = qualities[no - 1]
+    return selected_quality["sourceURL"]
+
+
 def _download_clip(slug, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
@@ -201,15 +226,8 @@ def _download_clip(slug, args):
         utils.format_duration(clip["durationSeconds"])
     ))
 
-    print_out("\nAvailable qualities:")
-    qualities = clip["videoQualities"]
-
-    for n, q in enumerate(qualities):
-        print_out("{}) {} [{} fps]".format(n + 1, q["quality"], q["frameRate"]))
-
-    no = utils.read_int("Choose quality", min=1, max=len(qualities), default=1)
-    selected_quality = qualities[no - 1]
-    url = selected_quality["sourceURL"]
+    url = _get_clip_url(clip, args)
+    print_out("<dim>Selected URL: {}</dim>".format(url))
 
     url_path = urlparse(url).path
     extension = Path(url_path).suffix
