@@ -1,6 +1,13 @@
 Twitch Downloader change log
 ============================
 
+1.10.1 (2020-08-09)
+-------------------
+
+* Fix videos incorrectly identified as clips (#28)
+* Make download command work with video URLs lacking "www" before "twitch.tv"
+* Print an error when video or clip is not found instead of an exception trace
+
 1.10.0 (2020-08-07)
 -------------------
 
