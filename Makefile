@@ -19,3 +19,6 @@ deb:
 
 man:
 	scdoc < twitch-dl.1.scd > twitch-dl.1.man
+
+test:
+	pytest

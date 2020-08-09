@@ -164,28 +164,28 @@ def _crete_temp_dir(base_uri):
 
 VIDEO_PATTERNS = [
     r"^(?P<id>\d+)?$",
-    r"^https://www.twitch.tv/videos/(?P<id>\d+)(\?.+)?$",
+    r"^https://(www.)?twitch.tv/videos/(?P<id>\d+)(\?.+)?$",
 ]
 
 CLIP_PATTERNS = [
     r"^(?P<slug>[A-Za-z0-9]+)$",
-    r"^https://www.twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
+    r"^https://(www.)?twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
     r"^https://clips.twitch.tv/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
 ]
 
 
 def download(args):
-    for pattern in CLIP_PATTERNS:
-        match = re.match(pattern, args.video)
-        if match:
-            clip_slug = match.group('slug')
-            return _download_clip(clip_slug, args)
-
     for pattern in VIDEO_PATTERNS:
         match = re.match(pattern, args.video)
         if match:
             video_id = match.group('id')
             return _download_video(video_id, args)
+
+    for pattern in CLIP_PATTERNS:
+        match = re.match(pattern, args.video)
+        if match:
+            clip_slug = match.group('slug')
+            return _download_clip(clip_slug, args)
 
     raise ConsoleError("Invalid video: {}".format(args.video))
 
