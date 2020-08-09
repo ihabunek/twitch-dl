@@ -219,6 +219,9 @@ def _download_clip(slug, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
 
+    if not clip:
+        raise ConsoleError("Clip '{}' not found".format(slug))
+
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
         clip["title"],
         clip["broadcaster"]["displayName"],
