@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.10.2 (2020-08-11)
+-------------------
+
+* Fix version number displayed by `twitch-dl --version` (#29)
+
 1.10.1 (2020-08-09)
 -------------------
 
