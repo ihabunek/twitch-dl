@@ -11,3 +11,5 @@ tmp/
 /htmlcov
 /twitch-dl-*.tar.gz
 /twitch-dl.1.man
+/bundle
+/*.pyz

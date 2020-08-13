@@ -6,7 +6,15 @@ dist :
 
 clean :
 	find . -name "*pyc" | xargs rm -rf $1
-	rm -rf build dist MANIFEST htmlcov deb_dist twitch-dl*.tar.gz twitch-dl.1.man
+	rm -rf build dist bundle MANIFEST htmlcov deb_dist twitch-dl*.tar.gz twitch-dl.1.man
+
+bundle:
+	mkdir bundle
+	cp twitchdl/__main__.py bundle
+	pip install . --target=bundle
+	rm -rf bundle/*.dist-info
+	python -m zipapp -p "/usr/bin/env python3" bundle
+	mv bundle.pyz twitchdl.pyz
 
 publish :
 	twine upload dist/*.tar.gz dist/*.whl
