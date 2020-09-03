@@ -284,8 +284,14 @@ def _download_video(video_id, args):
     path_map = download_files(base_uri, target_dir, vod_paths, args.max_workers)
 
     # Make a modified playlist which references downloaded VODs
-    for segment in playlist.segments:
-        segment.uri = path_map[segment.uri]
+    # Keep only the downloaded segments and skip the rest
+    org_segments = playlist.segments.copy()
+    playlist.segments.clear()
+    for segment in org_segments:
+        if segment.uri in path_map:
+            segment.uri = path_map[segment.uri]
+            playlist.segments.append(segment)
+
     playlist_path = target_dir + "playlist_downloaded.m3u8"
     playlist.dump(playlist_path)
 
