@@ -13,8 +13,11 @@ bundle:
 	cp twitchdl/__main__.py bundle
 	pip install . --target=bundle
 	rm -rf bundle/*.dist-info
-	python -m zipapp -p "/usr/bin/env python3" bundle
-	mv bundle.pyz twitchdl.pyz
+	find bundle/ -type d -name "__pycache__" -exec rm -rf {} +
+	python -m zipapp \
+		--python "/usr/bin/env python3" \
+		--output twitch-dl.`git describe`.pyz bundle \
+		--compress
 
 publish :
 	twine upload dist/*.tar.gz dist/*.whl
