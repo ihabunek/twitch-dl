@@ -1,6 +1,13 @@
 Twitch Downloader change log
 ============================
 
+1.11.0 (2020-09-03)
+-------------------
+
+* Make downloading more robust, fixes issues with some VODs (#35)
+* Bundle twitch-dl to a standalone archive, simplifying installation, see
+  installation instructions in README
+
 1.10.2 (2020-08-11)
 -------------------
 
