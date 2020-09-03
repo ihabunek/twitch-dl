@@ -1,6 +1,7 @@
 import os
 import requests
 
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from functools import partial
@@ -75,13 +76,17 @@ def _print_progress(futures):
         print_out("\r" + msg.ljust(max_msg_size), end="")
 
 
-def download_files(base_url, directory, filenames, max_workers):
-    urls = [base_url + f for f in filenames]
-    paths = ["{}{:05d}.vod".format(directory, k) for k, _ in enumerate(filenames)]
-    partials = (partial(download_file, url, path) for url, path in zip(urls, paths))
+def download_files(base_url, target_dir, vod_paths, max_workers):
+    """
+    Downloads a list of VODs defined by a common `base_url` and a list of
+    `vod_paths`, returning a dict which maps the paths to the downloaded files.
+    """
+    urls = [base_url + path for path in vod_paths]
+    targets = ["{}{:05d}.ts".format(target_dir, k) for k, _ in enumerate(vod_paths)]
+    partials = (partial(download_file, url, path) for url, path in zip(urls, targets))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(fn) for fn in partials]
         _print_progress(futures)
 
-    return paths
+    return OrderedDict(zip(vod_paths, targets))

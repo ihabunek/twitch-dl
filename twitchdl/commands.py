@@ -103,17 +103,10 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(directory, file_paths, target):
-    input_path = "{}files.txt".format(directory)
-
-    with open(input_path, 'w') as f:
-        for path in file_paths:
-            f.write('file {}\n'.format(os.path.basename(path)))
-
+def _join_vods(playlist_path, target):
     command = [
         "ffmpeg",
-        "-f", "concat",
-        "-i", input_path,
+        "-i", playlist_path,
         "-c", "copy",
         target,
         "-stats",
@@ -140,8 +133,9 @@ def _video_target_filename(video, format):
     return name + "." + format
 
 
-def _get_files(playlist, start, end):
-    """Extract files for download from playlist."""
+def _get_vod_paths(playlist, start, end):
+    """Extract unique VOD paths for download from playlist."""
+    files = []
     vod_start = 0
     for segment in playlist.segments:
         vod_end = vod_start + segment.duration
@@ -151,10 +145,12 @@ def _get_files(playlist, start, end):
         start_condition = not start or vod_end > start
         end_condition = not end or vod_start < end
 
-        if start_condition and end_condition:
-            yield segment.uri
+        if start_condition and end_condition and segment.uri not in files:
+            files.append(segment.uri)
 
         vod_start = vod_end
+
+    return files
 
 
 def _crete_temp_dir(base_uri):
@@ -275,7 +271,7 @@ def _download_video(video_id, args):
 
     base_uri = re.sub("/[^/]+$", "/", playlist_uri)
     target_dir = _crete_temp_dir(base_uri)
-    filenames = list(_get_files(playlist, args.start, args.end))
+    vod_paths = _get_vod_paths(playlist, args.start, args.end)
 
     # Save playlists for debugging purposes
     with open(target_dir + "playlists.m3u8", "w") as f:
@@ -284,12 +280,18 @@ def _download_video(video_id, args):
         f.write(response.text)
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
-        len(filenames), args.max_workers, target_dir))
-    file_paths = download_files(base_uri, target_dir, filenames, args.max_workers)
+        len(vod_paths), args.max_workers, target_dir))
+    path_map = download_files(base_uri, target_dir, vod_paths, args.max_workers)
+
+    # Make a modified playlist which references downloaded VODs
+    for segment in playlist.segments:
+        segment.uri = path_map[segment.uri]
+    playlist_path = target_dir + "playlist_downloaded.m3u8"
+    playlist.dump(playlist_path)
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, args.format)
-    _join_vods(target_dir, file_paths, target)
+    _join_vods(playlist_path, target)
 
     if args.keep:
         print_out("\nTemporary files not deleted: {}".format(target_dir))
