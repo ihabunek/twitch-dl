@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import sys
 import re
 
@@ -51,6 +52,10 @@ def print_out(*args, **kwargs):
     print(*args, **kwargs)
 
 
+def print_json(data):
+    print(json.dumps(data))
+
+
 def print_err(*args, **kwargs):
     args = ["<red>{}</red>".format(a) for a in args]
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
@@ -62,7 +67,7 @@ def print_video(video):
     length = utils.format_duration(video["lengthSeconds"])
     channel = video["creator"]["channel"]["displayName"]
     playing = (
-        " playing <blue>{}</blue>".format(video["game"]["name"])
+        "playing <blue>{}</blue>".format(video["game"]["name"])
         if video["game"] else ""
     )
 
@@ -74,3 +79,20 @@ def print_video(video):
     print_out("<blue>{}</blue> {}".format(channel, playing))
     print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
     print_out("<i>{}</i>".format(url))
+
+
+def print_clip(clip):
+    published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
+    length = utils.format_duration(clip["durationSeconds"])
+
+    print_out("\n<b>{}</b>".format(clip["slug"]))
+    print_out("<green>{}</green>".format(clip["title"]))
+    print_out("<blue>{}</blue> playing <blue>{}</blue>".format(
+        clip["broadcaster"]["channel"]["displayName"],
+        clip["game"]["name"]
+    ))
+    print_out(
+        "Published <blue>{}</blue>"
+        "  Length: <blue>{}</blue>"
+        "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
+    print_out("<i>{}</i>".format(clip["url"]))

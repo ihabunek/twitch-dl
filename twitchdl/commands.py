@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from twitchdl import twitch, utils
 from twitchdl.download import download_file, download_files
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out, print_video
+from twitchdl.output import print_out, print_clip, print_video, print_json
 
 
 def _continue():
@@ -43,6 +43,43 @@ def _get_game_ids(names):
         game_ids.append(int(game_id))
 
     return game_ids
+
+
+def clips(args):
+    if args.json:
+        clips = twitch.get_channel_clips(args.channel_name, args.period, args.limit)
+        nodes = list(edge["node"] for edge in clips["edges"])
+        print_json(nodes)
+        return
+
+    print_out("<dim>Loading clips...</dim>")
+    generator = twitch.channel_clips_generator(args.channel_name, args.period, args.limit)
+
+    first = 1
+
+    for clips, has_more in generator:
+        count = len(clips["edges"]) if "edges" in clips else 0
+        last = first + count - 1
+
+        print_out("-" * 80)
+        print_out("<yellow>Showing clips {}-{} of ??</yellow>".format(first, last))
+
+        for clip in clips["edges"]:
+            print_clip(clip["node"])
+
+        if not args.pager:
+            print_out(
+                "\n<dim>There are more clips. "
+                "Increase the --limit or use --pager to see the rest.</dim>"
+            )
+            break
+
+        if not has_more or not _continue():
+            break
+
+        first += count
+    else:
+        print_out("<yellow>No clips found</yellow>")
 
 
 def videos(args):

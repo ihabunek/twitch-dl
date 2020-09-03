@@ -85,6 +85,37 @@ COMMANDS = [
         ],
     ),
     Command(
+        name="clips",
+        description="List clips",
+        arguments=[
+            (["channel_name"], {
+                "help": "channel name",
+                "type": str,
+            }),
+            (["-l", "--limit"], {
+                "help": "Number of videos to fetch (default 10, max 100)",
+                "type": limit,
+                "default": 10,
+            }),
+            (["-P", "--period"], {
+                "help": "Period from which to return clips. (default: 'all_time')",
+                "type": str,
+                "choices": ["last_day", "last_week", "last_month", "all_time"],
+                "default": "all_time",
+            }),
+            (["-j", "--json"], {
+                "help": "Show results as JSON",
+                "action": "store_true",
+                "default": False,
+            }),
+            (["-p", "--pager"], {
+                "help": "If there are more results than LIMIT, ask to show next page",
+                "action": "store_true",
+                "default": False,
+            })
+        ],
+    ),
+    Command(
         name="download",
         description="Download a video",
         arguments=[

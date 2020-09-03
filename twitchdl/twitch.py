@@ -96,6 +96,84 @@ def get_clip(slug):
     return response["data"]["clip"]
 
 
+def get_channel_clips(channel_id, period, limit, after=None):
+    """
+    List channel clips.
+
+    At the time of writing this:
+    * filtering by game name returns an error
+    * sorting by anything but VIEWS_DESC or TRENDING returns an error
+    * sorting by VIEWS_DESC and TRENDING returns the same results
+    * there is no totalCount
+    """
+    query = """
+    {{
+      user(login: "{channel_id}") {{
+        clips(first: {limit}, after: "{after}", criteria: {{ period: {period} }}) {{
+          pageInfo {{
+            hasNextPage
+            hasPreviousPage
+          }}
+          edges {{
+            cursor
+            node {{
+              id
+              slug
+              title
+              createdAt
+              viewCount
+              durationSeconds
+              url
+              videoQualities {{
+                frameRate
+                quality
+                sourceURL
+              }}
+              game {{
+                id
+                name
+              }}
+              broadcaster {{
+                channel {{
+                  displayName
+                }}
+              }}
+            }}
+          }}
+        }}
+      }}
+    }}
+    """
+
+    query = query.format(**{
+        "channel_id": channel_id,
+        "after": after if after else "",
+        "limit": limit,
+        "period": period.upper(),
+    })
+
+    response = gql_query(query)
+    return response["data"]["user"]["clips"]
+
+
+def channel_clips_generator(channel_id, period, limit):
+    cursor = ""
+    while True:
+        clips = get_channel_clips(
+            channel_id, period, limit, after=cursor)
+
+        if not clips["edges"]:
+            break
+
+        has_next = clips["pageInfo"]["hasNextPage"]
+        cursor = clips["edges"][-1]["cursor"] if has_next else None
+
+        yield clips, has_next
+
+        if not cursor:
+            break
+
+
 def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None):
     query = """
     {{
@@ -139,7 +217,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     query = query.format(**{
         "channel_id": channel_id,
         "game_ids": game_ids,
-        "after": after,
+        "after": after if after else "",
         "limit": limit,
         "sort": sort.upper(),
         "type": type.upper(),
@@ -150,7 +228,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
 
 
 def channel_videos_generator(channel_id, limit, sort, type, game_ids=None):
-    cursor = None
+    cursor = ""
     while True:
         videos = get_channel_videos(
             channel_id, limit, sort, type, game_ids=game_ids, after=cursor)
