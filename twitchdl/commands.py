@@ -299,4 +299,4 @@ def _download_video(video_id, args):
         print_out("\nDeleting temporary files...")
         shutil.rmtree(target_dir)
 
-    print_out("Downloaded: {}".format(target))
+    print_out("\nDownloaded: <green>{}</green>".format(target))
