@@ -1,10 +1,10 @@
 Twitch Downloader
 =================
 
-A simple CLI tool for downloading videos from Twitch.
+CLI tool for downloading videos from twitch.tv
 
-Inspired by youtube-dl but improves upon it by using multiple concurrent
-connections to make the download faster.
+Inspired by [youtube-dl](https://youtube-dl.org/) but improves upon it by using
+multiple concurrent connections to make the download faster.
 
 Resources
 ---------
@@ -17,7 +17,64 @@ Requirements
 ------------
 
 * Python 3.5+
-* [ffmpeg](https://ffmpeg.org/) must be installed and in the path
+* [ffmpeg](https://ffmpeg.org/download.html), installed and on the system path
+
+Installation
+------------
+
+### Download standalone archive
+
+Go to the [latest release](https://github.com/ihabunek/twitch-dl/releases/latest)
+and download the `twitch-dl.<version>.pyz` archive.
+
+Run the archive by either:
+
+a) passing it to python:
+
+```
+python3 twitch-dl.1.10.2.pyz --help
+```
+
+b) making it executable and invoking it directly (linux specific):
+
+```
+chmod +x twitch-dl.1.10.2.pyz
+./twitch-dl.1.10.2.pyz --help
+```
+
+Feel free to rename the archive to something more managable, like `twitch-dl`.
+
+To upgrade to a newer version, repeat the process with the newer release.
+
+### From PYPI using pipx
+
+**pipx** is a tool which installs python apps into isolated environments, which
+prevents all kinds of problems later so it's the suggested way to install
+twitch-dl from PYPI.
+
+Install pipx as described in
+[pipx install docs](https://pipxproject.github.io/pipx/installation/).
+
+Install twitch-dl:
+
+```
+pipx install twitch-dl
+```
+
+Check installation worked:
+
+```
+twitch-dl --help
+```
+
+If twitch-dl executable is not found, check that the pipx binary location (by
+default `~/.local/bin`) is in your PATH.
+
+To upgrade twitch-dl to the latest version:
+
+```
+pipx install twitch-dl
+```
 
 Usage
 -----
@@ -97,6 +154,6 @@ make man
 License
 -------
 
-Copyright 2018 Ivan Habunek <ivan@habunek.com>
+Copyright 2018-2020 Ivan Habunek <ivan@habunek.com>
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
