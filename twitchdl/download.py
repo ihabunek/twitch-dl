@@ -82,7 +82,7 @@ def download_files(base_url, target_dir, vod_paths, max_workers):
     `vod_paths`, returning a dict which maps the paths to the downloaded files.
     """
     urls = [base_url + path for path in vod_paths]
-    targets = ["{}{:05d}.ts".format(target_dir, k) for k, _ in enumerate(vod_paths)]
+    targets = [os.path.join(target_dir, "{:05d}.ts".format(k)) for k, _ in enumerate(vod_paths)]
     partials = (partial(download_file, url, path) for url, path in zip(urls, targets))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

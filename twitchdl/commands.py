@@ -1,12 +1,11 @@
 import m3u8
-import os
-import pathlib
 import re
 import requests
 import shutil
 import subprocess
 import tempfile
 
+from os import path
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -155,10 +154,10 @@ def _get_vod_paths(playlist, start, end):
 
 def _crete_temp_dir(base_uri):
     """Create a temp dir to store downloads if it doesn't exist."""
-    path = urlparse(base_uri).path
-    directory = '{}/twitch-dl{}'.format(tempfile.gettempdir(), path)
-    pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
-    return directory
+    path = urlparse(base_uri).path.lstrip("/")
+    temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    return temp_dir
 
 
 VIDEO_PATTERNS = [
@@ -274,9 +273,9 @@ def _download_video(video_id, args):
     vod_paths = _get_vod_paths(playlist, args.start, args.end)
 
     # Save playlists for debugging purposes
-    with open(target_dir + "playlists.m3u8", "w") as f:
+    with open(path.join(target_dir, "playlists.m3u8"), "w") as f:
         f.write(playlists_m3u8)
-    with open(target_dir + "playlist.m3u8", "w") as f:
+    with open(path.join(target_dir, "playlist.m3u8"), "w") as f:
         f.write(response.text)
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
@@ -292,7 +291,7 @@ def _download_video(video_id, args):
             segment.uri = path_map[segment.uri]
             playlist.segments.append(segment)
 
-    playlist_path = target_dir + "playlist_downloaded.m3u8"
+    playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
     playlist.dump(playlist_path)
 
     print_out("\n\nJoining files...")
@@ -300,9 +299,9 @@ def _download_video(video_id, args):
     _join_vods(playlist_path, target)
 
     if args.keep:
-        print_out("\nTemporary files not deleted: {}".format(target_dir))
+        print_out("\n<dim>Temporary files not deleted: {}</dim>".format(target_dir))
     else:
-        print_out("\nDeleting temporary files...")
+        print_out("\n<dim>Deleting temporary files...</dim>")
         shutil.rmtree(target_dir)
 
     print_out("\nDownloaded: <green>{}</green>".format(target))
