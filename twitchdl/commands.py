@@ -104,13 +104,13 @@ def _select_playlist_interactive(playlists):
 
 
 def _join_vods(directory, file_paths, target):
-    input_path = "{}/files.txt".format(directory)
+    input_path = "{}files.txt".format(directory)
 
     with open(input_path, 'w') as f:
         for path in file_paths:
             f.write('file {}\n'.format(os.path.basename(path)))
 
-    result = subprocess.run([
+    command = [
         "ffmpeg",
         "-f", "concat",
         "-i", input_path,
@@ -118,9 +118,12 @@ def _join_vods(directory, file_paths, target):
         target,
         "-stats",
         "-loglevel", "warning",
-    ])
+    ]
 
-    result.check_returncode()
+    print_out("<dim>{}</dim>".format(" ".join(command)))
+    result = subprocess.run(command)
+    if result.returncode != 0:
+        raise ConsoleError("Joining files failed")
 
 
 def _video_target_filename(video, format):
