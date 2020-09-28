@@ -193,6 +193,10 @@ def _get_clip_url(clip, args):
 
     # Quality given as an argument
     if args.quality:
+        print(qualities)
+        if args.quality == 'best'
+            q["quality"] == qualities[0]
+            return q["sourceURL"]
         selected_quality = args.quality.rstrip("p")  # allow 720p as well as 720
         for q in qualities:
             if q["quality"] == selected_quality:
