@@ -301,6 +301,11 @@ def _download_video(video_id, args):
     playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
     playlist.dump(playlist_path)
 
+    if args.no_join:
+        print_out("\n\n<dim>Skipping joining files...</dim>")
+        print_out("VODs downloaded to:\n<blue>{}</blue>".format(target_dir))
+        return
+
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, args.format)
     _join_vods(playlist_path, target)

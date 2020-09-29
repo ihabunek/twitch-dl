@@ -118,6 +118,11 @@ COMMANDS = [
                 "help": "Video quality, e.g. 720p. Set to 'source' to get best quality.",
                 "type": str,
             }),
+            (["--no-join"], {
+                "help": "Don't run ffmpeg to join the downloaded vods, implies --keep.",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
 ]
