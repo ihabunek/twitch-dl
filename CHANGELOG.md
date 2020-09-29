@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.12.1 (2020-09-29)
+-------------------
+
+* Fix bug introduced in previous version which broke joining
+
 1.12.0 (2020-09-29)
 -------------------
 

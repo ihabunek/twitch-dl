@@ -11,7 +11,7 @@ makes it faster.
 
 setup(
     name='twitch-dl',
-    version='1.12.0',
+    version='1.12.1',
     description='Twitch downloader',
     long_description=long_description.strip(),
     author='Ivan Habunek',
