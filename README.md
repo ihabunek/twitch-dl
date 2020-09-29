@@ -125,6 +125,12 @@ Specify video quality to download:
 twitch-dl download -q 720p 221837124
 ```
 
+Setting quality to `source` will download the best available quality:
+
+```
+twitch-dl download -q source 221837124
+```
+
 Download a clip by slug or URL:
 
 ```

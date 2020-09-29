@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.12.0 (TBA)
+-------------------
+
+* Added `source` as alias for best available quality (#33)
+
 1.11.0 (2020-09-03)
 -------------------
 

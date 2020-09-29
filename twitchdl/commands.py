@@ -83,6 +83,10 @@ def _parse_playlists(playlists_m3u8):
 
 
 def _get_playlist_by_name(playlists, quality):
+    if quality == "source":
+        _, _, uri = playlists[0]
+        return uri
+
     for name, _, uri in playlists:
         if name == quality:
             return uri
@@ -193,6 +197,9 @@ def _get_clip_url(clip, args):
 
     # Quality given as an argument
     if args.quality:
+        if args.quality == "source":
+            return qualities[0]["sourceURL"]
+
         selected_quality = args.quality.rstrip("p")  # allow 720p as well as 720
         for q in qualities:
             if q["quality"] == selected_quality:

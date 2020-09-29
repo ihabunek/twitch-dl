@@ -115,7 +115,7 @@ COMMANDS = [
                 "default": False,
             }),
             (["-q", "--quality"], {
-                "help": "Video quality.",
+                "help": "Video quality, e.g. 720p. Set to 'source' to get best quality.",
                 "type": str,
             }),
         ],
