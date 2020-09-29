@@ -113,7 +113,7 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target, overwrite, no_overwrite):
+def _join_vods(playlist_path, target, overwrite):
     command = [
         "ffmpeg",
         "-i", playlist_path,
