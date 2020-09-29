@@ -123,6 +123,11 @@ COMMANDS = [
                 "action": "store_true",
                 "default": False,
             }),
+            (["--overwrite"], {
+                "help": "Overwrite the target file if it already exists without prompting.",
+                "action": "store_true",
+                "default": False,
+            })
         ],
     ),
 ]

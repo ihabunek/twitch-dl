@@ -106,7 +106,7 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target):
+def _join_vods(playlist_path, target, overwrite, no_overwrite):
     command = [
         "ffmpeg",
         "-i", playlist_path,
@@ -115,6 +115,9 @@ def _join_vods(playlist_path, target):
         "-stats",
         "-loglevel", "warning",
     ]
+
+    if overwrite:
+        command.append("-y")
 
     print_out("<dim>{}</dim>".format(" ".join(command)))
     result = subprocess.run(command)
@@ -308,7 +311,7 @@ def _download_video(video_id, args):
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, args.format)
-    _join_vods(playlist_path, target)
+    _join_vods(playlist_path, target, args.overwrite)
 
     if args.keep:
         print_out("\n<dim>Temporary files not deleted: {}</dim>".format(target_dir))

@@ -6,6 +6,8 @@ Twitch Downloader change log
 
 * Added `source` as alias for best available quality (#33)
 * Added `--no-join` option to `download` to skip ffmpeg join (#36)
+* Added `--overwrite` option to `download` to overwrite target without prompting
+  for confirmation (#37)
 
 1.11.0 (2020-09-03)
 -------------------
