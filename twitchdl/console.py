@@ -77,6 +77,11 @@ COMMANDS = [
                 "choices": ["archive", "highlight", "upload"],
                 "default": "archive",
             }),
+            (["-p", "--pager"], {
+                "help": "If there are more results than LIMIT, ask to show next page",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
     Command(

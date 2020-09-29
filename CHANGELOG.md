@@ -8,6 +8,7 @@ Twitch Downloader change log
 * Added `--no-join` option to `download` to skip ffmpeg join (#36)
 * Added `--overwrite` option to `download` to overwrite target without prompting
   for confirmation (#37)
+* Added `--pager` option to `videos`, don't page by default (#30)
 
 1.11.0 (2020-09-03)
 -------------------
