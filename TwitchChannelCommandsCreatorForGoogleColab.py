@@ -162,9 +162,9 @@ def urlersr(urlazn, uanaza):
     count = count + 1
     if content[count:count + 9] == "recording":
       isitstreaming = 1
-  print('%cd "/content/drive/Shared drives/Downloads/filipetaleshipolitosoares73/Twitch/' + username + '"')
+  print('%cd "/content/drive/My Drive/Twitch Downloaded/' + username + '"')
   print('!mkdir "' + str(uanaza) + '"')
-  print('%cd "/content/drive/Shared drives/Downloads/filipetaleshipolitosoares73/Twitch/' + username + "/" + str(uanaza) + '"')
+  print('%cd "/content/drive/My Drive/Twitch Downloaded/' + username + "/" + str(uanaza) + '"')
   count = 0
   twister = 0
   if isitstreaming == 1:
