@@ -117,7 +117,7 @@ def _join_vods(playlist_path, target, overwrite):
     command = [
         "ffmpeg",
         "-i", playlist_path,
-        "-c", "copy",
+        "-c", "copy", "-crf 32",
         target,
         "-stats",
         "-loglevel", "warning",
