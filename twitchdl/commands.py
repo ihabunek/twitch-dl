@@ -121,14 +121,15 @@ def _select_playlist_interactive(playlists):
 
 
 def _join_vods(playlist_path, target, overwrite):
-  print("Getting Video Length...")
   video_length = sum([get_len(x) for x in [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('/tmp/twitch-dl')] for val in sublist] if x.endswith('.ts')])
-  print("Video Length In Bytes is: " + video_length)
-  if sum(f.stat().st_size for f in Path("/home/runner/Alternative").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts') > 1999999999:
+  print("Video Length is: " + video_length)
+  size = sum(f.stat().st_size for f in Path("/home/runner/Alternative").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
+  print("Size in bytes is: " + size)
+  if size > 1999999999:
     command = [
         "ffmpeg",
         "-i", playlist_path,
-        "-b:a", "96000", "-b:v", ((1999999999 * 6) / video_length),
+        "-b:a", "96000", "-b:v", str((1999999999 * 6) / video_length),
         target,
         "-stats",
         "-loglevel", "warning",
@@ -147,7 +148,7 @@ def _join_vods(playlist_path, target, overwrite):
         command.append("-y")
 
     print_out("<dim>{}</dim>".format(" ".join(command)))
-    result = subprocess.run(command)
+    result = print(subprocess.run(command))
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
 
