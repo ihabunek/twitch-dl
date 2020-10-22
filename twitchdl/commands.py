@@ -4,6 +4,9 @@ import requests
 import shutil
 import subprocess
 import tempfile
+from pathlib import Path
+import os
+import json
 
 from os import path
 from pathlib import Path
@@ -14,6 +17,10 @@ from twitchdl.download import download_file, download_files
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
 
+def get_len(filename):
+   result = subprocess.Popen(["ffprobe", filename, '-print_format', 'json', '-show_streams', '-loglevel', 'quiet'],
+     stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+   return float(json.loads(result.stdout.read())['streams'][0]['duration'])
 
 def _continue():
     print_out(
@@ -114,10 +121,23 @@ def _select_playlist_interactive(playlists):
 
 
 def _join_vods(playlist_path, target, overwrite):
+  print("Getting Video Length...")
+  video_length = sum([get_len(x) for x in [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('/tmp/twitch-dl')] for val in sublist] if x.endswith('.ts')])
+  print("Video Length In Bytes is: " + video_length)
+  if sum(f.stat().st_size for f in Path("/home/runner/Alternative").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts') > 1999999999:
     command = [
         "ffmpeg",
         "-i", playlist_path,
-        "-c", "copy", "-crf 32",
+        "-b:a", "96000", "-b:v", ((1999999999 * 6) / video_length),
+        target,
+        "-stats",
+        "-loglevel", "warning",
+    ]
+  else:
+    command = [
+        "ffmpeg",
+        "-i", playlist_path,
+        "-c", "copy",
         target,
         "-stats",
         "-loglevel", "warning",
