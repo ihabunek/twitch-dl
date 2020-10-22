@@ -16,6 +16,7 @@ from twitchdl import twitch, utils
 from twitchdl.download import download_file, download_files
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
+global viderr
 
 def get_len(filename):
    result = subprocess.Popen(["ffprobe", filename, '-print_format', 'json', '-show_streams', '-loglevel', 'quiet'],
@@ -121,7 +122,12 @@ def _select_playlist_interactive(playlists):
 
 
 def _join_vods(playlist_path, target, overwrite):
-  video_length = sum([get_len(x) for x in [val for sublist in [[os.path.join(i[0], j) for j in i[2]] for i in os.walk('/tmp/twitch-dl')] for val in sublist] if x.endswith('.ts')])
+  url = "https://api.twitch.tv/kraken/videos/" + viderr + "?client_id=9kr7kfumdnzkcr9rgg4g0qtfnk2618&api_version=5&limit=100"
+  r = requests.get(str(url))
+  content = r.text
+  lengther = len(content)
+  getjder = json.loads(content)
+  video_length = getjder["length"]
   print("Video Length is: " + str(video_length))
   size = sum(f.stat().st_size for f in Path("/home/runner/Alternative").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
@@ -148,7 +154,7 @@ def _join_vods(playlist_path, target, overwrite):
         command.append("-y")
 
     print_out("<dim>{}</dim>".format(" ".join(ommand)))
-    result = subprocess.run(command))
+    result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
 
@@ -161,6 +167,7 @@ def _video_target_filename(video, format):
         date,
         video['_id'][1:],
         video['channel']['name'],
+        video['game'],
         utils.slugify(video['title']),
     ])
 
@@ -288,6 +295,8 @@ def _download_video(video_id, args):
 
     print_out("<dim>Looking up video...</dim>")
     video = twitch.get_video(video_id)
+    viderr = video_id  
+      
 
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
         video['title'], video['channel']['display_name']))
