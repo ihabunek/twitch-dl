@@ -129,7 +129,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
   if bool(getjder.get("length")):
     video_length = getjder["length"]
     print("Video Length is: " + str(video_length))
-  else
+  else:
     video_length = int(20000)
     print("Video Length Not Found, Defaulted to " + str(video_length))
   size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
