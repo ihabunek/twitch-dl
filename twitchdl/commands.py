@@ -152,8 +152,8 @@ def _join_vods(playlist_path, target, overwrite, anion):
     if overwrite:
         command.append("-y")
 
-    print_out("<dim>{}</dim>".format(" ".join(ommand)))
-    result = subprocess.run(command)
+    print_out("<dim>{}</dim>".format(" ".join(command)))
+    result = subprocess.run(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
 
