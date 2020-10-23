@@ -16,7 +16,6 @@ from twitchdl import twitch, utils
 from twitchdl.download import download_file, download_files
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_video
-global viderr
 
 def get_len(filename):
    result = subprocess.Popen(["ffprobe", filename, '-print_format', 'json', '-show_streams', '-loglevel', 'quiet'],
@@ -121,8 +120,8 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target, overwrite):
-  url = "https://api.twitch.tv/kraken/videos/" + viderr + "?client_id=9kr7kfumdnzkcr9rgg4g0qtfnk2618&api_version=5&limit=100"
+def _join_vods(playlist_path, target, overwrite, anion):
+  url = "https://api.twitch.tv/kraken/videos/" + anion + "?client_id=9kr7kfumdnzkcr9rgg4g0qtfnk2618&api_version=5&limit=100"
   r = requests.get(str(url))
   content = r.text
   lengther = len(content)
@@ -219,7 +218,6 @@ def download(args):
         match = re.match(pattern, args.video)
         if match:
             video_id = match.group('id')
-            viderr = match.group('id')
             return _download_video(video_id, args)
 
     for pattern in CLIP_PATTERNS:
@@ -293,7 +291,8 @@ def _download_clip(slug, args):
 def _download_video(video_id, args):
     if args.start and args.end and args.end <= args.start:
         raise ConsoleError("End time must be greater than start time")
-
+      
+    
     print_out("<dim>Looking up video...</dim>")
     video = twitch.get_video(video_id)  
       
@@ -345,10 +344,11 @@ def _download_video(video_id, args):
         print_out("\n\n<dim>Skipping joining files...</dim>")
         print_out("VODs downloaded to:\n<blue>{}</blue>".format(target_dir))
         return
-
+    
+    letsgo = video_id
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, args.format)
-    _join_vods(playlist_path, target, args.overwrite)
+    _join_vods(playlist_path, target, args.overwrite, letsgo)
 
     if args.keep:
         print_out("\n<dim>Temporary files not deleted: {}</dim>".format(target_dir))
