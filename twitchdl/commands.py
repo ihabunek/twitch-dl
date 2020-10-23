@@ -131,31 +131,15 @@ def _join_vods(playlist_path, target, overwrite, anion):
   size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
   if size > 1999999999:
-    command = [
-        "ffmpeg",
-        "-i", playlist_path,
-        "-b:a", "96000", "-b:v", str((1999999999 * 6) / video_length),
-        target,
-        "-stats",
-        "-loglevel", "warning",
-    ]
-  else:
-    command = [
-        "ffmpeg",
-        "-i", playlist_path,
-        "-c", "copy",
-        target,
-        "-stats",
-        "-loglevel", "warning",
-    ]
+    command = "ffmpeg -hwaccel cuvid -i " + str(playlist_path) + " -b:a 96000 -b:v " + str((1999999999 * 6) / video_length) + " " + str(target) + " -stats -loglevel warning"
+  else: 
+    command = "ffmpeg -hwaccel cuvid -i " + str(playlist_path) + " -c copy " + str(target) + " -stats -loglevel warning"
 
     if overwrite:
-        command.append("-y")
+        command.append(" -y")
 
     print_out("<dim>{}</dim>".format(" ".join(command)))
-    result = subprocess.run(command, stdout = subprocess.PIPE)
-    if result.returncode != 0:
-        raise ConsoleError("Joining files failed")
+    result = get_ipython().system(command)
 
 
 def _video_target_filename(video, format):
@@ -170,7 +154,7 @@ def _video_target_filename(video, format):
         utils.slugify(video['title']),
     ])
     
-    print(name)
+    print(name + "." + format)
       
     return name + "." + format
 
