@@ -155,7 +155,7 @@ def _video_target_filename(video, format):
         date,
         video['_id'][1:],
         video['channel']['name'],
-        str(video.get('game')),
+        str(video.get('game').replace(" ", "_")),
         utils.slugify(video['title']),
         str(video.get("fps").get("chunked")),
         str(video.get("resolutions").get("chunked")),
