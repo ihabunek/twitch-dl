@@ -140,7 +140,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
     command.append(" -y")
 
   print(command)
-  os.Popen(command).read()
+  os.popen(command).read()
 
 
 def _video_target_filename(video, format):
