@@ -126,8 +126,12 @@ def _join_vods(playlist_path, target, overwrite, anion):
   content = r.text
   lengther = len(content)
   getjder = json.loads(content)
-  video_length = getjder["length"]
-  print("Video Length is: " + str(video_length))
+  if bool(getjder.get("length")):
+    video_length = getjder["length"]
+    print("Video Length is: " + str(video_length))
+  else
+    video_length = int(20000)
+    print("Video Length Not Found, Defaulted to " + str(video_length))
   size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
   global command
@@ -151,10 +155,10 @@ def _video_target_filename(video, format):
         date,
         video['_id'][1:],
         video['channel']['name'],
-        video['game'],
+        str(video.get('game')),
         utils.slugify(video['title']),
-        str(video["fps"]["chunked"]),
-        str(a["resolutions"]["chunked"])
+        str(video.get("fps").get("chunked")),
+        str(a.get("resolutions").get("chunked"))
     ])
     
     print(name + "." + format)
