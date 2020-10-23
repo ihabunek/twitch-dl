@@ -153,7 +153,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
         command.append("-y")
 
     print_out("<dim>{}</dim>".format(" ".join(command)))
-    result = subprocess.run(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    result = subprocess.run(command, stdout = subprocess.PIPE)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
 
@@ -169,7 +169,9 @@ def _video_target_filename(video, format):
         video['game'],
         utils.slugify(video['title']),
     ])
-
+    
+    print(name)
+      
     return name + "." + format
 
 
