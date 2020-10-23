@@ -136,7 +136,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
   print("Size in bytes is: " + str(size))
   global command
   if size > 1999999999:
-    command = "ffmpeg -hwaccel cuvid -hwaccel_output_format cuvid -vcodec h264 -i " + playlist_path + " -b:a 96000 -b:v " + str((1999999999 * 6) / video_length) + " -preset ultrafast " + str(target) +  " -stats -loglevel warning"
+    command = "ffmpeg -hwaccel cuvid -hwaccel_output_format cuda -vcodec h264 -i " + playlist_path + " -b:a 96000 -b:v " + str((1999999999 * 6) / video_length) + " -preset ultrafast " + str(target) +  " -stats -loglevel warning"
   else: 
     command = "ffmpeg -i " + str(playlist_path) + " -c copy " + str(target) + " -stats -loglevel warning"
 
