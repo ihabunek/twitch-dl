@@ -219,6 +219,7 @@ def download(args):
         match = re.match(pattern, args.video)
         if match:
             video_id = match.group('id')
+            viderr = match.group('id')
             return _download_video(video_id, args)
 
     for pattern in CLIP_PATTERNS:
@@ -294,8 +295,7 @@ def _download_video(video_id, args):
         raise ConsoleError("End time must be greater than start time")
 
     print_out("<dim>Looking up video...</dim>")
-    video = twitch.get_video(video_id)
-    viderr = video_id  
+    video = twitch.get_video(video_id)  
       
 
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
