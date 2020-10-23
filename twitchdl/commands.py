@@ -136,11 +136,11 @@ def _join_vods(playlist_path, target, overwrite, anion):
   else: 
     command = "ffmpeg -i " + str(playlist_path) + " -c copy " + str(target) + " -stats -loglevel warning"
 
-    if overwrite:
-        command.append(" -y")
+  if overwrite:
+    command.append(" -y")
 
-    print(command)
-    os.system(command)
+  print(command)
+  get_ipython().system(command)
 
 
 def _video_target_filename(video, format):
