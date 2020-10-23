@@ -130,6 +130,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
   print("Video Length is: " + str(video_length))
   size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
+  global command
   if size > 1999999999:
     command = "ffmpeg -i " + str(playlist_path) + " -b:a 96000 -b:v " + str((1999999999 * 6) / video_length) + " " + str(target) + " -stats -loglevel warning"
   else: 
@@ -139,7 +140,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
         command.append(" -y")
 
     print(command)
-    result = os.system(command)
+    os.system(command)
 
 
 def _video_target_filename(video, format):
