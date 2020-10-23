@@ -155,8 +155,8 @@ def _video_target_filename(video, format):
         date,
         video['_id'][1:],
         video['channel']['name'],
-        str(video.get('game').replace(" ", "_").replace("\\", "").replace("/", "").replace(":", "").replace("*", "").replace("?", "").replace('"', "").replace("<", "").replace(">", "").replace("|", "")),
-        str(video.get('title').replace(" ", "_").replace("\\", "").replace("/", "").replace(":", "").replace("*", "").replace("?", "").replace('"', "").replace("<", "").replace(">", "").replace("|", "")),
+        str(video.get('game').replace(" ", "_").replace("/", "")),
+        str(video.get('title').replace(" ", "_").replace("/", "")),
         str(video.get("fps").get("chunked")),
         str(video.get("resolutions").get("chunked")),
         str(video.get("length"))
