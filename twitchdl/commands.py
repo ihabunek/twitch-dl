@@ -128,7 +128,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
   getjder = json.loads(content)
   video_length = getjder["length"]
   print("Video Length is: " + str(video_length))
-  size = sum(f.stat().st_size for f in Path("/home/runner/Alternative").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
+  size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
   if size > 1999999999:
     command = [
