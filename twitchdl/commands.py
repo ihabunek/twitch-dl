@@ -136,9 +136,9 @@ def _join_vods(playlist_path, target, overwrite, anion):
   print("Size in bytes is: " + str(size))
   global command
   if size > 1999999999:
-    command = "ffmpeg -hwaccel cuvid -hwaccel_output_format cuda -vcodec copy -c:a copy -i " + playlist_path + " -b:a 96000 -b:v " + str((1999999999 * 6) / video_length) + " -preset ultrafast " + str(target) +  " -stats -loglevel warning"
+    command = 'ffmpeg -hwaccel cuvid -hwaccel_output_format cuda -vcodec copy -c:a copy -i "' + playlist_path + '" -b:a 96000 -b:v ' + str((1999999999 * 6) / video_length) + ' -preset ultrafast "' + str(target) +  '" -stats -loglevel warning'
   else: 
-    command = "ffmpeg -i " + str(playlist_path) + " -c copy " + str(target) + " -stats -loglevel warning"
+    command = 'ffmpeg -i "' + str(playlist_path) + '" -c copy "' + str(target) + '" -stats -loglevel warning'
 
   if overwrite:
     command.append(" -y")
@@ -150,17 +150,11 @@ def _join_vods(playlist_path, target, overwrite, anion):
 def _video_target_filename(video, format):
     match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", video['published_at'])
     date = "".join(match.groups())
-
-    name = "_".join([
-        date,
-        video['_id'][1:],
-        video['channel']['name'],
-        str(video.get('game').replace(" ", "_").replace("/", "")),
-        str(video.get('title').replace(" ", "_").replace("/", "")),
-        str(video.get("fps").get("chunked")),
-        str(video.get("resolutions").get("chunked")),
-        str(video.get("length"))
-    ])
+    
+    if os.name == "posix":
+      name = date + " " + video['_id'][1:] + " " + video['channel']['name'] + " " + str(video.get('game').replace("/", "")) + " " + str(video.get('title').replace("/", "")) + " " + str(video.get("fps").get("chunked")) + " " + str(video.get("resolutions").get("chunked")) + " " + str(video.get("length"))
+    else:
+      name = date + " " + video['_id'][1:] + " " + video['channel']['name'] + " " + str(str(utils.slugify(video.get('game'))).replace("/", "")) + " " + str(str(utils.slugify(video.get('title'))).replace("/", "")) + " " + str(video.get("fps").get("chunked")) + " " + str(video.get("resolutions").get("chunked")) + " " + str(video.get("length"))
     
     print(name + "." + format)
       
