@@ -135,7 +135,7 @@ def _join_vods(playlist_path, target, overwrite, anion):
   size = sum(f.stat().st_size for f in Path("/tmp/twitch-dl").glob('**/*') if f.is_file() and f.name[len(f.name) - 3:len(f.name)] == '.ts')
   print("Size in bytes is: " + str(size))
   global command
-  if size > 1999999999:
+  if size > 267241379:
     command = 'ffmpeg -hwaccel cuvid -hwaccel_output_format cuda -vcodec h264 -i "' + playlist_path + '" -b:a 96000 -b:v ' + str((267241379 * 5.5) / video_length) + ' -preset ultrafast -c:a copy -s 1280x720 -r 24 "' + str(target) +  '" -stats -loglevel warning'
   else: 
     command = 'ffmpeg -i "' + str(playlist_path) + '" -c copy "' + str(target) + '" -stats -loglevel warning'
