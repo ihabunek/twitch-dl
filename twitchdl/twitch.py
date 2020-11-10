@@ -153,7 +153,12 @@ def get_channel_clips(channel_id, period, limit, after=None):
         "period": period.upper(),
     })
 
+
     response = gql_query(query)
+    user = response["data"]["user"]
+    if not user:
+        raise ConsoleError("Channel {} not found".format(channel_id))
+
     return response["data"]["user"]["clips"]
 
 
