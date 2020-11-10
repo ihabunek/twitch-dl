@@ -112,7 +112,12 @@ COMMANDS = [
                 "help": "If there are more results than LIMIT, ask to show next page",
                 "action": "store_true",
                 "default": False,
-            })
+            }),
+            (["-d", "--download"], {
+                "help": "Download all videos in given period (in source quality)",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
     Command(

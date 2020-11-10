@@ -45,12 +45,32 @@ def _get_game_ids(names):
     return game_ids
 
 
+def _clips_json(args):
+    clips = twitch.get_channel_clips(args.channel_name, args.period, args.limit)
+    nodes = list(edge["node"] for edge in clips["edges"])
+    print_json(nodes)
+
+
+def _clips_download(args):
+    generator = twitch.channel_clips_generator(args.channel_name, args.period, 100)
+    for clips, _ in generator:
+        for clip in clips["edges"]:
+            clip = clip["node"]
+            url = clip["videoQualities"][0]["sourceURL"]
+            target = _clip_target_filename(clip)
+            if path.exists(target):
+                print_out("Already downloaded: <green>{}</green>".format(target))
+            else:
+                print_out("Downloading: <yellow>{}</yellow>".format(target))
+                download_file(url, target)
+
+
 def clips(args):
     if args.json:
-        clips = twitch.get_channel_clips(args.channel_name, args.period, args.limit)
-        nodes = list(edge["node"] for edge in clips["edges"])
-        print_json(nodes)
-        return
+        return _clips_json(args)
+
+    if args.download:
+        return _clips_download(args)
 
     print_out("<dim>Loading clips...</dim>")
     generator = twitch.channel_clips_generator(args.channel_name, args.period, args.limit)
@@ -183,6 +203,24 @@ def _video_target_filename(video, format):
     return name + "." + format
 
 
+def _clip_target_filename(clip):
+    url = clip["videoQualities"][0]["sourceURL"]
+    _, ext = path.splitext(url)
+    ext = ext.lstrip(".")
+
+    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", clip["createdAt"])
+    date = "".join(match.groups())
+
+    name = "_".join([
+        date,
+        clip["id"],
+        clip["broadcaster"]["channel"]["name"],
+        utils.slugify(clip["title"]),
+    ])
+
+    return "{}.{}".format(name, ext)
+
+
 def _get_vod_paths(playlist, start, end):
     """Extract unique VOD paths for download from playlist."""
     files = []
@@ -284,18 +322,12 @@ def _download_clip(slug, args):
     url = _get_clip_url(clip, args)
     print_out("<dim>Selected URL: {}</dim>".format(url))
 
-    url_path = urlparse(url).path
-    extension = Path(url_path).suffix
-    filename = "{}_{}{}".format(
-        clip["broadcaster"]["login"],
-        utils.slugify(clip["title"]),
-        extension
-    )
+    target = _clip_target_filename(clip)
 
     print_out("Downloading clip...")
-    download_file(url, filename)
+    download_file(url, target)
 
-    print_out("Downloaded: {}".format(filename))
+    print_out("Downloaded: {}".format(target))
 
 
 def _download_video(video_id, args):

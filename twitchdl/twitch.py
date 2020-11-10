@@ -109,7 +109,7 @@ def get_channel_clips(channel_id, period, limit, after=None):
     query = """
     {{
       user(login: "{channel_id}") {{
-        clips(first: {limit}, after: "{after}", criteria: {{ period: {period} }}) {{
+        clips(first: {limit}, after: "{after}", criteria: {{ period: {period}, sort: VIEWS_DESC }}) {{
           pageInfo {{
             hasNextPage
             hasPreviousPage
@@ -135,6 +135,7 @@ def get_channel_clips(channel_id, period, limit, after=None):
               }}
               broadcaster {{
                 channel {{
+                  name
                   displayName
                 }}
               }}
