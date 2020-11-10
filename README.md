@@ -79,6 +79,8 @@ pipx install twitch-dl
 Usage
 -----
 
+### Listing videos
+
 List recent streams for a given channel:
 
 ```
@@ -112,6 +114,8 @@ Use the `--game` option to specify one or more games to show:
 twitch-dl videos --game "doom eternal" --game "cave story" bananasaurus_rex
 ```
 
+### Downloading videos
+
 Download a stream by ID or URL:
 
 ```
@@ -131,6 +135,26 @@ Setting quality to `source` will download the best available quality:
 twitch-dl download -q source 221837124
 ```
 
+### Listing clips
+
+List clips for the given period:
+
+```
+twitch-dl clips bananasaurus_rex --period last_week
+```
+
+Supported periods are: `last_day`, `last_week`, `last_month`, `all_time`.
+
+For listing a large number of clips, it's nice to page them:
+
+```
+twitch-dl clips bananasaurus_rex --period all_time --limit 10 --pager
+```
+
+This will show 10 clips at a time and ask to continue.
+
+### Downloading clips
+
 Download a clip by slug or URL:
 
 ```
@@ -145,6 +169,27 @@ twitch-dl download -q 720 VenomousTameWormHumbleLife
 ```
 
 Note that twitch names for clip qualities have no trailing "p".
+
+### Batch downloading clips
+
+It's possible to download all clips for a given period:
+
+```
+twitch-dl clips bananasaurus_rex --period last_week --download
+```
+
+Clips are downloaded in source quality.
+
+A note about clips
+------------------
+
+Currently it doesn't seem to be possible to get a list of clips ordered by time
+of creation, only by view count. Clips with the same view count seem to be
+returned in random order. This can break paging resulting in duplicate clips
+listed or clips missed.
+
+When batch downloading a large number of clips (over 100), it's possible that
+some will be missed.
 
 Temporary files
 ---------------
