@@ -84,13 +84,15 @@ def print_video(video):
 def print_clip(clip):
     published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(clip["durationSeconds"])
+    channel = clip["broadcaster"]["channel"]["displayName"]
+    playing = (
+        "playing <blue>{}</blue>".format(clip["game"]["name"])
+        if clip["game"] else ""
+    )
 
     print_out("\n<b>{}</b>".format(clip["slug"]))
     print_out("<green>{}</green>".format(clip["title"]))
-    print_out("<blue>{}</blue> playing <blue>{}</blue>".format(
-        clip["broadcaster"]["channel"]["displayName"],
-        clip["game"]["name"]
-    ))
+    print_out("<blue>{}</blue> {}".format(channel, playing))
     print_out(
         "Published <blue>{}</blue>"
         "  Length: <blue>{}</blue>"
