@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.13.0 (2020-11-10)
+-------------------
+
+* Added `clips` command for listing and batch downloading clips (#26)
+
 1.12.1 (2020-09-29)
 -------------------
 

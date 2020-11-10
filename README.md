@@ -32,14 +32,14 @@ Run the archive by either:
 a) passing it to python:
 
 ```
-python3 twitch-dl.1.10.2.pyz --help
+python3 twitch-dl.1.13.0.pyz --help
 ```
 
 b) making it executable and invoking it directly (linux specific):
 
 ```
-chmod +x twitch-dl.1.10.2.pyz
-./twitch-dl.1.10.2.pyz --help
+chmod +x twitch-dl.1.13.0.pyz
+./twitch-dl.1.13.0.pyz --help
 ```
 
 Feel free to rename the archive to something more managable, like `twitch-dl`.
