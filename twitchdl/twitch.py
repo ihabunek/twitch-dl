@@ -74,7 +74,9 @@ def get_clip(slug):
     query = """
     {{
         clip(slug: "{}") {{
+            id
             title
+            createdAt
             durationSeconds
             game {{
                 name
@@ -82,6 +84,9 @@ def get_clip(slug):
             broadcaster {{
                 login
                 displayName
+                channel {{
+                  name
+                }}
             }}
             videoQualities {{
                 frameRate
@@ -152,7 +157,6 @@ def get_channel_clips(channel_id, period, limit, after=None):
         "limit": limit,
         "period": period.upper(),
     })
-
 
     response = gql_query(query)
     user = response["data"]["user"]
