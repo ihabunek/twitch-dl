@@ -122,7 +122,7 @@ def videos(args):
         for video in videos["edges"]:
             print_video(video["node"])
 
-        if not args.pager:
+        if not args.pager and has_more:
             print_out(
                 "\n<dim>There are more videos. "
                 "Increase the --limit or use --pager to see the rest.</dim>"
