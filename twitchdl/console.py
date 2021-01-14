@@ -171,6 +171,21 @@ COMMANDS = [
             })
         ],
     ),
+    Command(
+        name="info",
+        description="Print information for a given Twitch URL, video ID or clip slug",
+        arguments=[
+            (["identifier"], {
+                "help": "identifier",
+                "type": str,
+            }),
+            (["-j", "--json"], {
+                "help": "Show results as JSON",
+                "action": "store_true",
+                "default": False,
+            }),
+        ],
+    )
 ]
 
 COMMON_ARGUMENTS = [

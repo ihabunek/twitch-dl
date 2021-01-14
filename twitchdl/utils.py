@@ -61,3 +61,31 @@ def slugify(value):
     value = unicodedata.normalize('NFKC', value)
     value = re_pattern.sub('', value).strip().lower()
     return re_spaces.sub('_', value)
+
+
+VIDEO_PATTERNS = [
+    r"^(?P<id>\d+)?$",
+    r"^https://(www.)?twitch.tv/videos/(?P<id>\d+)(\?.+)?$",
+]
+
+CLIP_PATTERNS = [
+    r"^(?P<slug>[A-Za-z0-9]+)$",
+    r"^https://(www.)?twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
+    r"^https://clips.twitch.tv/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
+]
+
+
+def parse_video_identifier(identifier):
+    """Given a video ID or URL returns the video ID, or null if not matched"""
+    for pattern in VIDEO_PATTERNS:
+        match = re.match(pattern, identifier)
+        if match:
+            return match.group("id")
+
+
+def parse_clip_identifier(identifier):
+    """Given a clip slug or URL returns the clip slug, or null if not matched"""
+    for pattern in CLIP_PATTERNS:
+        match = re.match(pattern, identifier)
+        if match:
+            return match.group("slug")

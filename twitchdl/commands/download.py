@@ -68,13 +68,13 @@ def _join_vods(playlist_path, target, overwrite):
 
 
 def _video_target_filename(video, format):
-    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", video['published_at'])
+    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", video['publishedAt'])
     date = "".join(match.groups())
 
     name = "_".join([
         date,
-        video['_id'][1:],
-        video['channel']['name'],
+        video['id'][1:],
+        video['creator']['login'],
         utils.slugify(video['title']),
     ])
 
@@ -92,7 +92,7 @@ def _clip_target_filename(clip):
     name = "_".join([
         date,
         clip["id"],
-        clip["broadcaster"]["channel"]["name"],
+        clip["broadcaster"]["login"],
         utils.slugify(clip["title"]),
     ])
 
@@ -127,32 +127,16 @@ def _crete_temp_dir(base_uri):
     return temp_dir
 
 
-VIDEO_PATTERNS = [
-    r"^(?P<id>\d+)?$",
-    r"^https://(www.)?twitch.tv/videos/(?P<id>\d+)(\?.+)?$",
-]
-
-CLIP_PATTERNS = [
-    r"^(?P<slug>[A-Za-z0-9]+)$",
-    r"^https://(www.)?twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
-    r"^https://clips.twitch.tv/(?P<slug>[A-Za-z0-9]+)(\?.+)?$",
-]
-
-
 def download(args):
-    for pattern in VIDEO_PATTERNS:
-        match = re.match(pattern, args.video)
-        if match:
-            video_id = match.group('id')
-            return _download_video(video_id, args)
+    video_id = utils.parse_video_identifier(args.video)
+    if video_id:
+        return _download_video(video_id, args)
 
-    for pattern in CLIP_PATTERNS:
-        match = re.match(pattern, args.video)
-        if match:
-            clip_slug = match.group('slug')
-            return _download_clip(clip_slug, args)
+    clip_slug = utils.parse_clip_identifier(args.video)
+    if clip_slug:
+        return _download_clip(clip_slug, args)
 
-    raise ConsoleError("Invalid video: {}".format(args.video))
+    raise ConsoleError("Invalid input: {}".format(args.video))
 
 
 def _get_clip_url(clip, args):
@@ -216,7 +200,7 @@ def _download_video(video_id, args):
     video = twitch.get_video(video_id)
 
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
-        video['title'], video['channel']['display_name']))
+        video['title'], video['creator']['displayName']))
 
     print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_access_token(video_id)

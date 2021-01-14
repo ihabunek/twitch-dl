@@ -55,7 +55,7 @@ def _clip_target_filename(clip):
     name = "_".join([
         date,
         clip["id"],
-        clip["broadcaster"]["channel"]["name"],
+        clip["broadcaster"]["login"],
         utils.slugify(clip["title"]),
     ])
 
@@ -96,6 +96,7 @@ def clips(args):
         print_out("<yellow>Showing clips {}-{} of ??</yellow>".format(first, last))
 
         for clip in clips["edges"]:
+            print_out()
             print_clip(clip["node"])
 
         if not args.pager:

@@ -62,10 +62,16 @@ def print_err(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+def print_log(*args, **kwargs):
+    args = ["<dim>{}</dim>".format(a) for a in args]
+    args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
+    print(*args, file=sys.stderr, **kwargs)
+
+
 def print_video(video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
-    channel = video["creator"]["channel"]["displayName"]
+    channel = video["creator"]["displayName"]
     playing = (
         "playing <blue>{}</blue>".format(video["game"]["name"])
         if video["game"] else ""
@@ -74,7 +80,7 @@ def print_video(video):
     # Can't find URL in video object, strange
     url = "https://www.twitch.tv/videos/{}".format(video["id"])
 
-    print_out("\n<b>{}</b>".format(video["id"]))
+    print_out("<b>Video {}</b>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
     print_out("<blue>{}</blue> {}".format(channel, playing))
     print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
@@ -84,13 +90,13 @@ def print_video(video):
 def print_clip(clip):
     published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(clip["durationSeconds"])
-    channel = clip["broadcaster"]["channel"]["displayName"]
+    channel = clip["broadcaster"]["displayName"]
     playing = (
         "playing <blue>{}</blue>".format(clip["game"]["name"])
         if clip["game"] else ""
     )
 
-    print_out("\n<b>{}</b>".format(clip["slug"]))
+    print_out("Clip <b>{}</b>".format(clip["slug"]))
     print_out("<green>{}</green>".format(clip["title"]))
     print_out("<blue>{}</blue> {}".format(channel, playing))
     print_out(
@@ -98,3 +104,8 @@ def print_clip(clip):
         "  Length: <blue>{}</blue>"
         "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
     print_out("<i>{}</i>".format(clip["url"]))
+
+
+def print_clip_urls(clip):
+    from pprint import pprint
+    pprint(clip)

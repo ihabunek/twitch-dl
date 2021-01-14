@@ -51,6 +51,7 @@ def videos(args):
         print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
 
         for video in videos["edges"]:
+            print_out()
             print_video(video["node"])
 
         if not args.pager:

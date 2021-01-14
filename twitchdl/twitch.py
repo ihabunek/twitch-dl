@@ -61,7 +61,7 @@ def gql_query(query):
     return response
 
 
-def get_video(video_id):
+def get_video_legacy(video_id):
     """
     https://dev.twitch.tv/docs/v5/reference/videos#get-video
     """
@@ -70,28 +70,60 @@ def get_video(video_id):
     return kraken_get(url).json()
 
 
+VIDEO_FIELDS = """
+    id
+    title
+    publishedAt
+    broadcastType
+    lengthSeconds
+    game {
+        name
+    }
+    creator {
+        login
+        displayName
+    }
+"""
+
+
+def get_video(video_id):
+    query = """
+    {{
+        video(id: "{video_id}") {{
+            {fields}
+        }}
+    }}
+    """
+
+    query = query.format(video_id=video_id, fields=VIDEO_FIELDS)
+
+    response = gql_query(query)
+    return response["data"]["video"]
+
+
 def get_clip(slug):
     query = """
     {{
         clip(slug: "{}") {{
             id
+            slug
             title
             createdAt
+            viewCount
             durationSeconds
-            game {{
-                name
-            }}
-            broadcaster {{
-                login
-                displayName
-                channel {{
-                  name
-                }}
-            }}
+            url
             videoQualities {{
                 frameRate
                 quality
                 sourceURL
+            }}
+            game {{
+                id
+                name
+            }}
+            broadcaster {{
+                displayName
+                login
             }}
         }}
     }}
@@ -139,10 +171,8 @@ def get_channel_clips(channel_id, period, limit, after=None):
                 name
               }}
               broadcaster {{
-                channel {{
-                  name
-                  displayName
-                }}
+                displayName
+                login
               }}
             }}
           }}
@@ -213,9 +243,8 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
                             name
                         }}
                         creator {{
-                            channel {{
-                                displayName
-                            }}
+                            login
+                            displayName
                         }}
                     }}
                 }}
