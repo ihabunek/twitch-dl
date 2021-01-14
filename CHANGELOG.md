@@ -1,10 +1,16 @@
 Twitch Downloader change log
 ============================
 
+1.14.1 (2021-01-14)
+-------------------
+
+* Handle videos which don't exist more gracefully
+
 1.14.0 (2021-01-14)
 -------------------
 
 * Added `info` command for displaying video or clip info (#51)
+* Don't show there are more videos when there aren't (#52, thanks @scottyallen)
 * Fixed Twitch regression for getting the access token (#53)
 
 1.13.1 (2020-11-23)
