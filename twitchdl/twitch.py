@@ -285,9 +285,26 @@ def channel_videos_generator(channel_id, limit, sort, type, game_ids=None):
 
 
 def get_access_token(video_id):
-    url = "https://api.twitch.tv/api/vods/{}/access_token".format(video_id)
+    query = """
+    {{
+        videoPlaybackAccessToken(
+            id: {video_id},
+            params: {{
+                platform: "web",
+                playerBackend: "mediaplayer",
+                playerType: "site"
+            }}
+        ) {{
+            signature
+            value
+        }}
+    }}
+    """
 
-    return authenticated_get(url).json()
+    query = query.format(video_id=video_id)
+
+    response = gql_query(query)
+    return response["data"]["videoPlaybackAccessToken"]
 
 
 def get_playlists(video_id, access_token):
@@ -297,8 +314,8 @@ def get_playlists(video_id, access_token):
     url = "http://usher.twitch.tv/vod/{}".format(video_id)
 
     response = requests.get(url, params={
-        "nauth": access_token['token'],
-        "nauthsig": access_token['sig'],
+        "nauth": access_token['value'],
+        "nauthsig": access_token['signature'],
         "allow_source": "true",
         "player": "twitchweb",
     })
