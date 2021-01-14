@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.14.0 (2021-01-14)
+-------------------
+
+* Added `info` command for displaying video or clip info (#51)
+* Fixed Twitch regression for getting the access token (#53)
+
 1.13.1 (2020-11-23)
 -------------------
 
