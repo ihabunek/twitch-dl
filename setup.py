@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 long_description = """
 Quickly download videos from twitch.tv.
@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    packages=['twitchdl'],
+    packages=find_packages(),
     python_requires='>=3.5',
     install_requires=[
         "m3u8>=0.3.12,<0.4",
