@@ -11,6 +11,9 @@ def info(args):
         print_log("Fetching video...")
         video = twitch.get_video(video_id)
 
+        if not video:
+            raise ConsoleError("Video {} not found".format(video_id))
+
         print_log("Fetching access token...")
         access_token = twitch.get_access_token(video_id)
 
@@ -24,20 +27,18 @@ def info(args):
                 video_info(video, playlists)
             return
 
-        raise ConsoleError("Video #{} not found".format(video_id))
-
     clip_slug = utils.parse_clip_identifier(args.identifier)
     if clip_slug:
         print_log("Fetching clip...")
         clip = twitch.get_clip(clip_slug)
-        if clip:
-            if args.json:
-                print_json(clip)
-            else:
-                clip_info(clip)
-            return
+        if not clip:
+            raise ConsoleError("Clip {} not found".format(clip_slug))
 
-        raise ConsoleError("Clip {} not found".format(clip_slug))
+        if args.json:
+            print_json(clip)
+        else:
+            clip_info(clip)
+        return
 
     raise ConsoleError("Invalid input: {}".format(args.video))
 
