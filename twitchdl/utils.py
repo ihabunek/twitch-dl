@@ -69,9 +69,9 @@ VIDEO_PATTERNS = [
 ]
 
 CLIP_PATTERNS = [
-    r"^(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_]+)?)$",
-    r"^https://(www.)?twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_]+)?)(\?.+)?$",
-    r"^https://clips.twitch.tv/(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_]+)?)(\?.+)?$",
+    r"^(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_-]{16})?)$",
+    r"^https://(www.)?twitch.tv/\w+/clip/(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_-]{16})?)(\?.+)?$",
+    r"^https://clips.twitch.tv/(?P<slug>[A-Za-z0-9]+(?:-[A-Za-z0-9_-]{16})?)(\?.+)?$",
 ]
 
 
