@@ -40,7 +40,7 @@ def info(args):
             clip_info(clip)
         return
 
-    raise ConsoleError("Invalid input: {}".format(args.video))
+    raise ConsoleError("Invalid input: {}".format(args.identifier))
 
 
 def video_info(video, playlists):
