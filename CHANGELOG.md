@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.15.0 (2021-02-15)
+-------------------
+
+* Add support for new format of clip slug (thanks @Loveangel1337)
+
 1.14.1 (2021-01-14)
 -------------------
 
