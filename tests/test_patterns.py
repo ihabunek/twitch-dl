@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch
 from twitchdl.commands import download
 from collections import namedtuple
+from twitchdl.utils import parse_video_identifier, parse_clip_identifier
 
 Args = namedtuple("args", ["video"])
 
@@ -29,21 +30,11 @@ TEST_CLIP_PATTERNS = {
 }
 
 
-@patch("twitchdl.commands._download_clip")
-@patch("twitchdl.commands._download_video")
 @pytest.mark.parametrize("expected,input", TEST_VIDEO_PATTERNS)
-def test_video_patterns(video_dl, clip_dl, expected, input):
-    args = Args(video=input)
-    download(args)
-    video_dl.assert_called_once_with(expected, args)
-    clip_dl.assert_not_called()
+def test_video_patterns(expected, input):
+    assert parse_video_identifier(input) == expected
 
 
-@patch("twitchdl.commands._download_clip")
-@patch("twitchdl.commands._download_video")
 @pytest.mark.parametrize("expected,input", TEST_CLIP_PATTERNS)
-def test_clip_patterns(video_dl, clip_dl, expected, input):
-    args = Args(video=input)
-    download(args)
-    clip_dl.assert_called_once_with(expected, args)
-    video_dl.assert_not_called()
+def test_video_patterns(expected, input):
+    assert parse_clip_identifier(input) == expected
