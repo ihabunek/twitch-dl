@@ -263,6 +263,10 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     })
 
     response = gql_query(query)
+
+    if not response["data"]["user"]:
+        raise ConsoleError("Channel {} not found".format(channel_id))
+
     return response["data"]["user"]["videos"]
 
 
