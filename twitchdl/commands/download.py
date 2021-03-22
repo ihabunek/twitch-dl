@@ -73,7 +73,7 @@ def _video_target_filename(video, format):
 
     name = "_".join([
         date,
-        video['id'][1:],
+        video['id'],
         video['creator']['login'],
         utils.slugify(video['title']),
     ])
