@@ -96,6 +96,30 @@ VIDEO_FIELDS = """
 """
 
 
+CLIP_FIELDS = """
+    id
+    slug
+    title
+    createdAt
+    viewCount
+    durationSeconds
+    url
+    videoQualities {
+        frameRate
+        quality
+        sourceURL
+    }
+    game {
+        id
+        name
+    }
+    broadcaster {
+        displayName
+        login
+    }
+"""
+
+
 def get_video(video_id):
     query = """
     {{
@@ -115,31 +139,12 @@ def get_clip(slug):
     query = """
     {{
         clip(slug: "{}") {{
-            id
-            slug
-            title
-            createdAt
-            viewCount
-            durationSeconds
-            url
-            videoQualities {{
-                frameRate
-                quality
-                sourceURL
-            }}
-            game {{
-                id
-                name
-            }}
-            broadcaster {{
-                displayName
-                login
-            }}
+            {fields}
         }}
     }}
     """
 
-    response = gql_query(query.format(slug))
+    response = gql_query(query.format(slug, fields=CLIP_FIELDS))
     return response["data"]["clip"]
 
 
@@ -184,26 +189,7 @@ def get_channel_clips(channel_id, period, limit, after=None):
           edges {{
             cursor
             node {{
-              id
-              slug
-              title
-              createdAt
-              viewCount
-              durationSeconds
-              url
-              videoQualities {{
-                frameRate
-                quality
-                sourceURL
-              }}
-              game {{
-                id
-                name
-              }}
-              broadcaster {{
-                displayName
-                login
-              }}
+              {fields}
             }}
           }}
         }}
@@ -211,12 +197,13 @@ def get_channel_clips(channel_id, period, limit, after=None):
     }}
     """
 
-    query = query.format(**{
-        "channel_id": channel_id,
-        "after": after if after else "",
-        "limit": limit,
-        "period": period.upper(),
-    })
+    query = query.format(
+        channel_id=channel_id,
+        after=after if after else "",
+        limit=limit,
+        period=period.upper(),
+        fields=CLIP_FIELDS
+    )
 
     response = gql_query(query)
     user = response["data"]["user"]
@@ -264,18 +251,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
                 edges {{
                     cursor
                     node {{
-                        id
-                        title
-                        publishedAt
-                        broadcastType
-                        lengthSeconds
-                        game {{
-                            name
-                        }}
-                        creator {{
-                            login
-                            displayName
-                        }}
+                        {fields}
                     }}
                 }}
             }}
@@ -283,14 +259,15 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     }}
     """
 
-    query = query.format(**{
-        "channel_id": channel_id,
-        "game_ids": game_ids,
-        "after": after if after else "",
-        "limit": limit,
-        "sort": sort.upper(),
-        "type": type.upper(),
-    })
+    query = query.format(
+        channel_id=channel_id,
+        game_ids=game_ids,
+        after=after if after else "",
+        limit=limit,
+        sort=sort.upper(),
+        type=type.upper(),
+        fields=VIDEO_FIELDS
+    )
 
     response = gql_query(query)
 
