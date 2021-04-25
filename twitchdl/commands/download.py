@@ -222,6 +222,9 @@ def _download_video(video_id, args):
     print_out("<dim>Looking up video...</dim>")
     video = twitch.get_video(video_id)
 
+    if not video:
+        raise ConsoleError("Video {} not found".format(video_id))
+
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
         video['title'], video['creator']['displayName']))
 
