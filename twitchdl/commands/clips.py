@@ -8,6 +8,16 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_clip, print_json
 
 
+def clips(args):
+    if args.json:
+        return _clips_json(args)
+
+    if args.download:
+        return _clips_download(args)
+
+    return _clips_list(args)
+
+
 def _continue():
     print_out(
         "\nThere are more clips. "
@@ -83,13 +93,7 @@ def _clips_download(args):
                 return
 
 
-def clips(args):
-    if args.json:
-        return _clips_json(args)
-
-    if args.download:
-        return _clips_download(args)
-
+def _clips_list(args):
     print_out("<dim>Loading clips...</dim>")
     generator = twitch.channel_clips_generator(args.channel_name, args.period, args.limit)
 
