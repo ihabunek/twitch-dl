@@ -63,17 +63,24 @@ def _clip_target_filename(clip):
 
 
 def _clips_download(args):
+    downloaded_count = 0
     generator = twitch.channel_clips_generator(args.channel_name, args.period, 100)
+
     for clips, _ in generator:
         for clip in clips["edges"]:
             clip = clip["node"]
             url = clip["videoQualities"][0]["sourceURL"]
             target = _clip_target_filename(clip)
+
             if path.exists(target):
                 print_out("Already downloaded: <green>{}</green>".format(target))
             else:
                 print_out("Downloading: <yellow>{}</yellow>".format(target))
                 download_file(url, target)
+
+            downloaded_count += 1
+            if args.limit and downloaded_count >= args.limit:
+                return
 
 
 def clips(args):
