@@ -1,9 +1,6 @@
 import pytest
 
-from collections import namedtuple
 from twitchdl.utils import parse_video_identifier, parse_clip_identifier
-
-Args = namedtuple("args", ["video"])
 
 
 TEST_VIDEO_PATTERNS = [
