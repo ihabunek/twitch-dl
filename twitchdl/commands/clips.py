@@ -3,6 +3,7 @@ import re
 from os import path
 
 from twitchdl import twitch, utils
+from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_clip, print_json
@@ -79,7 +80,7 @@ def _clips_download(args):
     for clips, _ in generator:
         for clip in clips["edges"]:
             clip = clip["node"]
-            url = clip["videoQualities"][0]["sourceURL"]
+            url = get_clip_authenticated_url(clip["slug"], "source")
             target = _clip_target_filename(clip)
 
             if path.exists(target):

@@ -51,6 +51,16 @@ def kraken_get(url, params={}, headers={}):
     return authenticated_get(url, params, headers)
 
 
+def gql_post(query):
+    url = "https://gql.twitch.tv/gql"
+    response = authenticated_post(url, data=query).json()
+
+    if "errors" in response:
+        raise GQLError(response["errors"])
+
+    return response
+
+
 def gql_query(query):
     url = "https://gql.twitch.tv/gql"
     response = authenticated_post(url, json={"query": query}).json()
@@ -130,6 +140,26 @@ def get_clip(slug):
     """
 
     response = gql_query(query.format(slug))
+    return response["data"]["clip"]
+
+
+def get_clip_access_token(slug):
+    query = """
+    {{
+        "operationName": "VideoAccessToken_Clip",
+        "variables": {{
+            "slug": "{slug}"
+        }},
+        "extensions": {{
+            "persistedQuery": {{
+                "version": 1,
+                "sha256Hash": "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"
+            }}
+        }}
+    }}
+    """
+
+    response = gql_post(query.format(slug=slug).strip())
     return response["data"]["clip"]
 
 

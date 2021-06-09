@@ -7,7 +7,7 @@ import tempfile
 
 from os import path
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
 from twitchdl.download import download_file, download_files
@@ -139,21 +139,21 @@ def download(args):
     raise ConsoleError("Invalid input: {}".format(args.video))
 
 
-def _get_clip_url(clip, args):
+def _get_clip_url(clip, quality):
     qualities = clip["videoQualities"]
 
     # Quality given as an argument
-    if args.quality:
-        if args.quality == "source":
+    if quality:
+        if quality == "source":
             return qualities[0]["sourceURL"]
 
-        selected_quality = args.quality.rstrip("p")  # allow 720p as well as 720
+        selected_quality = quality.rstrip("p")  # allow 720p as well as 720
         for q in qualities:
             if q["quality"] == selected_quality:
                 return q["sourceURL"]
 
         available = ", ".join([str(q["quality"]) for q in qualities])
-        msg = "Quality '{}' not found. Available qualities are: {}".format(args.quality, available)
+        msg = "Quality '{}' not found. Available qualities are: {}".format(quality, available)
         raise ConsoleError(msg)
 
     # Ask user to select quality
@@ -167,12 +167,35 @@ def _get_clip_url(clip, args):
     return selected_quality["sourceURL"]
 
 
+def get_clip_authenticated_url(slug, quality):
+    print_out("<dim>Fetching access token...</dim>")
+    access_token = twitch.get_clip_access_token(slug)
+
+    if not access_token:
+        raise ConsoleError("Access token not found for slug '{}'".format(slug))
+
+    url = _get_clip_url(access_token, quality)
+
+    query = urlencode({
+        "sig": access_token["playbackAccessToken"]["signature"],
+        "token": access_token["playbackAccessToken"]["value"],
+    })
+
+    return "{}?{}".format(url, query)
+
+
 def _download_clip(slug, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
 
     if not clip:
         raise ConsoleError("Clip '{}' not found".format(slug))
+
+    print_out("<dim>Fetching access token...</dim>")
+    access_token = twitch.get_clip_access_token(slug)
+
+    if not access_token:
+        raise ConsoleError("Access token not found for slug '{}'".format(slug))
 
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
         clip["title"],
@@ -181,7 +204,7 @@ def _download_clip(slug, args):
         utils.format_duration(clip["durationSeconds"])
     ))
 
-    url = _get_clip_url(clip, args)
+    url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
 
     target = _clip_target_filename(clip)
