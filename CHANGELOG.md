@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.16.0 (2021-06-09)
+-------------------
+
+* Fix clips download caused by Twitch changes (#64, thanks to all participants)
+
+
 1.15.0 (2021-02-15)
 -------------------
 
