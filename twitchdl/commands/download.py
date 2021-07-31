@@ -124,7 +124,7 @@ def _crete_temp_dir(base_uri):
     path = urlparse(base_uri).path.lstrip("/")
     temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
     temp_dir.mkdir(parents=True, exist_ok=True)
-    return temp_dir
+    return str(temp_dir)
 
 
 def download(args):
