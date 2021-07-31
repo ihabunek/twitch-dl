@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.16.1 (2021-07-31)
+-------------------
+
+* Fix compat with older versions of python (#71)
+
 1.16.0 (2021-06-09)
 -------------------
 
