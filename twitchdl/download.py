@@ -31,14 +31,15 @@ def _download(url, path):
     os.rename(tmp_path, path)
     return size
 
-
 def download_file(url, path, retries=RETRY_COUNT):
     if os.path.exists(path):
-        return os.path.getsize(path)
-
+        from_disk = True
+        return (os.path.getsize(path), from_disk)
+        
+    from_disk = False
     for _ in range(retries):
         try:
-            return _download(url, path)
+            return (_download(url, path), from_disk)
         except RequestException:
             pass
 
@@ -51,17 +52,29 @@ def _print_progress(futures):
     max_msg_size = 0
     start_time = datetime.now()
     total_count = len(futures)
+    current_download_size = 0
+    current_downloaded_count = 0
 
     for future in as_completed(futures):
-        size = future.result()
+        results = future.result()
+        size, from_disk = results
         downloaded_count += 1
         downloaded_size += size
+        
+        if from_disk:
+            # If we find something on disk, then the download speed will be wrong
+            start_time = datetime.now()
+            current_download_size = 0
+            current_downloaded_count = 0
+        else:
+            current_download_size += size
+            current_downloaded_count += 1
 
         percentage = 100 * downloaded_count // total_count
         est_total_size = int(total_count * downloaded_size / downloaded_count)
         duration = (datetime.now() - start_time).seconds
-        speed = downloaded_size // duration if duration else 0
-        remaining = (total_count - downloaded_count) * duration / downloaded_count
+        speed = current_download_size // duration if duration else 0
+        remaining = (total_count - downloaded_count) * duration / current_downloaded_count if current_downloaded_count else -1
 
         msg = " ".join([
             "Downloaded VOD {}/{}".format(downloaded_count, total_count),
@@ -71,7 +84,6 @@ def _print_progress(futures):
             "at <cyan>{}/s</cyan>".format(format_size(speed)) if speed > 0 else "",
             "remaining <cyan>~{}</cyan>".format(format_duration(remaining)) if speed > 0 else "",
         ])
-
         max_msg_size = max(len(msg), max_msg_size)
         print_out("\r" + msg.ljust(max_msg_size), end="")
 
