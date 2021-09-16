@@ -1,6 +1,22 @@
 Twitch Downloader change log
 ============================
 
+1.17.0 (TBA)
+------------
+
+* Fix speed calculation when resuming download (#75, thanks CroquetteTheThe)
+
+1.16.1 (2021-07-31)
+-------------------
+
+* Fix compat with older versions of python (#71)
+
+1.16.0 (2021-06-09)
+-------------------
+
+* Fix clips download caused by Twitch changes (#64, thanks to all participants)
+
+
 1.15.0 (2021-02-15)
 -------------------
 

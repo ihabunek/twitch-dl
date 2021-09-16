@@ -42,13 +42,14 @@ def authenticated_post(url, data=None, json=None, headers={}):
     return response
 
 
-def kraken_get(url, params={}, headers={}):
-    """
-    Add accept header required by kraken API v5.
-    see: https://discuss.dev.twitch.tv/t/change-in-access-to-deprecated-kraken-twitch-apis/22241
-    """
-    headers["Accept"] = "application/vnd.twitchtv.v5+json"
-    return authenticated_get(url, params, headers)
+def gql_post(query):
+    url = "https://gql.twitch.tv/gql"
+    response = authenticated_post(url, data=query).json()
+
+    if "errors" in response:
+        raise GQLError(response["errors"])
+
+    return response
 
 
 def gql_query(query):
@@ -59,15 +60,6 @@ def gql_query(query):
         raise GQLError(response["errors"])
 
     return response
-
-
-def get_video_legacy(video_id):
-    """
-    https://dev.twitch.tv/docs/v5/reference/videos#get-video
-    """
-    url = "https://api.twitch.tv/kraken/videos/{}".format(video_id)
-
-    return kraken_get(url).json()
 
 
 VIDEO_FIELDS = """
@@ -82,6 +74,30 @@ VIDEO_FIELDS = """
     creator {
         login
         displayName
+    }
+"""
+
+
+CLIP_FIELDS = """
+    id
+    slug
+    title
+    createdAt
+    viewCount
+    durationSeconds
+    url
+    videoQualities {
+        frameRate
+        quality
+        sourceURL
+    }
+    game {
+        id
+        name
+    }
+    broadcaster {
+        displayName
+        login
     }
 """
 
@@ -105,31 +121,32 @@ def get_clip(slug):
     query = """
     {{
         clip(slug: "{}") {{
-            id
-            slug
-            title
-            createdAt
-            viewCount
-            durationSeconds
-            url
-            videoQualities {{
-                frameRate
-                quality
-                sourceURL
-            }}
-            game {{
-                id
-                name
-            }}
-            broadcaster {{
-                displayName
-                login
+            {fields}
+        }}
+    }}
+    """
+
+    response = gql_query(query.format(slug, fields=CLIP_FIELDS))
+    return response["data"]["clip"]
+
+
+def get_clip_access_token(slug):
+    query = """
+    {{
+        "operationName": "VideoAccessToken_Clip",
+        "variables": {{
+            "slug": "{slug}"
+        }},
+        "extensions": {{
+            "persistedQuery": {{
+                "version": 1,
+                "sha256Hash": "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"
             }}
         }}
     }}
     """
 
-    response = gql_query(query.format(slug))
+    response = gql_post(query.format(slug=slug).strip())
     return response["data"]["clip"]
 
 
@@ -154,26 +171,7 @@ def get_channel_clips(channel_id, period, limit, after=None):
           edges {{
             cursor
             node {{
-              id
-              slug
-              title
-              createdAt
-              viewCount
-              durationSeconds
-              url
-              videoQualities {{
-                frameRate
-                quality
-                sourceURL
-              }}
-              game {{
-                id
-                name
-              }}
-              broadcaster {{
-                displayName
-                login
-              }}
+              {fields}
             }}
           }}
         }}
@@ -181,12 +179,13 @@ def get_channel_clips(channel_id, period, limit, after=None):
     }}
     """
 
-    query = query.format(**{
-        "channel_id": channel_id,
-        "after": after if after else "",
-        "limit": limit,
-        "period": period.upper(),
-    })
+    query = query.format(
+        channel_id=channel_id,
+        after=after if after else "",
+        limit=limit,
+        period=period.upper(),
+        fields=CLIP_FIELDS
+    )
 
     response = gql_query(query)
     user = response["data"]["user"]
@@ -234,18 +233,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
                 edges {{
                     cursor
                     node {{
-                        id
-                        title
-                        publishedAt
-                        broadcastType
-                        lengthSeconds
-                        game {{
-                            name
-                        }}
-                        creator {{
-                            login
-                            displayName
-                        }}
+                        {fields}
                     }}
                 }}
             }}
@@ -253,14 +241,15 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     }}
     """
 
-    query = query.format(**{
-        "channel_id": channel_id,
-        "game_ids": game_ids,
-        "after": after if after else "",
-        "limit": limit,
-        "sort": sort.upper(),
-        "type": type.upper(),
-    })
+    query = query.format(
+        channel_id=channel_id,
+        game_ids=game_ids,
+        after=after if after else "",
+        limit=limit,
+        sort=sort.upper(),
+        type=type.upper(),
+        fields=VIDEO_FIELDS
+    )
 
     response = gql_query(query)
 

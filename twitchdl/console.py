@@ -239,6 +239,9 @@ def main():
     except ConsoleError as e:
         print_err(e)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print_err("Operation canceled")
+        sys.exit(1)
     except GQLError as e:
         print_err(e)
         for err in e.errors:

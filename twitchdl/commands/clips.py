@@ -3,9 +3,20 @@ import re
 from os import path
 
 from twitchdl import twitch, utils
+from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_clip, print_json
+
+
+def clips(args):
+    if args.json:
+        return _clips_json(args)
+
+    if args.download:
+        return _clips_download(args)
+
+    return _clips_list(args)
 
 
 def _continue():
@@ -63,26 +74,27 @@ def _clip_target_filename(clip):
 
 
 def _clips_download(args):
+    downloaded_count = 0
     generator = twitch.channel_clips_generator(args.channel_name, args.period, 100)
+
     for clips, _ in generator:
         for clip in clips["edges"]:
             clip = clip["node"]
-            url = clip["videoQualities"][0]["sourceURL"]
+            url = get_clip_authenticated_url(clip["slug"], "source")
             target = _clip_target_filename(clip)
+
             if path.exists(target):
                 print_out("Already downloaded: <green>{}</green>".format(target))
             else:
                 print_out("Downloading: <yellow>{}</yellow>".format(target))
                 download_file(url, target)
 
+            downloaded_count += 1
+            if args.limit and downloaded_count >= args.limit:
+                return
 
-def clips(args):
-    if args.json:
-        return _clips_json(args)
 
-    if args.download:
-        return _clips_download(args)
-
+def _clips_list(args):
     print_out("<dim>Loading clips...</dim>")
     generator = twitch.channel_clips_generator(args.channel_name, args.period, args.limit)
 

@@ -1,11 +1,6 @@
 import pytest
 
-from unittest.mock import patch
-from twitchdl.commands import download
-from collections import namedtuple
 from twitchdl.utils import parse_video_identifier, parse_clip_identifier
-
-Args = namedtuple("args", ["video"])
 
 
 TEST_VIDEO_PATTERNS = [
@@ -36,5 +31,5 @@ def test_video_patterns(expected, input):
 
 
 @pytest.mark.parametrize("expected,input", TEST_CLIP_PATTERNS)
-def test_video_patterns(expected, input):
+def test_clip_patterns(expected, input):
     assert parse_clip_identifier(input) == expected
