@@ -85,6 +85,7 @@ def _print_progress(futures):
             "at <cyan>{}/s</cyan>".format(format_size(speed)) if speed > 0 else "",
             "remaining <cyan>~{}</cyan>".format(format_duration(remaining)) if speed > 0 else "",
         ])
+        
         max_msg_size = max(len(msg), max_msg_size)
         print_out("\r" + msg.ljust(max_msg_size), end="")
 
