@@ -42,15 +42,6 @@ def authenticated_post(url, data=None, json=None, headers={}):
     return response
 
 
-def kraken_get(url, params={}, headers={}):
-    """
-    Add accept header required by kraken API v5.
-    see: https://discuss.dev.twitch.tv/t/change-in-access-to-deprecated-kraken-twitch-apis/22241
-    """
-    headers["Accept"] = "application/vnd.twitchtv.v5+json"
-    return authenticated_get(url, params, headers)
-
-
 def gql_post(query):
     url = "https://gql.twitch.tv/gql"
     response = authenticated_post(url, data=query).json()
@@ -69,15 +60,6 @@ def gql_query(query):
         raise GQLError(response["errors"])
 
     return response
-
-
-def get_video_legacy(video_id):
-    """
-    https://dev.twitch.tv/docs/v5/reference/videos#get-video
-    """
-    url = "https://api.twitch.tv/kraken/videos/{}".format(video_id)
-
-    return kraken_get(url).json()
 
 
 VIDEO_FIELDS = """
