@@ -1,6 +1,11 @@
 Twitch Downloader change log
 ============================
 
+1.17.0 (TBA)
+------------
+
+* Fix speed calculation when resuming download (#75, thanks CroquetteTheThe)
+
 1.16.1 (2021-07-31)
 -------------------
 
