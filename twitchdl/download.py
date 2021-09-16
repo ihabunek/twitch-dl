@@ -31,6 +31,7 @@ def _download(url, path):
     os.rename(tmp_path, path)
     return size
 
+
 def download_file(url, path, retries=RETRY_COUNT):
     if os.path.exists(path):
         from_disk = True
@@ -56,13 +57,13 @@ def _print_progress(futures):
     current_downloaded_count = 0
 
     for future in as_completed(futures):
-        results = future.result()
-        size, from_disk = results
+        size, from_disk = future.result()
         downloaded_count += 1
         downloaded_size += size
         
         if from_disk:
-            # If we find something on disk, then the download speed will be wrong
+            # If we find something on disk, we don't want to
+            # take it in account in the speed calculation
             start_time = datetime.now()
             current_download_size = 0
             current_downloaded_count = 0
