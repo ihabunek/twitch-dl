@@ -48,14 +48,17 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target, overwrite):
+def _join_vods(playlist_path, target, overwrite, video):
     command = [
         "ffmpeg",
         "-i", playlist_path,
         "-c", "copy",
-        target,
+        "-metadata", "artist={}".format(video["creator"]["displayName"]),
+        "-metadata", "title={}".format(video["title"]),
+        "-metadata", "encoded_by=twitch-dl",
         "-stats",
         "-loglevel", "warning",
+        target,
     ]
 
     if overwrite:
@@ -275,7 +278,7 @@ def _download_video(video_id, args):
 
     print_out("\n\nJoining files...")
     target = _video_target_filename(video, args.format)
-    _join_vods(playlist_path, target, args.overwrite)
+    _join_vods(playlist_path, target, args.overwrite, video)
 
     if args.keep:
         print_out("\n<dim>Temporary files not deleted: {}</dim>".format(target_dir))

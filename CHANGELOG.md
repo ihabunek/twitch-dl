@@ -5,6 +5,7 @@ Twitch Downloader change log
 ------------
 
 * Fix speed calculation when resuming download (#75, thanks CroquetteTheThe)
+* Add artist and title metadata to resulting video (#80)
 
 1.16.1 (2021-07-31)
 -------------------
