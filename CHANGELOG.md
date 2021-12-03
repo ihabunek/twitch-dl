@@ -1,8 +1,8 @@
 Twitch Downloader change log
 ============================
 
-1.17.0 (TBA)
-------------
+1.17.0 (2021-12-03)
+-------------------
 
 * Fix speed calculation when resuming download (#75, thanks CroquetteTheThe)
 * Add artist and title metadata to resulting video (#80)
