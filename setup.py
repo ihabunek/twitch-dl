@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     python_requires='>=3.5',
     install_requires=[
-        "m3u8>=0.3.12,<0.4",
+        "m3u8>=1.0.0,<2.0.0",
         "requests>=2.13,<3.0",
     ],
     entry_points={
