@@ -3,6 +3,8 @@
 import json
 import sys
 import re
+import os
+os.system("")
 
 from twitchdl import utils
 
