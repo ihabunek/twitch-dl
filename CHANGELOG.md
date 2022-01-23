@@ -1,6 +1,12 @@
 Twitch Downloader change log
 ============================
 
+1.18.0 (TBA)
+-------------------
+
+* Added `--output` option to `download` command which allows setting output file
+  template
+
 1.17.1 (2022-01-19)
 -------------------
 

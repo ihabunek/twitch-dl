@@ -168,6 +168,11 @@ COMMANDS = [
                 "help": "Overwrite the target file if it already exists without prompting.",
                 "action": "store_true",
                 "default": False,
+            }),
+            (["-o", "--output"], {
+                "help": "Output file name template. See docs for details.",
+                "type": str,
+                "default": "{date}_{id}_{channel_login}_{title_slug}.{format}"
             })
         ],
     ),

@@ -147,6 +147,42 @@ Setting quality to `source` will download the best available quality:
 twitch-dl download -q source 221837124
 ```
 
+### Overriding file name
+
+The target filename can be defined by passing the `--output` option followed by
+the desired file name, e.g. `--output strim.mkv`.
+
+The filename uses
+[Python format string syntax](https://docs.python.org/3/library/string.html#format-string-syntax)
+and may contain placeholders in curly braces which will be replaced with
+relevant information tied to the downloaded video.
+
+The supported placeholders are:
+
+| Placeholder       | Description                    | Example                        |
+| ----------------- | ------------------------------ | ------------------------------ |
+| `{id}`            | Video ID                       | 1255522958                     |
+| `{title}`         | Video title                    | Dark Souls 3 First playthrough |
+| `{title_slug}`    | Slugified video title          | dark_souls_3_first_playthrough |
+| `{datetime}`      | Video date and time            | 2022-01-07T04:00:27Z           |
+| `{date}`          | Video date                     | 2022-01-07                     |
+| `{time}`          | Video time                     | 04:00:27Z                      |
+| `{channel}`       | Channel name                   | KatLink                        |
+| `{channel_login}` | Channel login                  | katlink                        |
+| `{format}`        | File extension, see `--format` | mkv                            |
+| `{game}`          | Game name                      | Dark Souls III                 |
+| `{game_slug}`     | Slugified game name            | dark_souls_iii                 |
+
+
+A couple of examples:
+
+Pattern: `"{date}_{id}_{channel_login}_{title_slug}.{format}"`<br />
+Expands to: `2022-01-07_1255522958_katlink_dark_souls_3_first_playthrough.mkv`<br />
+*This is the default.*
+
+Pattern: `"{channel} - {game} - {title}.{format}"`<br />
+Expands to: `KatLink - Dark Souls III - Dark Souls 3 First playthrough.mkv`
+
 ### Listing clips
 
 List clips for the given period:

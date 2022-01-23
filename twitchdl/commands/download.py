@@ -70,36 +70,56 @@ def _join_vods(playlist_path, target, overwrite, video):
         raise ConsoleError("Joining files failed")
 
 
-def _video_target_filename(video, format):
-    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", video['publishedAt'])
-    date = "".join(match.groups())
+def _video_target_filename(video, args):
+    date, time = video['publishedAt'].split("T")
 
-    name = "_".join([
-        date,
-        video['id'],
-        video['creator']['login'],
-        utils.slugify(video['title']),
-    ])
+    subs = {
+        "channel": video["creator"]["displayName"],
+        "channel_login": video["creator"]["login"],
+        "date": date,
+        "datetime": video["publishedAt"],
+        "format": args.format,
+        "game": video["game"]["name"],
+        "game_slug": utils.slugify(video["game"]["name"]),
+        "id": video["id"],
+        "time": time,
+        "title": utils.titlify(video["title"]),
+        "title_slug": utils.slugify(video["title"]),
+    }
 
-    return name + "." + format
+    try:
+        return args.output.format(**subs)
+    except KeyError as e:
+        supported = ", ".join(subs.keys())
+        raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
 
-def _clip_target_filename(clip):
+def _clip_target_filename(clip, args):
+    date, time = clip["createdAt"].split("T")
+
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
 
-    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", clip["createdAt"])
-    date = "".join(match.groups())
+    subs = {
+        "channel": clip["broadcaster"]["displayName"],
+        "channel_login": clip["broadcaster"]["login"],
+        "date": date,
+        "datetime": clip["createdAt"],
+        "format": ext,
+        "game": clip["game"]["name"],
+        "game_slug": utils.slugify(clip["game"]["name"]),
+        "id": clip["id"],
+        "time": time,
+        "title": utils.titlify(clip["title"]),
+        "title_slug": utils.slugify(clip["title"]),
+    }
 
-    name = "_".join([
-        date,
-        clip["id"],
-        clip["broadcaster"]["login"],
-        utils.slugify(clip["title"]),
-    ])
-
-    return "{}.{}".format(name, ext)
+    try:
+        return args.output.format(**subs)
+    except KeyError as e:
+        supported = ", ".join(subs.keys())
+        raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
 
 def _get_vod_paths(playlist, start, end):
@@ -194,12 +214,6 @@ def _download_clip(slug, args):
     if not clip:
         raise ConsoleError("Clip '{}' not found".format(slug))
 
-    print_out("<dim>Fetching access token...</dim>")
-    access_token = twitch.get_clip_access_token(slug)
-
-    if not access_token:
-        raise ConsoleError("Access token not found for slug '{}'".format(slug))
-
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
         clip["title"],
         clip["broadcaster"]["displayName"],
@@ -207,10 +221,11 @@ def _download_clip(slug, args):
         utils.format_duration(clip["durationSeconds"])
     ))
 
+    target = _clip_target_filename(clip, args)
+    print_out("Target: <blue>{}</blue>".format(target))
+
     url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
-
-    target = _clip_target_filename(clip)
 
     print_out("Downloading clip...")
     download_file(url, target)
@@ -230,6 +245,9 @@ def _download_video(video_id, args):
 
     print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
         video['title'], video['creator']['displayName']))
+
+    target = _video_target_filename(video, args)
+    print_out("Output: <blue>{}</blue>".format(target))
 
     print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_access_token(video_id)
@@ -277,7 +295,6 @@ def _download_video(video_id, args):
         return
 
     print_out("\n\nJoining files...")
-    target = _video_target_filename(video, args.format)
     _join_vods(playlist_path, target, args.overwrite, video)
 
     if args.keep:

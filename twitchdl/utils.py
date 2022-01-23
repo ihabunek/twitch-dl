@@ -55,12 +55,17 @@ def read_int(msg, min, max, default):
 
 
 def slugify(value):
-    re_pattern = re.compile(r'[^\w\s-]', flags=re.U)
-    re_spaces = re.compile(r'[-\s]+', flags=re.U)
-    value = str(value)
-    value = unicodedata.normalize('NFKC', value)
-    value = re_pattern.sub('', value).strip().lower()
-    return re_spaces.sub('_', value)
+    value = unicodedata.normalize('NFKC', str(value))
+    value = re.sub(r'[^\w\s_-]', '', value)
+    value = re.sub(r'[\s_-]+', '_', value)
+    return value.strip("_").lower()
+
+
+def titlify(value):
+    value = unicodedata.normalize('NFKC', str(value))
+    value = re.sub(r'[^\w\s\[\]().-]', '', value)
+    value = re.sub(r'\s+', ' ', value)
+    return value.strip()
 
 
 VIDEO_PATTERNS = [
