@@ -227,10 +227,10 @@ def _download_clip(slug, args):
     url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
 
-    print_out("Downloading clip...")
+    print_out("<dim>Downloading clip...</dim>")
     download_file(url, target)
 
-    print_out("Downloaded: {}".format(target))
+    print_out("Downloaded: <blue>{}</blue>".format(target))
 
 
 def _download_video(video_id, args):
