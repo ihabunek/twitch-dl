@@ -224,6 +224,12 @@ def _download_clip(slug, args):
     target = _clip_target_filename(clip, args)
     print_out("Target: <blue>{}</blue>".format(target))
 
+    if not args.overwrite and path.exists(target):
+        response = input("File exists. Overwrite? [Y/n]: ")
+        if response.lower().strip() not in ["", "y"]:
+            raise ConsoleError("Aborted")
+        args.overwrite = True
+
     url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
 
@@ -248,6 +254,12 @@ def _download_video(video_id, args):
 
     target = _video_target_filename(video, args)
     print_out("Output: <blue>{}</blue>".format(target))
+
+    if not args.overwrite and path.exists(target):
+        response = input("File exists. Overwrite? [Y/n]: ")
+        if response.lower().strip() not in ["", "y"]:
+            raise ConsoleError("Aborted")
+        args.overwrite = True
 
     print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_access_token(video_id)
