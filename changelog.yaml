@@ -25,7 +25,6 @@
   changes:
     - "Fix clips download caused by Twitch changes (#64, thanks to all participants)"
 
-
 1.15.0:
   date: 2021-02-15
   changes:
