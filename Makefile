@@ -33,3 +33,6 @@ man:
 
 test:
 	pytest
+
+changelog:
+	./scripts/generate_changelog > CHANGELOG.md
