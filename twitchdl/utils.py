@@ -54,6 +54,16 @@ def read_int(msg, min, max, default):
             pass
 
 
+def read_char(msg, options):
+    while True:
+        try:
+            val = input(msg).lower()
+            if val.strip() in options and len(val) == 1:
+                return val
+        except ValueError:
+            pass
+
+
 def slugify(value):
     value = unicodedata.normalize('NFKC', str(value))
     value = re.sub(r'[^\w\s_-]', '', value)

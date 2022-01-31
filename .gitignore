@@ -7,10 +7,12 @@ dist/
 tmp/
 .pypirc
 /.env
+/.venv
 /.coverage
 /htmlcov
 /twitch-dl-*.tar.gz
 /twitch-dl.1.man
+/twitch_dl.egg-info
 /bundle
 /*.pyz
 /pyrightconfig.json

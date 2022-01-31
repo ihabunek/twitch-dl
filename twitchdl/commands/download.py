@@ -72,6 +72,13 @@ def _join_vods(playlist_path, target, overwrite, video):
 
 def _video_target_filename(video, args):
     date, time = video['publishedAt'].split("T")
+    if isinstance(video["game"], type(None)):
+        print_out("No game defined in the video <blue>{}</blue> by <yellow>{}</yellow>".format(
+            video['title'], video['creator']['displayName']))
+        if 'y' in utils.read_char("Proceed with the download? Yes[Y\y]/No[N\\n]:", options="yn"):
+            video["game"] = dict(name="Undefined")
+        else:
+            raise ConsoleError("Aborted")
 
     subs = {
         "channel": video["creator"]["displayName"],
@@ -100,6 +107,14 @@ def _clip_target_filename(clip, args):
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
+
+    if isinstance(clip["game"], type(None)):
+        print_out("No game defined in the clip <blue>{}</blue> by <yellow>{}</yellow>".format(
+            clip['title'], clip['creator']['displayName']))
+        if 'y' in utils.read_char("Proceed with the download? Yes[Y" + r"\y]/No[N" + r"\n]:", options="yn"):
+            clip["game"] = dict(name="Undefined")
+        else:
+            raise ConsoleError("Aborted")
 
     subs = {
         "channel": clip["broadcaster"]["displayName"],
@@ -268,7 +283,7 @@ def _download_video(video_id, args):
     playlists_m3u8 = twitch.get_playlists(video_id, access_token)
     playlists = list(_parse_playlists(playlists_m3u8))
     playlist_uri = (_get_playlist_by_name(playlists, args.quality) if args.quality
-            else _select_playlist_interactive(playlists))
+                    else _select_playlist_interactive(playlists))
 
     print_out("<dim>Fetching playlist...</dim>")
     response = requests.get(playlist_uri)
