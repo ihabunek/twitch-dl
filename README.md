@@ -270,6 +270,6 @@ make man
 License
 -------
 
-Copyright 2018-2020 Ivan Habunek <ivan@habunek.com>
+Copyright 2018-2022 Ivan Habunek <ivan@habunek.com>
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
