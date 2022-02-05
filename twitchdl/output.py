@@ -72,6 +72,7 @@ def print_video(video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
     channel = video["creator"]["displayName"]
+
     playing = (
         "playing <blue>{}</blue>".format(video["game"]["name"])
         if video["game"] else ""
@@ -104,8 +105,3 @@ def print_clip(clip):
         "  Length: <blue>{}</blue>"
         "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
     print_out("<i>{}</i>".format(clip["url"]))
-
-
-def print_clip_urls(clip):
-    from pprint import pprint
-    pprint(clip)
