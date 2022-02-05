@@ -25,9 +25,6 @@ publish :
 coverage:
 	py.test --cov=toot --cov-report html tests/
 
-deb:
-	@python setup.py --command-packages=stdeb.command bdist_deb
-
 man:
 	scdoc < twitch-dl.1.scd > twitch-dl.1.man
 
