@@ -1,5 +1,5 @@
 1.19.0:
-  date: TBA
+  date: 2022-02-05
   changes:
     - "Add support for downloading audio only (#10)"
 
