@@ -58,7 +58,7 @@ def _join_vods(playlist_path, target, overwrite, video):
         "-metadata", "encoded_by=twitch-dl",
         "-stats",
         "-loglevel", "warning",
-        target,
+        "file:{}".format(target),
     ]
 
     if overwrite:
