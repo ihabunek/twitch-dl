@@ -213,6 +213,7 @@ def get_clip_authenticated_url(slug, quality):
 def _download_clip(slug, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
+    game = clip["game"]["name"] if clip["game"] else "Unknown"
 
     if not clip:
         raise ConsoleError("Clip '{}' not found".format(slug))
@@ -220,7 +221,7 @@ def _download_clip(slug, args):
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
         clip["title"],
         clip["broadcaster"]["displayName"],
-        clip["game"]["name"],
+        game,
         utils.format_duration(clip["durationSeconds"])
     ))
 
