@@ -172,7 +172,7 @@ The supported placeholders are:
 | `{format}`        | File extension, see `--format` | mkv                            |
 | `{game}`          | Game name                      | Dark Souls III                 |
 | `{game_slug}`     | Slugified game name            | dark_souls_iii                 |
-
+| `{slug}`          | Clip slug (clips only)         | AbrasivePlacidCatDxAbomb       |
 
 A couple of examples:
 

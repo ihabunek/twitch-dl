@@ -112,6 +112,7 @@ def _clip_target_filename(clip, args):
         "game": game,
         "game_slug": utils.slugify(game),
         "id": clip["id"],
+        "slug": clip["slug"],
         "time": time,
         "title": utils.titlify(clip["title"]),
         "title_slug": utils.slugify(clip["title"]),
