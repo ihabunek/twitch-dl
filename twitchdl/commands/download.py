@@ -18,10 +18,15 @@ from twitchdl.output import print_out
 def _parse_playlists(playlists_m3u8):
     playlists = m3u8.loads(playlists_m3u8)
 
-    for p in playlists.playlists:
-        name = p.media[0].name if p.media else ""
-        resolution = "x".join(str(r) for r in p.stream_info.resolution)
-        yield name, resolution, p.uri
+    for p in sorted(playlists.playlists, key=lambda p: p.stream_info.resolution is None):
+        if p.stream_info.resolution:
+            name = p.media[0].name
+            description = "x".join(str(r) for r in p.stream_info.resolution)
+        else:
+            name = p.media[0].group_id
+            description = None
+
+        yield name, description, p.uri
 
 
 def _get_playlist_by_name(playlists, quality):
@@ -41,7 +46,10 @@ def _get_playlist_by_name(playlists, quality):
 def _select_playlist_interactive(playlists):
     print_out("\nAvailable qualities:")
     for n, (name, resolution, uri) in enumerate(playlists):
-        print_out("{}) {} [{}]".format(n + 1, name, resolution))
+        if resolution:
+            print_out("{}) {} [{}]".format(n + 1, name, resolution))
+        else:
+            print_out("{}) {}".format(n + 1, name))
 
     no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
     _, _, uri = playlists[no - 1]

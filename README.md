@@ -147,6 +147,12 @@ Setting quality to `source` will download the best available quality:
 twitch-dl download -q source 221837124
 ```
 
+Setting quality to `audio_only` will download only audio:
+
+```
+twitch-dl download -q audio_only 221837124
+```
+
 ### Overriding file name
 
 The target filename can be defined by passing the `--output` option followed by

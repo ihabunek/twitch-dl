@@ -309,6 +309,7 @@ def get_playlists(video_id, access_token):
     response = requests.get(url, params={
         "nauth": access_token['value'],
         "nauthsig": access_token['signature'],
+        "allow_audio_only": "true",
         "allow_source": "true",
         "player": "twitchweb",
     })
