@@ -72,6 +72,7 @@ def _join_vods(playlist_path, target, overwrite, video):
 
 def _video_target_filename(video, args):
     date, time = video['publishedAt'].split("T")
+    game = video["game"]["name"] if video["game"] else "Unknown"
 
     subs = {
         "channel": video["creator"]["displayName"],
@@ -79,8 +80,8 @@ def _video_target_filename(video, args):
         "date": date,
         "datetime": video["publishedAt"],
         "format": args.format,
-        "game": video["game"]["name"],
-        "game_slug": utils.slugify(video["game"]["name"]),
+        "game": game,
+        "game_slug": utils.slugify(game),
         "id": video["id"],
         "time": time,
         "title": utils.titlify(video["title"]),
@@ -96,6 +97,7 @@ def _video_target_filename(video, args):
 
 def _clip_target_filename(clip, args):
     date, time = clip["createdAt"].split("T")
+    game = clip["game"]["name"] if clip["game"] else "Unknown"
 
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
@@ -107,8 +109,8 @@ def _clip_target_filename(clip, args):
         "date": date,
         "datetime": clip["createdAt"],
         "format": ext,
-        "game": clip["game"]["name"],
-        "game_slug": utils.slugify(clip["game"]["name"]),
+        "game": game,
+        "game_slug": utils.slugify(game),
         "id": clip["id"],
         "time": time,
         "title": utils.titlify(clip["title"]),
