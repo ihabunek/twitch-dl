@@ -1,6 +1,6 @@
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out, print_video
+from twitchdl.output import print_out, print_video, print_json
 
 
 def _continue():
@@ -33,12 +33,20 @@ def _get_game_ids(names):
     return game_ids
 
 
+def _videos_json(generator):
+    print_json([video["edges"] for video, has_more in generator][0])
+
+
 def videos(args):
     game_ids = _get_game_ids(args.game)
 
-    print_out("<dim>Loading videos...</dim>")
     generator = twitch.channel_videos_generator(
         args.channel_name, args.limit, args.sort, args.type, game_ids=game_ids)
+
+    if args.json:
+        return _videos_json(generator)
+
+    print_out("<dim>Loading videos...</dim>")
 
     first = 1
 

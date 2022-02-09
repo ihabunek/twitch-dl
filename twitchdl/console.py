@@ -77,6 +77,11 @@ COMMANDS = [
                 "choices": ["archive", "highlight", "upload"],
                 "default": "archive",
             }),
+            (["-j", "--json"], {
+                "help": "Show results as JSON",
+                "action": "store_true",
+                "default": False,
+            }),
             (["-p", "--pager"], {
                 "help": "If there are more results than LIMIT, ask to show next page",
                 "action": "store_true",
