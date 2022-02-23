@@ -47,6 +47,18 @@ def limit(value):
     return value
 
 
+def pos_integer(value):
+    try:
+        value = int(value)
+    except ValueError:
+        raise ArgumentTypeError("must be an integer")
+
+    if value < 1:
+        raise ArgumentTypeError("must be positive")
+
+    return value
+
+
 COMMANDS = [
     Command(
         name="videos",
@@ -62,9 +74,14 @@ COMMANDS = [
                 "type": str,
             }),
             (["-l", "--limit"], {
-                "help": "Number of videos to fetch (default 10, max 100)",
-                "type": limit,
+                "help": "Number of videos to fetch (default 10)",
+                "type": pos_integer,
                 "default": 10,
+            }),
+            (["-a", "--all"], {
+                "help": "Fetch all videos, overrides --limit",
+                "action": "store_true",
+                "default": False,
             }),
             (["-s", "--sort"], {
                 "help": "Sorting order of videos. (default: time)",
@@ -79,14 +96,15 @@ COMMANDS = [
                 "default": "archive",
             }),
             (["-j", "--json"], {
-                "help": "Show results as JSON",
+                "help": "Show results as JSON. Ignores --pager.",
                 "action": "store_true",
                 "default": False,
             }),
             (["-p", "--pager"], {
-                "help": "If there are more results than LIMIT, ask to show next page",
-                "action": "store_true",
-                "default": False,
+                "help": "Number of videos to show per page. Disabled by default.",
+                "type": pos_integer,
+                "nargs": "?",
+                "const": 10,
             }),
         ],
     ),

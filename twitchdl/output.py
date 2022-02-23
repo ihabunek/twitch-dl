@@ -4,6 +4,7 @@ import json
 import sys
 import re
 
+from itertools import islice
 from twitchdl import utils
 
 
@@ -88,6 +89,34 @@ def print_video(video):
     print_out("<i>{}</i>".format(url))
 
 
+def print_paged_videos(generator, page_size, total_count):
+    iterator = iter(generator)
+    page = list(islice(iterator, page_size))
+
+    first = 1
+    last = first + len(page) - 1
+
+    while True:
+        print_out("-" * 80)
+
+        print_out()
+        for video in page:
+            print_video(video)
+            print_out()
+
+        last = first + len(page) - 1
+
+        print_out("-" * 80)
+        print_out("<yellow>Videos {}-{} of {}</yellow>".format(first, last, total_count))
+
+        first = first + len(page)
+        last = first + 1
+
+        page = list(islice(iterator, page_size))
+        if not page or not _continue():
+            break
+
+
 def print_clip(clip):
     published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(clip["durationSeconds"])
@@ -105,3 +134,14 @@ def print_clip(clip):
         "  Length: <blue>{}</blue>"
         "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
     print_out("<i>{}</i>".format(clip["url"]))
+
+
+def _continue():
+    print_out("Press <green><b>Enter</green> to continue, <yellow><b>Ctrl+C</yellow> to break.")
+
+    try:
+        input()
+    except KeyboardInterrupt:
+        return False
+
+    return True

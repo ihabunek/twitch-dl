@@ -259,22 +259,26 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     return response["data"]["user"]["videos"]
 
 
-def channel_videos_generator(channel_id, limit, sort, type, game_ids=None):
-    cursor = ""
-    while True:
-        videos = get_channel_videos(
-            channel_id, limit, sort, type, game_ids=game_ids, after=cursor)
-
-        if not videos["edges"]:
-            break
+def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=None):
+    def _generator(videos, max_videos):
+        for video in videos["edges"]:
+            if max_videos < 1:
+                return
+            yield video["node"]
+            max_videos -= 1
 
         has_next = videos["pageInfo"]["hasNextPage"]
-        cursor = videos["edges"][-1]["cursor"] if has_next else None
+        if max_videos < 1 or not has_next:
+            return
 
-        yield videos, has_next
+        limit = min(max_videos, 100)
+        cursor = videos["edges"][-1]["cursor"]
+        videos = get_channel_videos(channel_id, limit, sort, type, game_ids, cursor)
+        yield from _generator(videos, max_videos)
 
-        if not cursor:
-            break
+    limit = min(max_videos, 100)
+    videos = get_channel_videos(channel_id, limit, sort, type, game_ids)
+    return videos["totalCount"], _generator(videos, max_videos)
 
 
 def get_access_token(video_id):

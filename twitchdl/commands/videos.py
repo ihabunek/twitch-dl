@@ -1,21 +1,50 @@
+import sys
+
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out, print_video, print_json
+from twitchdl.output import print_out, print_paged_videos, print_video, print_json
 
 
-def _continue():
-    print_out(
-        "\nThere are more videos. "
-        "Press <green><b>Enter</green> to continue, "
-        "<yellow><b>Ctrl+C</yellow> to break."
-    )
+def videos(args):
+    game_ids = _get_game_ids(args.game)
+    # Ignore --limit if --pager or --all are given
+    max_videos = sys.maxsize if args.all or args.pager else args.limit
 
-    try:
-        input()
-    except KeyboardInterrupt:
-        return False
+    total_count, generator = twitch.channel_videos_generator(
+        args.channel_name, max_videos, args.sort, args.type, game_ids=game_ids)
 
-    return True
+    if args.json:
+        videos = list(generator)
+        print_json({
+            "count": len(videos),
+            "totalCount": total_count,
+            "videos": videos
+        })
+        return
+
+    if total_count == 0:
+        print_out("<yellow>No videos found</yellow>")
+        return
+
+    if args.pager:
+        print_paged_videos(generator, args.pager, total_count)
+        return
+
+    count = 0
+    for video in generator:
+        print_out()
+        print_video(video)
+        count += 1
+
+    print_out()
+    print_out("-" * 80)
+    print_out("<yellow>Videos {}-{} of {}</yellow>".format(1, count, total_count))
+
+    if total_count > count:
+        print_out()
+        print_out(
+            "<dim>There are more videos. Increase the --limit, use --all or --pager to see the rest.</dim>"
+        )
 
 
 def _get_game_ids(names):
@@ -31,47 +60,3 @@ def _get_game_ids(names):
         game_ids.append(int(game_id))
 
     return game_ids
-
-
-def _videos_json(generator):
-    print_json([video["edges"] for video, has_more in generator][0])
-
-
-def videos(args):
-    game_ids = _get_game_ids(args.game)
-
-    generator = twitch.channel_videos_generator(
-        args.channel_name, args.limit, args.sort, args.type, game_ids=game_ids)
-
-    if args.json:
-        return _videos_json(generator)
-
-    print_out("<dim>Loading videos...</dim>")
-
-    first = 1
-
-    for videos, has_more in generator:
-        count = len(videos["edges"]) if "edges" in videos else 0
-        total = videos["totalCount"]
-        last = first + count - 1
-
-        print_out("-" * 80)
-        print_out("<yellow>Showing videos {}-{} of {}</yellow>".format(first, last, total))
-
-        for video in videos["edges"]:
-            print_out()
-            print_video(video["node"])
-
-        if not args.pager and has_more:
-            print_out(
-                "\n<dim>There are more videos. "
-                "Increase the --limit or use --pager to see the rest.</dim>"
-            )
-            break
-
-        if not has_more or not _continue():
-            break
-
-        first += count
-    else:
-        print_out("<yellow>No videos found</yellow>")
