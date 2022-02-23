@@ -1,3 +1,9 @@
+1.20.0:
+  date: TBA
+  changes:
+    - "Add `--json` option to ` command (#92, thanks @miff2000)"
+    - Revamp limiting and paging videos to work better with `--json`
+
 1.19.0:
   date: 2022-02-05
   changes:
