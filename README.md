@@ -9,292 +9,60 @@ multiple concurrent connections to make the download faster.
 Resources
 ---------
 
-* Homepage: https://github.com/ihabunek/twitch-dl
-* Issues: https://github.com/ihabunek/twitch-dl/issues
-* Python package: https://pypi.org/project/twitch-dl/
+* [Documentation](https://twitch-dl.bezdomni.net/)
+* [Source code](https://github.com/ihabunek/twitch-dl)
+* [Issues](https://github.com/ihabunek/twitch-dl/issues)
+* [Python package](https://pypi.org/project/twitch-dl/)
 
 Requirements
 ------------
 
-* Python 3.5+
+* Python 3.5 or later
 * [ffmpeg](https://ffmpeg.org/download.html), installed and on the system path
 
-Installation
-------------
+Quick start
+-----------
 
-### Download standalone archive
+See [installation instructions](https://twitch-dl.bezdomni.net/installation.html)
+to set up twitch-dl.
 
-Go to the [latest release](https://github.com/ihabunek/twitch-dl/releases/latest)
-and download the `twitch-dl.<version>.pyz` archive.
-
-Run the archive by either:
-
-a) passing it to python:
-
-```
-python3 twitch-dl.1.13.0.pyz --help
-```
-
-b) making it executable and invoking it directly (linux specific):
-
-```
-chmod +x twitch-dl.1.13.0.pyz
-./twitch-dl.1.13.0.pyz --help
-```
-
-Feel free to rename the archive to something more managable, like `twitch-dl`.
-
-To upgrade to a newer version, repeat the process with the newer release.
-
-### From PYPI using pipx
-
-**pipx** is a tool which installs python apps into isolated environments, which
-prevents all kinds of problems later so it's the suggested way to install
-twitch-dl from PYPI.
-
-Install pipx as described in
-[pipx install docs](https://pipxproject.github.io/pipx/installation/).
-
-Install twitch-dl:
-
-```
-pipx install twitch-dl
-```
-
-Check installation worked:
-
-```
-twitch-dl --help
-```
-
-If twitch-dl executable is not found, check that the pipx binary location (by
-default `~/.local/bin`) is in your PATH.
-
-To upgrade twitch-dl to the latest version:
-
-```
-pipx install twitch-dl
-```
-
-Usage
------
-
-This section does an overview of available features.
-
-To see a list of available commands run:
-
-```
-twitch-dl --help
-```
-
-And to see description and all arguments for a given command run:
-
-```
-twitch-dl <command> --help
-```
-
-### Print clip or video info
-
-Videos can be referenced by URL or ID:
-
-```
-twitch-dl info 863849735
-twitch-dl info https://www.twitch.tv/videos/863849735
-```
-
-Clips by slug or ID:
-
-```
-twitch-dl info BusyBlushingCattleItsBoshyTime
-twitch-dl info https://www.twitch.tv/bananasaurus_rex/clip/BusyBlushingCattleItsBoshyTime
-```
-
-Shows info about the video or clip as well as download URLs for clips and
-playlist URLs for videos.
-
-### Listing videos
-
-List recent channel videos (10 by default):
+List videos from a channel.
 
 ```
 twitch-dl videos bananasaurus_rex
 ```
 
-Limit to videos of one or more games:
+List clips from a channel.
 
 ```
-twitch-dl videos --game "doom eternal" --game "cave story" bananasaurus_rex
+twitch-dl clips bananasaurus_rex
 ```
 
-List all channel videos at once:
+Download a video by URL.
 
 ```
-twitch-dl videos bananasaurus_rex --all
+twitch-dl download https://www.twitch.tv/videos/1418494769
 ```
 
-List all channel videos in pages of 10:
+or by ID
 
 ```
-twitch-dl videos bananasaurus_rex --pager
+twitch-dl download 1418494769
 ```
 
-Page size can be adjusted by passing number of items per page:
+Download a clip by URL
 
 ```
-twitch-dl videos bananasaurus_rex --pager 5
+twitch-dl download https://www.twitch.tv/bananasaurus_rex/clip/PlacidColdClipsdadDeIlluminati-hL2s_aLE4CHvVN4J
 ```
 
-Returns all videos as a JSON list. Useful for scripting.
+or by slug
 
 ```
-twitch-dl videos bananasaurus_rex --json --all
+twitch-dl download PlacidColdClipsdadDeIlluminati-hL2s_aLE4CHvVN4J
 ```
 
-### Downloading videos
-
-Download a video by ID or URL:
-
-```
-twitch-dl download 221837124
-twitch-dl download https://www.twitch.tv/videos/221837124
-```
-
-Specify video quality to download:
-
-```
-twitch-dl download -q 720p 221837124
-```
-
-Setting quality to `source` will download the best available quality:
-
-```
-twitch-dl download -q source 221837124
-```
-
-Setting quality to `audio_only` will download only audio:
-
-```
-twitch-dl download -q audio_only 221837124
-```
-
-### Overriding file name
-
-The target filename can be defined by passing the `--output` option followed by
-the desired file name, e.g. `--output strim.mkv`.
-
-The filename uses
-[Python format string syntax](https://docs.python.org/3/library/string.html#format-string-syntax)
-and may contain placeholders in curly braces which will be replaced with
-relevant information tied to the downloaded video.
-
-The supported placeholders are:
-
-| Placeholder       | Description                    | Example                        |
-| ----------------- | ------------------------------ | ------------------------------ |
-| `{id}`            | Video ID                       | 1255522958                     |
-| `{title}`         | Video title                    | Dark Souls 3 First playthrough |
-| `{title_slug}`    | Slugified video title          | dark_souls_3_first_playthrough |
-| `{datetime}`      | Video date and time            | 2022-01-07T04:00:27Z           |
-| `{date}`          | Video date                     | 2022-01-07                     |
-| `{time}`          | Video time                     | 04:00:27Z                      |
-| `{channel}`       | Channel name                   | KatLink                        |
-| `{channel_login}` | Channel login                  | katlink                        |
-| `{format}`        | File extension, see `--format` | mkv                            |
-| `{game}`          | Game name                      | Dark Souls III                 |
-| `{game_slug}`     | Slugified game name            | dark_souls_iii                 |
-| `{slug}`          | Clip slug (clips only)         | AbrasivePlacidCatDxAbomb       |
-
-A couple of examples:
-
-Pattern: `"{date}_{id}_{channel_login}_{title_slug}.{format}"`<br />
-Expands to: `2022-01-07_1255522958_katlink_dark_souls_3_first_playthrough.mkv`<br />
-*This is the default.*
-
-Pattern: `"{channel} - {game} - {title}.{format}"`<br />
-Expands to: `KatLink - Dark Souls III - Dark Souls 3 First playthrough.mkv`
-
-### Listing clips
-
-Listing clips works similar to listing videos. Shows 10 clips by default. Use
-`--all` to list all in one go or `--pager` to show them in pages.
-
-List clips for the given period:
-
-```
-twitch-dl clips bananasaurus_rex --period last_week
-```
-
-Supported periods are: `last_day`, `last_week`, `last_month`, `all_time`.
-
-Also supports JSON output:
-
-```
-twitch-dl clips bananasaurus_rex --json --all
-```
-
-Note that this may make multiple requests to the server because each request is
-limited to 100 clips, so it may take a little while. You can use `--debug` to
-log requests.
-
-### Downloading clips
-
-Download a clip by slug or URL:
-
-```
-twitch-dl download VenomousTameWormHumbleLife
-twitch-dl download https://www.twitch.tv/bananasaurus_rex/clip/VenomousTameWormHumbleLife
-```
-
-Specify clip quality to download:
-
-```
-twitch-dl download -q 720 VenomousTameWormHumbleLife
-```
-
-Note that twitch names for clip qualities have no trailing "p".
-
-### Batch downloading clips
-
-It's possible to download all clips for a given period:
-
-```
-twitch-dl clips bananasaurus_rex --period last_week --download
-```
-
-Clips are downloaded in source quality.
-
-A note about clips
-------------------
-
-Currently it doesn't seem to be possible to get a list of clips ordered by time
-of creation, only by view count. Clips with the same view count seem to be
-returned in random order. This can break paging resulting in duplicate clips
-listed or clips missed.
-
-When batch downloading a large number of clips (over 100), it's possible that
-some will be missed.
-
-Temporary files
----------------
-
-By default, twitch-dl will download VODs to your systems temp dir (e.g. `/tmp/`
-on Linux). To change the location where the files are downloaded you can set
-the `TMP` environment variable, e.g.
-
-```
-TMP=/my/tmp/path/ twitch-dl download 221837124
-```
-
-Man page
---------
-
-Building the man page for twitch-dl requires scdoc.
-
-The source is in ``twitch-dl.1.scd``, and you can build it by running:
-
-```
-make man
-```
+For more info see [the documentation](https://twitch-dl.bezdomni.net/usage.html).
 
 License
 -------
@@ -302,3 +70,9 @@ License
 Copyright 2018-2022 Ivan Habunek <ivan@habunek.com>
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
+
+Useful links for dev
+--------------------
+
+* https://supersonichub1.github.io/twitch-graphql-api/index.html
+* https://github.com/SuperSonicHub1/twitch-graphql-api

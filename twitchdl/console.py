@@ -49,10 +49,10 @@ def pos_integer(value):
 COMMANDS = [
     Command(
         name="videos",
-        description="List videos from a channel",
+        description="List videos for a channel.",
         arguments=[
             (["channel_name"], {
-                "help": "channel name",
+                "help": "Name of the channel to list videos for.",
                 "type": str,
             }),
             (["-g", "--game"], {
@@ -61,7 +61,7 @@ COMMANDS = [
                 "type": str,
             }),
             (["-l", "--limit"], {
-                "help": "Number of videos to fetch (default 10)",
+                "help": "Number of videos to fetch. Defaults to 10.",
                 "type": pos_integer,
                 "default": 10,
             }),
@@ -71,24 +71,24 @@ COMMANDS = [
                 "default": False,
             }),
             (["-s", "--sort"], {
-                "help": "Sorting order of videos. (default: time)",
+                "help": "Sorting order of videos. Defaults to `time`.",
                 "type": str,
                 "choices": ["views", "time"],
                 "default": "time",
             }),
             (["-t", "--type"], {
-                "help": "Broadcast type. (default: archive)",
+                "help": "Broadcast type. Defaults to `archive`.",
                 "type": str,
                 "choices": ["archive", "highlight", "upload"],
                 "default": "archive",
             }),
             (["-j", "--json"], {
-                "help": "Show results as JSON. Ignores --pager.",
+                "help": "Show results as JSON. Ignores `--pager`.",
                 "action": "store_true",
                 "default": False,
             }),
             (["-p", "--pager"], {
-                "help": "Number of videos to show per page. Disabled by default.",
+                "help": "Print videos in pages. Ignores `--limit`. Defaults to 10.",
                 "type": pos_integer,
                 "nargs": "?",
                 "const": 10,
@@ -97,10 +97,10 @@ COMMANDS = [
     ),
     Command(
         name="clips",
-        description="List clips",
+        description="List or download clips for a channel.",
         arguments=[
             (["channel_name"], {
-                "help": "channel name",
+                "help": "Name of the channel to list clips for.",
                 "type": str,
             }),
             (["-l", "--limit"], {
@@ -114,13 +114,13 @@ COMMANDS = [
                 "default": False,
             }),
             (["-P", "--period"], {
-                "help": "Period from which to return clips. (default: 'all_time')",
+                "help": "Period from which to return clips. Defaults to `all_time`.",
                 "type": str,
                 "choices": ["last_day", "last_week", "last_month", "all_time"],
                 "default": "all_time",
             }),
             (["-j", "--json"], {
-                "help": "Show results as JSON",
+                "help": "Show results as JSON. Ignores `--pager`.",
                 "action": "store_true",
                 "default": False,
             }),
@@ -139,14 +139,14 @@ COMMANDS = [
     ),
     Command(
         name="download",
-        description="Download a video",
+        description="Download a video or clip.",
         arguments=[
             (["video"], {
-                "help": "video ID, clip slug, or URL",
+                "help": "Video ID, clip slug, or URL",
                 "type": str,
             }),
             (["-w", "--max-workers"], {
-                "help": "maximal number of threads for downloading vods "
+                "help": "Maximal number of threads for downloading vods "
                         "concurrently (default 20)",
                 "type": int,
                 "default": 20,
@@ -163,7 +163,7 @@ COMMANDS = [
             }),
             (["-f", "--format"], {
                 "help": "Video format to convert into, passed to ffmpeg as the "
-                        "target file extension (default: mkv)",
+                        "target file extension. Defaults to `mkv`.",
                 "type": str,
                 "default": "mkv",
             }),
@@ -195,10 +195,10 @@ COMMANDS = [
     ),
     Command(
         name="info",
-        description="Print information for a given Twitch URL, video ID or clip slug",
+        description="Print information for a given Twitch URL, video ID or clip slug.",
         arguments=[
-            (["identifier"], {
-                "help": "identifier",
+            (["video"], {
+                "help": "Video ID, clip slug, or URL",
                 "type": str,
             }),
             (["-j", "--json"], {
@@ -238,7 +238,11 @@ def get_parser():
     subparsers = parser.add_subparsers(title="commands")
 
     for command in COMMANDS:
-        sub = subparsers.add_parser(command.name, help=command.description)
+        sub = subparsers.add_parser(
+            command.name,
+            description=command.description,
+            epilog=CLIENT_WEBSITE
+        )
 
         # Set the function to call to the function of same name in the "commands" package
         sub.set_defaults(func=commands.__dict__.get(command.name))

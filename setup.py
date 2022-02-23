@@ -17,6 +17,9 @@ setup(
     author='Ivan Habunek',
     author_email='ivan@habunek.com',
     url='https://github.com/ihabunek/twitch-dl/',
+    project_urls={
+        "Documentation": "https://twitch-dl.bezdomni.net/"
+    },
     keywords='twitch vod video download',
     license='GPLv3',
     classifiers=[

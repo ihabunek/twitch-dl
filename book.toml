@@ -1,0 +1,10 @@
+[book]
+title = "twitch-dl Documentation"
+description = "CLI tool for downloading videos from twitch.tv"
+author = "Ivan Habunek"
+language = "en"
+multilingual = false
+src = "docs"
+
+[output.html]
+additional-css = ["book.css"]

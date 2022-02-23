@@ -14,3 +14,4 @@ tmp/
 /bundle
 /*.pyz
 /pyrightconfig.json
+/book

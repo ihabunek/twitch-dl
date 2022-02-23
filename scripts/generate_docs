@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+
+"""
+Auto-generates documentation from command defs in console.py.
+"""
+
+import html
+import os
+import re
+import shutil
+import textwrap
+
+from twitchdl.console import COMMANDS
+
+
+START_MARKER = "<!-- ------------------- generated docs start ------------------- -->"
+END_MARKER = "<!-- ------------------- generated docs end ------------------- -->"
+
+
+def main():
+    update_changelog()
+    for command in COMMANDS:
+        update_docs(command)
+
+
+def update_changelog():
+    print("Updating: docs/changelog.md")
+    root = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
+    source = os.path.join(root, "CHANGELOG.md")
+    target = os.path.join(root, "docs/changelog.md")
+    shutil.copy(source, target)
+
+
+def update_docs(command):
+    path = os.path.join("docs", "commands", f"{command.name}.md")
+    content = render_command(command)
+
+    if not os.path.exists(path):
+        print(f"Creating: {path}")
+        write(path, content)
+    else:
+        print(f"Updating: {path}")
+        [_, handwritten] = read(path).split(END_MARKER)
+        content = f"{content.strip()}\n\n{END_MARKER}\n\n{handwritten.strip()}"
+        write(path, content)
+
+
+def render_command(command):
+    content = START_MARKER
+    content += f"\n# twitch-dl {command.name}\n\n"
+    content += command.description + "\n\n"
+    content += render_usage(command)
+    content += render_arguments(command)
+    content += render_flags(command)
+    content += render_options(command)
+    return content
+
+
+def render_usage(command):
+    arguments = get_arguments(command)
+    arguments = " ".join(f"<{name}>" for [name, _] in arguments)
+    flags = get_flags(command)
+    options = get_options(command)
+
+    content = "### USAGE\n\n"
+    content += "```\n"
+    content += f"twitch-dl {command.name} {arguments}"
+
+    if flags:
+        content += " [FLAGS]"
+
+    if options:
+        content += " [OPTIONS]"
+
+    content += "\n```\n\n"
+
+    return content
+
+
+def render_arguments(command):
+    arguments = get_arguments(command)
+
+    if not arguments:
+        return ""
+
+    content = "### ARGUMENTS\n\n"
+
+    content += "<table>\n"
+    content += "<tbody>"
+    for [name, params] in arguments:
+        content += textwrap.dedent(f"""
+        <tr>
+            <td class="code">&lt;{escape(name)}&gt;</td>
+            <td>{escape(params['help'])}</td>
+        </tr>
+        """)
+    content += "</tbody>\n"
+    content += "</table>\n\n"
+
+    return content
+
+
+def render_flags(command):
+    flags = get_flags(command)
+
+    if not flags:
+        return ""
+
+    content = "### FLAGS\n\n"
+
+    content += "<table>\n"
+    content += "<tbody>"
+    for [names, params] in flags:
+        names = ", ".join(f"{name}" for name in names)
+        content += textwrap.dedent(f"""
+        <tr>
+            <td class="code">{escape(names)}</td>
+            <td>{escape(params['help'])}</td>
+        </tr>
+        """)
+    content += "</tbody>\n"
+    content += "</table>\n\n"
+
+    return content
+
+
+def render_options(command):
+    options = get_options(command)
+
+    if not options:
+        return ""
+
+    content = "### OPTIONS\n\n"
+
+    content += "<table>\n"
+    content += "<tbody>"
+    for [names, params] in options:
+        names = ", ".join(f"{name}" for name in names)
+        content += textwrap.dedent(f"""
+        <tr>
+            <td class="code">{escape(names)}</td>
+            <td>{escape(params['help'])}{choices(params)}</td>
+        </tr>
+        """)
+    content += "</tbody>\n"
+    content += "</table>\n\n"
+
+    return content
+
+
+def choices(params):
+    if "choices" in params:
+        choices = ", ".join(code(c) for c in params["choices"])
+        return f" Possible values: {choices}."
+    return ""
+
+
+def get_arguments(command):
+    return [
+        [names[0], options]
+        for names, options in command.arguments
+        if len(names) == 1 and not names[0].startswith("-")
+    ]
+
+
+def get_flags(command):
+    return [
+        [names, options]
+        for names, options in command.arguments
+        if names[0].startswith("-") and "type" not in options
+    ]
+
+
+def get_options(command):
+    return [
+        [names, options]
+        for names, options in command.arguments
+        if names[0].startswith("-") and "type" in options
+    ]
+
+
+def read(path):
+    with open(path, "r") as f:
+        return f.read()
+
+
+def write(path, content):
+    with open(path, "w") as f:
+        return f.write(content)
+
+
+def code(string):
+    return f"<code>{string}</code>"
+
+
+def escape(text: str):
+    text = html.escape(text)
+    text = re.sub(r"`([\S]+)`", "<code>\\1</code>", text)
+    return text
+
+
+if __name__ == "__main__":
+    main()
