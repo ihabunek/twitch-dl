@@ -71,19 +71,19 @@ def print_log(*args, **kwargs):
 def print_video(video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
-    channel = video["creator"]["displayName"]
 
-    playing = (
-        "playing <blue>{}</blue>".format(video["game"]["name"])
-        if video["game"] else ""
-    )
+    channel = "<blue>{}</blue>".format(video["creator"]["displayName"]) if video["creator"] else ""
+    playing = "playing <blue>{}</blue>".format(video["game"]["name"]) if video["game"] else ""
 
     # Can't find URL in video object, strange
     url = "https://www.twitch.tv/videos/{}".format(video["id"])
 
     print_out("<b>Video {}</b>".format(video["id"]))
     print_out("<green>{}</green>".format(video["title"]))
-    print_out("<blue>{}</blue> {}".format(channel, playing))
+
+    if channel or playing:
+        print_out(" ".join([channel, playing]))
+
     print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
     print_out("<i>{}</i>".format(url))
 
