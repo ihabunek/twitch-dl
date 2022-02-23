@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import sys
 
 from argparse import ArgumentParser, ArgumentTypeError
@@ -235,6 +236,9 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     if args.version:
         print("twitch-dl v{}".format(__version__))
