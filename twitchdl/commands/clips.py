@@ -1,5 +1,7 @@
 import re
+import sys
 
+from itertools import islice
 from os import path
 
 from twitchdl import twitch, utils
@@ -10,21 +12,26 @@ from twitchdl.output import print_out, print_clip, print_json
 
 
 def clips(args):
+    # Ignore --limit if --pager or --all are given
+    limit = sys.maxsize if args.all or args.pager else args.limit
+
+    generator = twitch.channel_clips_generator(args.channel_name, args.period, limit)
+
     if args.json:
-        return _clips_json(args)
+        return print_json(list(generator))
 
     if args.download:
-        return _clips_download(args)
+        return _download_clips(generator)
 
-    return _clips_list(args)
+    if args.pager:
+        print(args)
+        return _print_paged(generator, args.pager)
+
+    return _print_all(generator, args)
 
 
 def _continue():
-    print_out(
-        "\nThere are more clips. "
-        "Press <green><b>Enter</green> to continue, "
-        "<yellow><b>Ctrl+C</yellow> to break."
-    )
+    print_out("Press <green><b>Enter</green> to continue, <yellow><b>Ctrl+C</yellow> to break.")
 
     try:
         input()
@@ -34,28 +41,7 @@ def _continue():
     return True
 
 
-def _get_game_ids(names):
-    if not names:
-        return []
-
-    game_ids = []
-    for name in names:
-        print_out("<dim>Looking up game '{}'...</dim>".format(name))
-        game_id = twitch.get_game_id(name)
-        if not game_id:
-            raise ConsoleError("Game '{}' not found".format(name))
-        game_ids.append(int(game_id))
-
-    return game_ids
-
-
-def _clips_json(args):
-    clips = twitch.get_channel_clips(args.channel_name, args.period, args.limit)
-    nodes = list(edge["node"] for edge in clips["edges"])
-    print_json(nodes)
-
-
-def _clip_target_filename(clip):
+def _target_filename(clip):
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
@@ -73,54 +59,54 @@ def _clip_target_filename(clip):
     return "{}.{}".format(name, ext)
 
 
-def _clips_download(args):
-    downloaded_count = 0
-    generator = twitch.channel_clips_generator(args.channel_name, args.period, 100)
+def _download_clips(generator):
+    for clip in generator:
+        target = _target_filename(clip)
 
-    for clips, _ in generator:
-        for clip in clips["edges"]:
-            clip = clip["node"]
+        if path.exists(target):
+            print_out("Already downloaded: <green>{}</green>".format(target))
+        else:
             url = get_clip_authenticated_url(clip["slug"], "source")
-            target = _clip_target_filename(clip)
-
-            if path.exists(target):
-                print_out("Already downloaded: <green>{}</green>".format(target))
-            else:
-                print_out("Downloading: <yellow>{}</yellow>".format(target))
-                download_file(url, target)
-
-            downloaded_count += 1
-            if args.limit and downloaded_count >= args.limit:
-                return
+            print_out("Downloading: <yellow>{}</yellow>".format(target))
+            download_file(url, target)
 
 
-def _clips_list(args):
-    print_out("<dim>Loading clips...</dim>")
-    generator = twitch.channel_clips_generator(args.channel_name, args.period, args.limit)
+def _print_all(generator, args):
+    for clip in generator:
+        print_out()
+        print_clip(clip)
+
+
+    if not args.all:
+        print_out(
+            "\n<dim>There may be more clips. " +
+            "Increase the --limit, use --all or --pager to see the rest.</dim>"
+        )
+
+
+def _print_paged(generator, page_size):
+    iterator = iter(generator)
+    page = list(islice(iterator, page_size))
 
     first = 1
+    last = first + len(page) - 1
 
-    for clips, has_more in generator:
-        count = len(clips["edges"]) if "edges" in clips else 0
-        last = first + count - 1
+    while True:
+        print_out("-" * 80)
+
+        print_out()
+        for clip in page:
+            print_clip(clip)
+            print_out()
+
+        last = first + len(page) - 1
 
         print_out("-" * 80)
-        print_out("<yellow>Showing clips {}-{} of ??</yellow>".format(first, last))
+        print_out("<yellow>Clips {}-{}</yellow>".format(first, last))
 
-        for clip in clips["edges"]:
-            print_out()
-            print_clip(clip["node"])
+        first = first + len(page)
+        last = first + 1
 
-        if not args.pager:
-            print_out(
-                "\n<dim>There are more clips. "
-                "Increase the --limit or use --pager to see the rest.</dim>"
-            )
+        page = list(islice(iterator, page_size))
+        if not page or not _continue():
             break
-
-        if not has_more or not _continue():
-            break
-
-        first += count
-    else:
-        print_out("<yellow>No clips found</yellow>")

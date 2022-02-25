@@ -196,6 +196,28 @@ def get_channel_clips(channel_id, period, limit, after=None):
 
 
 def channel_clips_generator(channel_id, period, limit):
+    def _generator(clips, limit):
+        for clip in clips["edges"]:
+            if limit < 1:
+                return
+            yield clip["node"]
+            limit -= 1
+
+        has_next = clips["pageInfo"]["hasNextPage"]
+        if limit < 1 or not has_next:
+            return
+
+        req_limit = min(limit, 100)
+        cursor = clips["edges"][-1]["cursor"]
+        clips = get_channel_clips(channel_id, period, req_limit, cursor)
+        yield from _generator(clips, limit)
+
+    req_limit = min(limit, 100)
+    clips = get_channel_clips(channel_id, period, req_limit)
+    return _generator(clips, limit)
+
+
+def channel_clips_generator_old(channel_id, period, limit):
     cursor = ""
     while True:
         clips = get_channel_clips(

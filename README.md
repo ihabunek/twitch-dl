@@ -215,6 +215,9 @@ Expands to: `KatLink - Dark Souls III - Dark Souls 3 First playthrough.mkv`
 
 ### Listing clips
 
+Listing clips works similar to listing videos. Shows 10 clips by default. Use
+`--all` to list all in one go or `--pager` to show them in pages.
+
 List clips for the given period:
 
 ```
@@ -223,13 +226,15 @@ twitch-dl clips bananasaurus_rex --period last_week
 
 Supported periods are: `last_day`, `last_week`, `last_month`, `all_time`.
 
-For listing a large number of clips, it's nice to page them:
+Also supports JSON output:
 
 ```
-twitch-dl clips bananasaurus_rex --period all_time --limit 10 --pager
+twitch-dl clips bananasaurus_rex --json --all
 ```
 
-This will show 10 clips at a time and ask to continue.
+Note that this may make multiple requests to the server because each request is
+limited to 100 clips, so it may take a little while. You can use `--debug` to
+log requests.
 
 ### Downloading clips
 

@@ -34,19 +34,6 @@ def time(value):
     return hours * 3600 + minutes * 60 + seconds
 
 
-def limit(value):
-    """Validates the number of videos to fetch."""
-    try:
-        value = int(value)
-    except ValueError:
-        raise ArgumentTypeError("must be an integer")
-
-    if not 1 <= int(value) <= 100:
-        raise ArgumentTypeError("must be between 1 and 100")
-
-    return value
-
-
 def pos_integer(value):
     try:
         value = int(value)
@@ -118,8 +105,13 @@ COMMANDS = [
             }),
             (["-l", "--limit"], {
                 "help": "Number of videos to fetch (default 10, max 100)",
-                "type": limit,
+                "type": pos_integer,
                 "default": 10,
+            }),
+            (["-a", "--all"], {
+                "help": "Fetch all videos, overrides --limit",
+                "action": "store_true",
+                "default": False,
             }),
             (["-P", "--period"], {
                 "help": "Period from which to return clips. (default: 'all_time')",
@@ -133,9 +125,10 @@ COMMANDS = [
                 "default": False,
             }),
             (["-p", "--pager"], {
-                "help": "If there are more results than LIMIT, ask to show next page",
-                "action": "store_true",
-                "default": False,
+                "help": "Number of clips to show per page. Disabled by default.",
+                "type": pos_integer,
+                "nargs": "?",
+                "const": 10,
             }),
             (["-d", "--download"], {
                 "help": "Download all videos in given period (in source quality)",
