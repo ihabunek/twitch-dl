@@ -114,16 +114,40 @@ playlist URLs for videos.
 
 ### Listing videos
 
-List recent streams for a given channel:
+List recent channel videos (10 by default):
 
 ```
 twitch-dl videos bananasaurus_rex
 ```
 
-Use the `--game` option to specify one or more games to show:
+Limit to videos of one or more games:
 
 ```
 twitch-dl videos --game "doom eternal" --game "cave story" bananasaurus_rex
+```
+
+List all channel videos at once:
+
+```
+twitch-dl videos bananasaurus_rex --all
+```
+
+List all channel videos in pages of 10:
+
+```
+twitch-dl videos bananasaurus_rex --pager
+```
+
+Page size can be adjusted by passing number of items per page:
+
+```
+twitch-dl videos bananasaurus_rex --pager 5
+```
+
+Returns all videos as a JSON list. Useful for scripting.
+
+```
+twitch-dl videos bananasaurus_rex --json --all
 ```
 
 ### Downloading videos
