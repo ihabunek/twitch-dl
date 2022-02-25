@@ -1,8 +1,9 @@
 1.20.0:
-  date: TBA
+  date: 2022-02-25
   changes:
-    - "Add `--json` option to ` command (#92, thanks @miff2000)"
-    - Revamp limiting and paging videos to work better with `--json`
+    - "Add `--json` option to `videos` command (#92, thanks @miff2000)"
+    - "Add `--all` option to `videos` and `clips` commands to list all clips or videos in one go."
+    - "Modify how `--pager` works, will make multiple requests if needed to show all available items, ignoring `--limit`."
 
 1.19.0:
   date: 2022-02-05
