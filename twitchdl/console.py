@@ -253,7 +253,7 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    if args.debug:
+    if "--debug" in sys.argv:
         logging.basicConfig(level=logging.DEBUG)
 
     if args.version:
