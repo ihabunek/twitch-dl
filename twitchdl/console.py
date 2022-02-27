@@ -207,6 +207,11 @@ COMMANDS = [
                 "default": False,
             }),
         ],
+    ),
+    Command(
+        name="env",
+        description="Print environment information for inclusion in bug reports.",
+        arguments=[],
     )
 ]
 
