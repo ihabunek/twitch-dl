@@ -7,7 +7,6 @@ from os import path
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
-from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_clip, print_json
 
 
@@ -75,7 +74,6 @@ def _print_all(generator, args):
     for clip in generator:
         print_out()
         print_clip(clip)
-
 
     if not args.all:
         print_out(
