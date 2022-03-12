@@ -6,7 +6,7 @@ from twitchdl.output import print_video, print_clip, print_json, print_out, prin
 
 
 def info(args):
-    video_id = utils.parse_video_identifier(args.identifier)
+    video_id = utils.parse_video_identifier(args.video)
     if video_id:
         print_log("Fetching video...")
         video = twitch.get_video(video_id)
@@ -27,7 +27,7 @@ def info(args):
                 video_info(video, playlists)
             return
 
-    clip_slug = utils.parse_clip_identifier(args.identifier)
+    clip_slug = utils.parse_clip_identifier(args.video)
     if clip_slug:
         print_log("Fetching clip...")
         clip = twitch.get_clip(clip_slug)
@@ -40,7 +40,7 @@ def info(args):
             clip_info(clip)
         return
 
-    raise ConsoleError("Invalid input: {}".format(args.identifier))
+    raise ConsoleError("Invalid input: {}".format(args.video))
 
 
 def video_info(video, playlists):
