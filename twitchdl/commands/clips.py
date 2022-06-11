@@ -17,7 +17,9 @@ def clips(args):
     generator = twitch.channel_clips_generator(args.channel_name, args.period, limit)
 
     if args.json:
-        return print_json(list(generator))
+        data = list(generator)
+        print_json(data)
+        return data
 
     if args.download:
         return _download_clips(generator)

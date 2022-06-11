@@ -22,7 +22,7 @@ def info(args):
 
         if video:
             if args.json:
-                video_json(video, playlists)
+                return video_json(video, playlists)
             else:
                 video_info(video, playlists)
             return
@@ -36,6 +36,7 @@ def info(args):
 
         if args.json:
             print_json(clip)
+            return clip
         else:
             clip_info(clip)
         return
@@ -67,6 +68,7 @@ def video_json(video, playlists):
     ]
 
     print_json(video)
+    return video
 
 
 def clip_info(clip):
