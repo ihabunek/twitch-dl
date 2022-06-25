@@ -176,6 +176,13 @@ COMMANDS = [
                 "help": "Video quality, e.g. 720p. Set to 'source' to get best quality.",
                 "type": str,
             }),
+            (["-a", "--auth"], {
+                "help": "Authentication token, passed to Twitch to access subscriber only "
+                        "VODs. Can be copied from the 'auth_token' cookie in any browser "
+                        "logged in on Twitch.",
+                "type": str,
+                "default": None,
+            }),
             (["--no-join"], {
                 "help": "Don't run ffmpeg to join the downloaded vods, implies --keep.",
                 "action": "store_true",

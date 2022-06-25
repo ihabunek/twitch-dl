@@ -274,7 +274,7 @@ def _download_video(video_id, args):
         args.overwrite = True
 
     print_out("<dim>Fetching access token...</dim>")
-    access_token = twitch.get_access_token(video_id)
+    access_token = twitch.get_access_token(video_id, auth_token=args.auth)
 
     print_out("<dim>Fetching playlists...</dim>")
     playlists_m3u8 = twitch.get_playlists(video_id, access_token)
