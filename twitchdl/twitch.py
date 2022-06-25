@@ -52,9 +52,9 @@ def gql_post(query):
     return response
 
 
-def gql_query(query):
+def gql_query(query, headers={}):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, json={"query": query}).json()
+    response = authenticated_post(url, json={"query": query}, headers=headers).json()
 
     if "errors" in response:
         raise GQLError(response["errors"])
@@ -303,7 +303,7 @@ def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=None):
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id):
+def get_access_token(video_id, auth_token=None):
     query = """
     {{
         videoPlaybackAccessToken(
@@ -322,7 +322,11 @@ def get_access_token(video_id):
 
     query = query.format(video_id=video_id)
 
-    response = gql_query(query)
+    headers = {}
+    if auth_token is not None:
+        headers['authorization'] = f'OAuth {auth_token}'
+
+    response = gql_query(query, headers=headers)
     return response["data"]["videoPlaybackAccessToken"]
 
 
