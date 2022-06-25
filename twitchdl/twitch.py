@@ -4,6 +4,7 @@ Twitch API access.
 
 import requests
 
+from requests.exceptions import HTTPError
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
 
@@ -326,8 +327,22 @@ def get_access_token(video_id, auth_token=None):
     if auth_token is not None:
         headers['authorization'] = f'OAuth {auth_token}'
 
-    response = gql_query(query, headers=headers)
-    return response["data"]["videoPlaybackAccessToken"]
+    try:
+        response = gql_query(query, headers=headers)
+        return response["data"]["videoPlaybackAccessToken"]
+    except HTTPError as error:
+        # Provide a more useful error message when server returns HTTP 401
+        # Unauthorized while using a user-provided auth token.
+        if error.response.status_code == 401:
+            if auth_token:
+                raise ConsoleError("Unauthorized. The provided auth token is not valid.")
+            else:
+                raise ConsoleError(
+                    "Unauthorized. This video may be subscriber-only. See docs:\n"
+                    "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
+                )
+
+        raise
 
 
 def get_playlists(video_id, access_token):
