@@ -1,3 +1,8 @@
+1.22.0:
+  date: 2022-06-25
+  changes:
+    - "Add support for downloading subscriber-only VODs (#48, thanks @cemiu)"
+
 1.21.0:
   date: 2022-02-27
   changes:
