@@ -71,8 +71,8 @@ twitch-dl download <video> [FLAGS] [OPTIONS]
 </tr>
 
 <tr>
-    <td class="code">-a, --auth</td>
-    <td>Twitch authentication token needed for subscriber-only VODs. Can be found in the 'auth_token' cookie.</td>
+    <td class="code">-a, --auth-token</td>
+    <td>Authentication token, passed to Twitch to access subscriber only VODs. Can be copied from the &#x27;auth_token&#x27; cookie in any browser logged in on Twitch.</td>
 </tr>
 
 <tr>
