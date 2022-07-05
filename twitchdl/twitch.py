@@ -268,7 +268,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     return response["data"]["user"]["videos"]
 
 
-def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=None):
+def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=[]):
     def _generator(videos, max_videos):
         for video in videos["edges"]:
             if max_videos < 1:
