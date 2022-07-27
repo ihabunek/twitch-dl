@@ -18,7 +18,7 @@ Click on a command to see it's documentation.
 
 |                                      |                                 |
 |------------------------------------- | ------------------------------- |
-| [`videos`](commands/videos.html)     | List videos from a channel.     |
-| [`clips`](commands/clips.html)       | List clips from a channel.      |
-| [`download`](commands/download.html) | Download a video or clip.       |
-| [`info`](commands/info.html)         | Print info for a video or clip. |
+| [`videos`](commands/videos.md)     | List videos from a channel.     |
+| [`clips`](commands/clips.md)       | List clips from a channel.      |
+| [`download`](commands/download.md) | Download a video or clip.       |
+| [`info`](commands/info.md)         | Print info for a video or clip. |
