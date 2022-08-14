@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import re
 
 from argparse import ArgumentParser, ArgumentTypeError
 from collections import namedtuple
@@ -44,6 +45,24 @@ def pos_integer(value):
         raise ArgumentTypeError("must be positive")
 
     return value
+
+
+def rate(value):
+    match = re.search(r"^([0-9]+)(k|m|)$", value, flags=re.IGNORECASE)
+
+    if not match:
+        raise ArgumentTypeError("must be an integer, followed by an optional 'k' or 'm'")
+
+    amount = int(match.group(1))
+    unit = match.group(2)
+
+    if unit == "k":
+        return amount * 1024
+
+    if unit == "m":
+        return amount * 1024 * 1024
+
+    return amount
 
 
 COMMANDS = [
@@ -197,7 +216,12 @@ COMMANDS = [
                 "help": "Output file name template. See docs for details.",
                 "type": str,
                 "default": "{date}_{id}_{channel_login}_{title_slug}.{format}"
-            })
+            }),
+            (["-r", "--rate-limit"], {
+                "help": "Limit the maximum download speed in bytes per second. "
+                        "Use 'k' and 'm' suffixes for kbps and mbps.",
+                "type": rate,
+            }),
         ],
     ),
     Command(

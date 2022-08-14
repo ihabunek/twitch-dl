@@ -79,6 +79,11 @@ twitch-dl download <video> [FLAGS] [OPTIONS]
     <td class="code">-o, --output</td>
     <td>Output file name template. See docs for details.</td>
 </tr>
+
+<tr>
+    <td class="code">-r, --rate-limit</td>
+    <td>Limit the maximum download speed in bytes per second. Use &#x27;k&#x27; and &#x27;m&#x27; suffixes for kbps and mbps.</td>
+</tr>
 </tbody>
 </table>
 

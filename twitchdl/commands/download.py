@@ -305,7 +305,7 @@ def _download_video(video_id, args):
         len(vod_paths), args.max_workers, target_dir))
     sources = [base_uri + path for path in vod_paths]
     targets = [os.path.join(target_dir, "{:05d}.ts".format(k)) for k, _ in enumerate(vod_paths)]
-    asyncio.run(download_all(sources, targets, args.max_workers))
+    asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
 
     # Make a modified playlist which references downloaded VODs
     # Keep only the downloaded segments and skip the rest
