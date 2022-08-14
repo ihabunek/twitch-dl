@@ -29,6 +29,7 @@ class Progress:
     vod_count: int
     downloaded: int = 0
     estimated_total: Optional[int] = None
+    last_printed: float = field(default_factory=time.time)
     progress_bytes: int = 0
     progress_perc: int = 0
     remaining_time: Optional[int] = None
@@ -107,6 +108,12 @@ class Progress:
         self.remaining_time = int((self.estimated_total - self.progress_bytes) / self.speed) if self.estimated_total and self.speed else None
 
     def print(self):
+        now = time.time()
+
+        # Don't print more often than 10 times per second
+        if now - self.last_printed < 0.1:
+            return
+
         progress = " ".join([
             f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
             f"({self.progress_perc}%)",
@@ -117,3 +124,4 @@ class Progress:
         ])
 
         print_out(f"\r{progress}     ", end="")
+        self.last_printed = now
