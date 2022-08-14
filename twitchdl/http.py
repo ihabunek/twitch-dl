@@ -70,7 +70,10 @@ async def download(
     progress: Progress,
     token_bucket: AnyTokenBucket,
 ):
-    with open(target, "wb") as f:
+    # Download to a temp file first, then copy to target when over to avoid
+    # getting saving chunks which may persist if canceled or --keep is used
+    tmp_target = f"{target}.tmp"
+    with open(tmp_target, "wb") as f:
         async with client.stream("GET", source) as response:
             size = int(response.headers.get("content-length"))
             progress.start(task_id, size)
@@ -80,6 +83,7 @@ async def download(
                 token_bucket.advance(size)
                 progress.advance(task_id, size)
             progress.end(task_id)
+        os.rename(tmp_target, target)
 
 
 async def download_with_retries(
