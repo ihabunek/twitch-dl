@@ -1,4 +1,7 @@
+import asyncio
+from typing import OrderedDict
 import m3u8
+import os
 import re
 import requests
 import shutil
@@ -10,8 +13,9 @@ from pathlib import Path
 from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
-from twitchdl.download import download_file, download_files
+from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
+from twitchdl.http import download_all
 from twitchdl.output import print_out
 
 
@@ -299,11 +303,15 @@ def _download_video(video_id, args):
 
     print_out("\nDownloading {} VODs using {} workers to {}".format(
         len(vod_paths), args.max_workers, target_dir))
-    path_map = download_files(base_uri, target_dir, vod_paths, args.max_workers)
+    sources = [base_uri + path for path in vod_paths]
+    targets = [os.path.join(target_dir, "{:05d}.ts".format(k)) for k, _ in enumerate(vod_paths)]
+    asyncio.run(download_all(sources, targets, args.max_workers))
 
     # Make a modified playlist which references downloaded VODs
     # Keep only the downloaded segments and skip the rest
     org_segments = playlist.segments.copy()
+
+    path_map = OrderedDict(zip(vod_paths, targets))
     playlist.segments.clear()
     for segment in org_segments:
         if segment.uri in path_map:
