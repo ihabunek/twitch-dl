@@ -40,6 +40,19 @@ def format_duration(total_seconds):
     return "{} sec".format(seconds)
 
 
+def format_time(total_seconds):
+    total_seconds = int(total_seconds)
+    hours = total_seconds // 3600
+    remainder = total_seconds % 3600
+    minutes = remainder // 60
+    seconds = total_seconds % 60
+
+    if hours:
+        return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    return f"{minutes:02}:{seconds:02}"
+
+
 def read_int(msg, min, max, default):
     msg = msg + " [default {}]: ".format(default)
 

@@ -305,7 +305,7 @@ def main():
         print_err(e)
         sys.exit(1)
     except KeyboardInterrupt:
-        print_err("Operation canceled")
+        print_err("\nOperation canceled")
         sys.exit(1)
     except GQLError as e:
         print_err(e)

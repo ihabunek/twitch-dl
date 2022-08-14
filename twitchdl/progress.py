@@ -6,7 +6,7 @@ from statistics import mean
 from typing import Dict, Optional
 
 from twitchdl.output import print_out
-from twitchdl.utils import format_size, format_duration
+from twitchdl.utils import format_size, format_time
 
 logger = logging.getLogger(__name__)
 
@@ -116,11 +116,10 @@ class Progress:
 
         progress = " ".join([
             f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
-            f"({self.progress_perc}%)",
-            f"<cyan>{format_size(self.progress_bytes)}</cyan>",
-            f"of <cyan>~{format_size(self.estimated_total)}</cyan>" if self.estimated_total else "",
-            f"at <cyan>{format_size(self.speed)}/s</cyan>" if self.speed else "",
-            f"remaining <cyan>~{format_duration(self.remaining_time)}</cyan>" if self.remaining_time is not None else "",
+            f"<blue>{self.progress_perc}%</blue>",
+            f"of <blue>~{format_size(self.estimated_total)}</blue>" if self.estimated_total else "",
+            f"at <blue>{format_size(self.speed)}/s</blue>" if self.speed else "",
+            f"ETA <blue>{format_time(self.remaining_time)}</blue>" if self.remaining_time is not None else "",
         ])
 
         print_out(f"\r{progress}     ", end="")
