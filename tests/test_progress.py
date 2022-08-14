@@ -19,26 +19,32 @@ def test_downloaded():
     progress.start(3, 300)
 
     assert progress.downloaded == 0
+    assert progress.progress_bytes == 0
     assert progress.progress_perc == 0
 
     progress.advance(1, 100)
     assert progress.downloaded == 100
+    assert progress.progress_bytes == 100
     assert progress.progress_perc == 11
 
     progress.advance(2, 200)
     assert progress.downloaded == 300
+    assert progress.progress_bytes == 300
     assert progress.progress_perc == 33
 
     progress.advance(3, 150)
     assert progress.downloaded == 450
+    assert progress.progress_bytes == 450
     assert progress.progress_perc == 50
 
     progress.advance(1, 50)
     assert progress.downloaded == 500
+    assert progress.progress_bytes == 500
     assert progress.progress_perc == 55
 
     progress.abort(2)
-    assert progress.downloaded == 300
+    assert progress.downloaded == 500
+    assert progress.progress_bytes == 300
     assert progress.progress_perc == 33
 
     progress.start(2, 300)
@@ -47,14 +53,16 @@ def test_downloaded():
     progress.advance(2, 300)
     progress.advance(3, 150)
 
-    assert progress.downloaded == 900
+    assert progress.downloaded == 1100
+    assert progress.progress_bytes == 900
     assert progress.progress_perc == 100
 
     progress.end(1)
     progress.end(2)
     progress.end(3)
 
-    assert progress.downloaded == 900
+    assert progress.downloaded == 1100
+    assert progress.progress_bytes == 900
     assert progress.progress_perc == 100
 
 

@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 import logging
+import os
 import time
 
 from typing import List, Optional, Union
@@ -91,6 +92,11 @@ async def download_with_retries(
     token_bucket: AnyTokenBucket,
 ):
     async with semaphore:
+        if os.path.exists(target):
+            size = os.path.getsize(target)
+            progress.already_downloaded(task_id, size)
+            return
+
         for n in range(RETRY_COUNT):
             try:
                 return await download(client, task_id, source, target, progress, token_bucket)
