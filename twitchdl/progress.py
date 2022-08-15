@@ -39,8 +39,6 @@ class Progress:
     vod_downloaded_count: int = 0
 
     def start(self, task_id: int, size: int):
-        logger.debug(f"#{task_id} start {size}b")
-
         if task_id in self.tasks:
             raise ValueError(f"Task {task_id}: cannot start, already started")
 
@@ -50,8 +48,6 @@ class Progress:
         self.print()
 
     def advance(self, task_id: int, chunk_size: int):
-        logger.debug(f"#{task_id} advance {chunk_size}")
-
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot advance, not started")
 
@@ -73,8 +69,6 @@ class Progress:
         self.print()
 
     def abort(self, task_id: int):
-        logger.debug(f"#{task_id} abort")
-
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot abort, not started")
 
@@ -86,8 +80,6 @@ class Progress:
         self.print()
 
     def end(self, task_id: int):
-        logger.debug(f"#{task_id} end")
-
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot end, not started")
 
