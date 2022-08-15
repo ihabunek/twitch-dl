@@ -2,9 +2,8 @@
 Twitch API access.
 """
 
-import requests
+import httpx
 
-from requests.exceptions import HTTPError
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
 
@@ -18,7 +17,7 @@ class GQLError(Exception):
 def authenticated_get(url, params={}, headers={}):
     headers['Client-ID'] = CLIENT_ID
 
-    response = requests.get(url, params, headers=headers)
+    response = httpx.get(url, params=params, headers=headers)
     if 400 <= response.status_code < 500:
         data = response.json()
         # TODO: this does not look nice in the console since data["message"]
@@ -33,7 +32,7 @@ def authenticated_get(url, params={}, headers={}):
 def authenticated_post(url, data=None, json=None, headers={}):
     headers['Client-ID'] = CLIENT_ID
 
-    response = requests.post(url, data=data, json=json, headers=headers)
+    response = httpx.post(url, data=data, json=json, headers=headers)
     if response.status_code == 400:
         data = response.json()
         raise ConsoleError(data["message"])
@@ -330,7 +329,7 @@ def get_access_token(video_id, auth_token=None):
     try:
         response = gql_query(query, headers=headers)
         return response["data"]["videoPlaybackAccessToken"]
-    except HTTPError as error:
+    except httpx.HTTPStatusError as error:
         # Provide a more useful error message when server returns HTTP 401
         # Unauthorized while using a user-provided auth token.
         if error.response.status_code == 401:
@@ -351,7 +350,7 @@ def get_playlists(video_id, access_token):
     """
     url = "http://usher.twitch.tv/vod/{}".format(video_id)
 
-    response = requests.get(url, params={
+    response = httpx.get(url, params={
         "nauth": access_token['value'],
         "nauthsig": access_token['signature'],
         "allow_audio_only": "true",

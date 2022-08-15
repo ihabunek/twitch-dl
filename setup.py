@@ -34,7 +34,7 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         "m3u8>=1.0.0,<2.0.0",
-        "requests>=2.13,<3.0",
+        "httpx>=0.17.0,<1.0.0",
     ],
     entry_points={
         'console_scripts': [

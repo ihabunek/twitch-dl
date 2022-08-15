@@ -1,15 +1,15 @@
 import asyncio
-from typing import OrderedDict
+import httpx
 import m3u8
 import os
 import re
-import requests
 import shutil
 import subprocess
 import tempfile
 
 from os import path
 from pathlib import Path
+from typing import OrderedDict
 from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
@@ -287,7 +287,7 @@ def _download_video(video_id, args):
             else _select_playlist_interactive(playlists))
 
     print_out("<dim>Fetching playlist...</dim>")
-    response = requests.get(playlist_uri)
+    response = httpx.get(playlist_uri)
     response.raise_for_status()
     playlist = m3u8.loads(response.text)
 
