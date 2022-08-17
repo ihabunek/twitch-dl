@@ -44,14 +44,18 @@ if dist_version != version:
 
 release_date = changelog_item["date"]
 changes = changelog_item["changes"]
+description = changelog_item["description"] if "description" in changelog_item else None
 
 if not isinstance(release_date, date):
     print(f"Release date not set for version `{version}` in the changelog.", file=sys.stderr)
     sys.exit(1)
 
 commit_message = f"twitch-dl {version}\n\n"
+if description:
+    lines = textwrap.wrap(description.strip(), 72)
+    commit_message += "\n".join(lines) + "\n\n"
 for c in changes:
-    lines = textwrap.wrap(c, 70)
+    lines = textwrap.wrap(c, 69)
     initial = True
     for line in lines:
         lead = " *" if initial else "  "
