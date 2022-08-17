@@ -5,12 +5,16 @@ twitch-dl changelog
 
 ### [2.0.0 (TBA)](https://github.com/ihabunek/twitch-dl/releases/tag/2.0.0)
 
-* Switch from `requests` to `httpx` for making http requests, this enables using
-  asyncio for concurrency. No breaking changes.
-* Better progress meter, updates on each chunk downloaded, instead of after each
-  VOD downloaded.
+This release switches from using `requests` to `httpx` for making http requests,
+and from threads to `asyncio` for concurrency. This enables easier
+implementation of new features, but has no breaking changes for the CLI.
+
 * Add `--rate-limit` option to `download` for limiting maximum bandwith when
   downloading.
+* Improved progress meter, updates on each chunk downloaded, instead of each VOD
+  downloaded.
+* Improved speed estimate, displays recent speed instead of average speed since
+  the start of download.
 
 ### [1.22.0 (2022-06-25)](https://github.com/ihabunek/twitch-dl/releases/tag/1.22.0)
 
