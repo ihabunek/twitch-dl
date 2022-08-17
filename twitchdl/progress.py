@@ -1,9 +1,10 @@
 import logging
 import time
 
+from collections import deque
 from dataclasses import dataclass, field
 from statistics import mean
-from typing import Dict, Optional
+from typing import Dict, NamedTuple, Optional, Deque
 
 from twitchdl.output import print_out
 from twitchdl.utils import format_size, format_time
@@ -24,6 +25,11 @@ class Task:
         self.downloaded += size
 
 
+class Sample(NamedTuple):
+    downloaded: int
+    timestamp: float
+
+
 @dataclass
 class Progress:
     vod_count: int
@@ -37,6 +43,7 @@ class Progress:
     start_time: float = field(default_factory=time.time)
     tasks: Dict[TaskId, Task] = field(default_factory=dict)
     vod_downloaded_count: int = 0
+    samples: Deque[Sample] = field(default_factory=lambda: deque(maxlen=100))
 
     def start(self, task_id: int, size: int):
         if task_id in self.tasks:
@@ -47,13 +54,14 @@ class Progress:
         self._calculate_progress()
         self.print()
 
-    def advance(self, task_id: int, chunk_size: int):
+    def advance(self, task_id: int, size: int):
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot advance, not started")
 
-        self.downloaded += chunk_size
-        self.progress_bytes += chunk_size
-        self.tasks[task_id].advance(chunk_size)
+        self.downloaded += size
+        self.progress_bytes += size
+        self.tasks[task_id].advance(size)
+        self.samples.append(Sample(self.downloaded, time.time()))
         self._calculate_progress()
         self.print()
 
@@ -94,10 +102,21 @@ class Progress:
         self.estimated_total = int(mean(t.size for t in self.tasks.values()) * self.vod_count) if self.tasks else None
 
     def _calculate_progress(self):
-        elapsed_time = time.time() - self.start_time
+        self.speed = self._calculate_speed()
         self.progress_perc = int(100 * self.progress_bytes / self.estimated_total) if self.estimated_total else 0
-        self.speed = self.downloaded / elapsed_time if elapsed_time else None
         self.remaining_time = int((self.estimated_total - self.progress_bytes) / self.speed) if self.estimated_total and self.speed else None
+
+    def _calculate_speed(self):
+        if len(self.samples) < 2:
+            return None
+
+        first_sample = self.samples[0]
+        last_sample = self.samples[-1]
+
+        size = last_sample.downloaded - first_sample.downloaded
+        duration = last_sample.timestamp - first_sample.timestamp
+
+        return size / duration
 
     def print(self):
         now = time.time()
