@@ -33,6 +33,11 @@ twitch-dl videos <channel_name> [FLAGS] [OPTIONS]
     <td class="code">-j, --json</td>
     <td>Show results as JSON. Ignores <code>--pager</code>.</td>
 </tr>
+
+<tr>
+    <td class="code">-c, --compact</td>
+    <td>Show videos in compact mode, one line per video</td>
+</tr>
 </tbody>
 </table>
 

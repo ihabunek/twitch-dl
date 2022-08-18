@@ -12,6 +12,7 @@ implementation of new features, but has no breaking changes for the CLI.
 * **BREAKING**: Require Python 3.7 or later.
 * Add `--rate-limit` option to `download` for limiting maximum bandwidth when
   downloading.
+* Add `--compact` option to `download` for displaying one video per line.
 * Allow passing multiple video ids to `download` to download multiple videos
   successively.
 * Improved progress meter, updates on each chunk downloaded, instead of each VOD

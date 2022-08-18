@@ -112,6 +112,11 @@ COMMANDS = [
                 "nargs": "?",
                 "const": 10,
             }),
+            (["-c", "--compact"], {
+                "help": "Show videos in compact mode, one line per video",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
     Command(

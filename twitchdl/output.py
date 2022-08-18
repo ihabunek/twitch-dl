@@ -48,6 +48,13 @@ def strip_tags(text):
     return text
 
 
+def truncate(string, length):
+    if len(string) > length:
+        return string[:length - 1] + "…"
+
+    return string
+
+
 def print_out(*args, **kwargs):
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
     print(*args, **kwargs)
@@ -87,6 +94,14 @@ def print_video(video):
 
     print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
     print_out("<i>{}</i>".format(url))
+
+
+def print_video_compact(video):
+    id = video["id"]
+    date = video["publishedAt"][:10]
+    game = video["game"]["name"] if video["game"] else ""
+    title = truncate(video["title"], 80).ljust(80)
+    print_out(f'<b>{id}</b> {date} <green>{title}</green> <blue>{game}</blue>')
 
 
 def print_paged_videos(generator, page_size, total_count):

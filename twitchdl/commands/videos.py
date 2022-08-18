@@ -2,7 +2,7 @@ import sys
 
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out, print_paged_videos, print_video, print_json
+from twitchdl.output import print_out, print_paged_videos, print_video, print_json, print_video_compact
 
 
 def videos(args):
@@ -32,8 +32,11 @@ def videos(args):
 
     count = 0
     for video in generator:
-        print_out()
-        print_video(video)
+        if args.compact:
+            print_video_compact(video)
+        else:
+            print_out()
+            print_video(video)
         count += 1
 
     print_out()
