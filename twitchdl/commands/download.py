@@ -166,15 +166,20 @@ def _crete_temp_dir(base_uri):
 
 
 def download(args):
-    video_id = utils.parse_video_identifier(args.video)
+    for video in args.videos:
+        download_one(video, args)
+
+
+def download_one(video, args):
+    video_id = utils.parse_video_identifier(video)
     if video_id:
         return _download_video(video_id, args)
 
-    clip_slug = utils.parse_clip_identifier(args.video)
+    clip_slug = utils.parse_clip_identifier(video)
     if clip_slug:
         return _download_clip(clip_slug, args)
 
-    raise ConsoleError("Invalid input: {}".format(args.video))
+    raise ConsoleError("Invalid input: {}".format(video))
 
 
 def _get_clip_url(clip, quality):

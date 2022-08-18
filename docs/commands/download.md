@@ -1,12 +1,12 @@
 <!-- ------------------- generated docs start ------------------- -->
 # twitch-dl download
 
-Download a video or clip.
+Download videos or clips.
 
 ### USAGE
 
 ```
-twitch-dl download <video> [FLAGS] [OPTIONS]
+twitch-dl download <videos> [FLAGS] [OPTIONS]
 ```
 
 ### ARGUMENTS
@@ -14,8 +14,8 @@ twitch-dl download <video> [FLAGS] [OPTIONS]
 <table>
 <tbody>
 <tr>
-    <td class="code">&lt;video&gt;</td>
-    <td>Video ID, clip slug, or URL</td>
+    <td class="code">&lt;videos&gt;</td>
+    <td>One or more video ID, clip slug or twitch URL to download.</td>
 </tr>
 </tbody>
 </table>
@@ -114,6 +114,12 @@ Setting quality to `audio_only` will download only audio:
 
 ```
 twitch-dl download -q audio_only 221837124
+```
+
+Download multiple videos one after the other:
+
+```
+twitch-dl download 1559928295 1557034274 1555157293 -q source
 ```
 
 ### Overriding the target file name

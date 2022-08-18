@@ -158,11 +158,12 @@ COMMANDS = [
     ),
     Command(
         name="download",
-        description="Download a video or clip.",
+        description="Download videos or clips.",
         arguments=[
-            (["video"], {
-                "help": "Video ID, clip slug, or URL",
+            (["videos"], {
+                "help": "One or more video ID, clip slug or twitch URL to download.",
                 "type": str,
+                "nargs": "+",
             }),
             (["-w", "--max-workers"], {
                 "help": "Maximal number of threads for downloading vods "
