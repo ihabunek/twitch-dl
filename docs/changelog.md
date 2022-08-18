@@ -9,6 +9,7 @@ This release switches from using `requests` to `httpx` for making http requests,
 and from threads to `asyncio` for concurrency. This enables easier
 implementation of new features, but has no breaking changes for the CLI.
 
+* **BREAKING**: Require Python 3.7 or later.
 * Add `--rate-limit` option to `download` for limiting maximum bandwidth when
   downloading.
 * Allow passing multiple video ids to `download` to download multiple videos

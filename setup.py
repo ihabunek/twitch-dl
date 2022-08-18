@@ -24,14 +24,12 @@ setup(
     license='GPLv3',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
-    python_requires='>=3.5',
+    python_requires='>=3.7',
     install_requires=[
         "m3u8>=1.0.0,<2.0.0",
         "httpx>=0.17.0,<1.0.0",
