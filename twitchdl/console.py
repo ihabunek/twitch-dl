@@ -80,9 +80,8 @@ COMMANDS = [
                 "type": str,
             }),
             (["-l", "--limit"], {
-                "help": "Number of videos to fetch. Defaults to 10.",
+                "help": "Number of videos to fetch. Defaults to 40 in copmpact mode, 10 otherwise.",
                 "type": pos_integer,
-                "default": 10,
             }),
             (["-a", "--all"], {
                 "help": "Fetch all videos, overrides --limit",

@@ -7,8 +7,12 @@ from twitchdl.output import print_out, print_paged_videos, print_video, print_js
 
 def videos(args):
     game_ids = _get_game_ids(args.game)
+
+    # Set different defaults for limit for compact display
+    limit = args.limit or (40 if args.compact else 10)
+
     # Ignore --limit if --pager or --all are given
-    max_videos = sys.maxsize if args.all or args.pager else args.limit
+    max_videos = sys.maxsize if args.all or args.pager else limit
 
     total_count, generator = twitch.channel_videos_generator(
         args.channel_name, max_videos, args.sort, args.type, game_ids=game_ids)

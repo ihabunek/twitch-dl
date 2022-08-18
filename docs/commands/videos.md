@@ -52,7 +52,7 @@ twitch-dl videos <channel_name> [FLAGS] [OPTIONS]
 
 <tr>
     <td class="code">-l, --limit</td>
-    <td>Number of videos to fetch. Defaults to 10.</td>
+    <td>Number of videos to fetch. Defaults to 40 in copmpact mode, 10 otherwise.</td>
 </tr>
 
 <tr>
