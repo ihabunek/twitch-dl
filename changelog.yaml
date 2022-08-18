@@ -1,5 +1,5 @@
 2.0.0:
-  date: "TBA"
+  date: 2022-08-18
   description: |
     This release switches from using `requests` to `httpx` for making http
     requests, and from threads to `asyncio` for concurrency. This enables
