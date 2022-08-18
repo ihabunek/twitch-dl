@@ -47,7 +47,7 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
 <tbody>
 <tr>
     <td class="code">-w, --max-workers</td>
-    <td>Maximal number of threads for downloading vods concurrently (default 20)</td>
+    <td>Number of workers for downloading vods concurrently (default 5)</td>
 </tr>
 
 <tr>

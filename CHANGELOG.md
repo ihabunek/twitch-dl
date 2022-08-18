@@ -17,6 +17,9 @@ implementation of new features, but has no breaking changes for the CLI.
   downloaded.
 * Improved speed estimate, displays recent speed instead of average speed since
   the start of download.
+* Decreased default concurrent downloads to 5. This seems to be enough to
+  saturate the download link in most cases. You can override this by setting the
+  `-w` option. Please test and report back if this works for you.
 
 ### [1.22.0 (2022-06-25)](https://github.com/ihabunek/twitch-dl/releases/tag/1.22.0)
 

@@ -166,10 +166,9 @@ COMMANDS = [
                 "nargs": "+",
             }),
             (["-w", "--max-workers"], {
-                "help": "Maximal number of threads for downloading vods "
-                        "concurrently (default 20)",
+                "help": "Number of workers for downloading vods concurrently (default 5)",
                 "type": int,
-                "default": 20,
+                "default": 5,
             }),
             (["-s", "--start"], {
                 "help": "Download video from this time (hh:mm or hh:mm:ss)",
