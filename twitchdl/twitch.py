@@ -14,21 +14,6 @@ class GQLError(Exception):
         self.errors = errors
 
 
-def authenticated_get(url, params={}, headers={}):
-    headers['Client-ID'] = CLIENT_ID
-
-    response = httpx.get(url, params=params, headers=headers)
-    if 400 <= response.status_code < 500:
-        data = response.json()
-        # TODO: this does not look nice in the console since data["message"]
-        # can contain a JSON encoded object.
-        raise ConsoleError(data["message"])
-
-    response.raise_for_status()
-
-    return response
-
-
 def authenticated_post(url, data=None, json=None, headers={}):
     headers['Client-ID'] = CLIENT_ID
 
