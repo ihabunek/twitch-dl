@@ -31,7 +31,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.7",
     install_requires=[
-        "m3u8>=1.0.0,<2.0.0",
+        "m3u8>=1.0.0,<4.0.0",
         "httpx>=0.17.0,<1.0.0",
     ],
     entry_points={
