@@ -5,7 +5,7 @@ These tests depend on the channel having some videos and clips published.
 import httpx
 import m3u8
 from twitchdl import twitch
-from twitchdl.commands.download import _parse_playlists
+from twitchdl.commands.download import _parse_playlists, get_clip_authenticated_url
 
 TEST_CHANNEL = "bananasaurus_rex"
 
@@ -43,6 +43,8 @@ def test_get_clips():
     assert clips["pageInfo"]
     assert len(clips["edges"]) > 0
 
-    clip_slug = clips["edges"][0]["node"]["slug"]
-    clip = twitch.get_clip(clip_slug)
-    assert clip["slug"] == clip_slug
+    slug = clips["edges"][0]["node"]["slug"]
+    clip = twitch.get_clip(slug)
+    assert clip["slug"] == slug
+
+    assert get_clip_authenticated_url(slug, "source")
