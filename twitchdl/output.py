@@ -6,6 +6,7 @@ import re
 
 from itertools import islice
 from twitchdl import utils
+from typing import Any, Match
 
 
 START_CODES = {
@@ -29,26 +30,26 @@ END_PATTERN = "</(" + "|".join(START_CODES.keys()) + ")>"
 USE_ANSI_COLOR = "--no-color" not in sys.argv
 
 
-def start_code(match):
+def start_code(match: Match[str]) -> str:
     name = match.group(1)
     return START_CODES[name]
 
 
-def colorize(text):
+def colorize(text: str) -> str:
     text = re.sub(START_PATTERN, start_code, text)
     text = re.sub(END_PATTERN, END_CODE, text)
 
     return text
 
 
-def strip_tags(text):
+def strip_tags(text: str) -> str:
     text = re.sub(START_PATTERN, '', text)
     text = re.sub(END_PATTERN, '', text)
 
     return text
 
 
-def truncate(string, length):
+def truncate(string: str, length: int) -> str:
     if len(string) > length:
         return string[:length - 1] + "…"
 
@@ -60,7 +61,7 @@ def print_out(*args, **kwargs):
     print(*args, **kwargs)
 
 
-def print_json(data):
+def print_json(data: Any):
     print(json.dumps(data))
 
 

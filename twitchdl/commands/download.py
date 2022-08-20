@@ -9,7 +9,7 @@ import tempfile
 
 from os import path
 from pathlib import Path
-from typing import OrderedDict
+from typing import List, Optional, OrderedDict
 from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
@@ -137,7 +137,7 @@ def _clip_target_filename(clip, args):
         raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
 
-def _get_vod_paths(playlist, start, end):
+def _get_vod_paths(playlist, start: Optional[int], end: Optional[int]) -> List[str]:
     """Extract unique VOD paths for download from playlist."""
     files = []
     vod_start = 0
@@ -157,7 +157,7 @@ def _get_vod_paths(playlist, start, end):
     return files
 
 
-def _crete_temp_dir(base_uri):
+def _crete_temp_dir(base_uri: str) -> str:
     """Create a temp dir to store downloads if it doesn't exist."""
     path = urlparse(base_uri).path.lstrip("/")
     temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
@@ -166,11 +166,11 @@ def _crete_temp_dir(base_uri):
 
 
 def download(args):
-    for video in args.videos:
-        download_one(video, args)
+    for video_id in args.videos:
+        download_one(video_id, args)
 
 
-def download_one(video, args):
+def download_one(video: str, args):
     video_id = utils.parse_video_identifier(video)
     if video_id:
         return _download_video(video_id, args)
@@ -227,7 +227,7 @@ def get_clip_authenticated_url(slug, quality):
     return "{}?{}".format(url, query)
 
 
-def _download_clip(slug, args):
+def _download_clip(slug: str, args) -> None:
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
     game = clip["game"]["name"] if clip["game"] else "Unknown"
@@ -260,7 +260,7 @@ def _download_clip(slug, args):
     print_out("Downloaded: <blue>{}</blue>".format(target))
 
 
-def _download_video(video_id, args):
+def _download_video(video_id, args) -> None:
     if args.start and args.end and args.end <= args.start:
         raise ConsoleError("End time must be greater than start time")
 

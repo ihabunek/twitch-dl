@@ -55,7 +55,7 @@ class TokenBucket:
 
 class EndlessTokenBucket:
     """Used when download speed is not limited."""
-    def advance(self, size):
+    def advance(self, size: int):
         pass
 
 

@@ -5,7 +5,7 @@ import sys
 import re
 
 from argparse import ArgumentParser, ArgumentTypeError
-from collections import namedtuple
+from typing import NamedTuple, List, Tuple, Any, Dict
 
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_err
@@ -13,12 +13,19 @@ from twitchdl.twitch import GQLError
 from . import commands, __version__
 
 
-Command = namedtuple("Command", ["name", "description", "arguments"])
+Argument = Tuple[List[str], Dict[str, Any]]
+
+
+class Command(NamedTuple):
+    name: str
+    description: str
+    arguments: List[Argument]
+
 
 CLIENT_WEBSITE = 'https://github.com/ihabunek/twitch-dl'
 
 
-def time(value):
+def time(value: str) -> int:
     """Parse a time string (hh:mm or hh:mm:ss) to number of seconds."""
     parts = [int(p) for p in value.split(":")]
 
@@ -35,19 +42,19 @@ def time(value):
     return hours * 3600 + minutes * 60 + seconds
 
 
-def pos_integer(value):
+def pos_integer(value: str) -> int:
     try:
-        value = int(value)
+        parsed = int(value)
     except ValueError:
         raise ArgumentTypeError("must be an integer")
 
-    if value < 1:
+    if parsed < 1:
         raise ArgumentTypeError("must be positive")
 
-    return value
+    return parsed
 
 
-def rate(value):
+def rate(value: str) -> int:
     match = re.search(r"^([0-9]+)(k|m|)$", value, flags=re.IGNORECASE)
 
     if not match:

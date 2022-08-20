@@ -4,6 +4,7 @@ Twitch API access.
 
 import httpx
 
+from typing import Dict
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
 
@@ -37,7 +38,7 @@ def gql_post(query):
     return response
 
 
-def gql_query(query, headers={}):
+def gql_query(query: str, headers: Dict[str, str] = {}):
     url = "https://gql.twitch.tv/gql"
     response = authenticated_post(url, json={"query": query}, headers=headers).json()
 

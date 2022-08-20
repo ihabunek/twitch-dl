@@ -10,7 +10,7 @@ class DownloadFailed(Exception):
     pass
 
 
-def _download(url, path):
+def _download(url: str, path: str):
     tmp_path = path + ".tmp"
     size = 0
     with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT) as response:
@@ -23,7 +23,7 @@ def _download(url, path):
     return size
 
 
-def download_file(url, path, retries=RETRY_COUNT):
+def download_file(url: str, path: str, retries: int = RETRY_COUNT):
     if os.path.exists(path):
         from_disk = True
         return (os.path.getsize(path), from_disk)
