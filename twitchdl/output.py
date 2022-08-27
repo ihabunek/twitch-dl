@@ -6,7 +6,7 @@ import re
 
 from itertools import islice
 from twitchdl import utils
-from twitchdl.models import Clip
+from twitchdl.models import Clip, Video
 from typing import Any, Match
 
 
@@ -78,32 +78,31 @@ def print_log(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def print_video(video):
-    published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
-    length = utils.format_duration(video["lengthSeconds"])
+def print_video(video: Video):
+    published_at = video.published_at.replace("T", " @ ").replace("Z", "")
+    length = utils.format_duration(video.length_seconds)
 
-    channel = "<blue>{}</blue>".format(video["creator"]["displayName"]) if video["creator"] else ""
-    playing = "playing <blue>{}</blue>".format(video["game"]["name"]) if video["game"] else ""
+    channel = f"<blue>{video.creator.display_name}</blue>" if video.creator else ""
+    playing = f"playing <blue>{video.game.name}</blue>" if video.game else ""
 
     # Can't find URL in video object, strange
-    url = "https://www.twitch.tv/videos/{}".format(video["id"])
+    url = f"https://www.twitch.tv/videos/{video.id}"
 
-    print_out("<b>Video {}</b>".format(video["id"]))
-    print_out("<green>{}</green>".format(video["title"]))
+    print_out(f"<b>Video {video.id}</b>")
+    print_out(f"<green>{video.title}</green>")
 
     if channel or playing:
         print_out(" ".join([channel, playing]))
 
-    print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
-    print_out("<i>{}</i>".format(url))
+    print_out(f"Published <blue>{published_at}</blue>  Length: <blue>{length}</blue>")
+    print_out(f"<i>{url}</i>")
 
 
 def print_video_compact(video):
-    id = video["id"]
-    date = video["publishedAt"][:10]
-    game = video["game"]["name"] if video["game"] else ""
-    title = truncate(video["title"], 80).ljust(80)
-    print_out(f'<b>{id}</b> {date} <green>{title}</green> <blue>{game}</blue>')
+    date = video.published_at[:10]
+    game = video.game.name if video.game else ""
+    title = truncate(video.title, 80).ljust(80)
+    print_out(f"<b>{video.id}</b> {date} <green>{title}</green> <blue>{game}</blue>")
 
 
 def print_paged_videos(generator, page_size, total_count):

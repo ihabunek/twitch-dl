@@ -2,7 +2,7 @@ import m3u8
 
 from twitchdl import utils, twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.models import Clip
+from twitchdl.models import Clip, Video
 from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
 
 
@@ -44,7 +44,7 @@ def info(args):
     raise ConsoleError("Invalid input: {}".format(args.video))
 
 
-def video_info(video, playlists):
+def video_info(video: Video, playlists):
     print_out()
     print_video(video)
 
@@ -54,10 +54,11 @@ def video_info(video, playlists):
         print_out("<b>{}</b> {}".format(p.stream_info.video, p.uri))
 
 
-def video_json(video, playlists):
+def video_json(video: Video, playlists):
     playlists = m3u8.loads(playlists).playlists
+    json = video.raw
 
-    video["playlists"] = [
+    json["playlists"] = [
         {
             "bandwidth": p.stream_info.bandwidth,
             "resolution": p.stream_info.resolution,
@@ -67,7 +68,7 @@ def video_json(video, playlists):
         } for p in playlists
     ]
 
-    print_json(video)
+    print_json(json)
 
 
 def clip_info(clip: Clip):

@@ -6,19 +6,19 @@ import httpx
 import m3u8
 from twitchdl import twitch
 from twitchdl.commands.download import _parse_playlists, get_clip_authenticated_url
-from twitchdl.models import Game
+from twitchdl.models import Game, VideosPage
 
 TEST_CHANNEL = "bananasaurus_rex"
 
 
 def test_get_videos():
-    videos = twitch.get_channel_videos(TEST_CHANNEL, 3, "time")
-    assert videos["pageInfo"]
-    assert len(videos["edges"]) > 0
+    page = twitch.get_channel_videos(TEST_CHANNEL, 3, "time")
+    assert isinstance(page, VideosPage)
+    assert len(page.videos) > 0
 
-    video_id = videos["edges"][0]["node"]["id"]
+    video_id = page.videos[0].id
     video = twitch.get_video(video_id)
-    assert video["id"] == video_id
+    assert video and video.id == video_id
 
     access_token = twitch.get_access_token(video_id)
     assert "signature" in access_token
@@ -27,7 +27,7 @@ def test_get_videos():
     playlists = twitch.get_playlists(video_id, access_token)
     assert playlists.startswith("#EXTM3U")
 
-    name, res, url = next(_parse_playlists(playlists))
+    _, _, url = next(_parse_playlists(playlists))
     playlist = httpx.get(url).text
     assert playlist.startswith("#EXTM3U")
 

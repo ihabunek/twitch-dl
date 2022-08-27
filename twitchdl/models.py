@@ -90,4 +90,52 @@ class ClipsPage():
         )
 
 
+@dataclass(frozen=True)
+class Video():
+    id: str
+    title: str
+    published_at: str
+    broadcast_type: str
+    length_seconds: int
+    game: Optional[Game]
+    creator: Broadcaster
+    raw: Json
+
+    @staticmethod
+    def from_json(data: Json) -> "Video":
+        game = Game.from_json(data["game"]) if data["game"] else None
+        creator = Broadcaster.from_json(data["creator"])
+
+        return Video(
+            data["id"],
+            data["title"],
+            data["publishedAt"],
+            data["broadcastType"],
+            data["lengthSeconds"],
+            game,
+            creator,
+            data
+        )
+
+
+@dataclass(frozen=True)
+class VideosPage():
+    cursor: str
+    has_next_page: bool
+    has_previous_page: bool
+    total_count: int
+    videos: List[Video]
+
+    @staticmethod
+    def from_json(data: Json) -> "VideosPage":
+        return VideosPage(
+            data["edges"][-1]["cursor"],
+            data["pageInfo"]["hasNextPage"],
+            data["pageInfo"].get("hasPreviousPage"),
+            data["totalCount"],
+            [Video.from_json(c["node"]) for c in data["edges"]]
+        )
+
+
 ClipGenerator = Generator[Clip, None, None]
+VideoGenerator = Generator[Video, None, None]

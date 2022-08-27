@@ -6,8 +6,8 @@ import httpx
 
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
-from twitchdl.models import Clip, ClipsPage, ClipGenerator, Game
-from typing import Dict, Optional
+from twitchdl.models import Clip, ClipsPage, ClipGenerator, Game, Video, VideoGenerator, VideosPage
+from typing import Dict, Optional, Tuple
 
 
 class GQLError(Exception):
@@ -94,7 +94,7 @@ CLIP_FIELDS = f"""
 """
 
 
-def get_video(video_id):
+def get_video(video_id: str) -> Optional[Video]:
     query = """
     {{
         video(id: "{video_id}") {{
@@ -106,7 +106,8 @@ def get_video(video_id):
     query = query.format(video_id=video_id, fields=VIDEO_FIELDS)
 
     response = gql_query(query)
-    return response["data"]["video"]
+    if response["data"]["video"]:
+        return Video.from_json(response["data"]["video"])
 
 
 def get_clip(slug: str) -> Clip:
@@ -224,7 +225,7 @@ def channel_clips_generator_old(channel_id, period, limit):
             break
 
 
-def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None):
+def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None) -> VideosPage:
     query = """
     {{
         user(login: "{channel_id}") {{
@@ -267,29 +268,27 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     if not response["data"]["user"]:
         raise ConsoleError("Channel {} not found".format(channel_id))
 
-    return response["data"]["user"]["videos"]
+    return VideosPage.from_json(response["data"]["user"]["videos"])
 
 
-def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=None):
-    def _generator(videos, max_videos):
-        for video in videos["edges"]:
+def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=None) -> Tuple[int, VideoGenerator]:
+    def _generator(page, max_videos):
+        for video in page.videos:
             if max_videos < 1:
                 return
-            yield video["node"]
+            yield video
             max_videos -= 1
 
-        has_next = videos["pageInfo"]["hasNextPage"]
-        if max_videos < 1 or not has_next:
+        if max_videos < 1 or not page.has_next_page:
             return
 
         limit = min(max_videos, 100)
-        cursor = videos["edges"][-1]["cursor"]
-        videos = get_channel_videos(channel_id, limit, sort, type, game_ids, cursor)
+        videos = get_channel_videos(channel_id, limit, sort, type, game_ids, page.cursor)
         yield from _generator(videos, max_videos)
 
     limit = min(max_videos, 100)
-    videos = get_channel_videos(channel_id, limit, sort, type, game_ids)
-    return videos["totalCount"], _generator(videos, max_videos)
+    page = get_channel_videos(channel_id, limit, sort, type, game_ids)
+    return page.total_count, _generator(page, max_videos)
 
 
 def get_access_token(video_id, auth_token=None):

@@ -16,7 +16,7 @@ from twitchdl import twitch, utils
 from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
-from twitchdl.models import Clip
+from twitchdl.models import Clip, Video
 from twitchdl.output import print_out
 
 
@@ -61,13 +61,13 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target, overwrite, video):
+def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
     command = [
         "ffmpeg",
         "-i", playlist_path,
         "-c", "copy",
-        "-metadata", "artist={}".format(video["creator"]["displayName"]),
-        "-metadata", "title={}".format(video["title"]),
+        "-metadata", f"artist={video.creator.display_name}",
+        "-metadata", f"title={video.title}",
         "-metadata", "encoded_by=twitch-dl",
         "-stats",
         "-loglevel", "warning",
@@ -83,22 +83,22 @@ def _join_vods(playlist_path, target, overwrite, video):
         raise ConsoleError("Joining files failed")
 
 
-def _video_target_filename(video, args):
-    date, time = video['publishedAt'].split("T")
-    game = video["game"]["name"] if video["game"] else "Unknown"
+def _video_target_filename(video: Video, args) -> str:
+    date, time = video.published_at.split("T")
+    game = video.game.name if video.game else "Unknown"
 
     subs = {
-        "channel": video["creator"]["displayName"],
-        "channel_login": video["creator"]["login"],
+        "channel": video.creator.display_name,
+        "channel_login": video.creator.login,
         "date": date,
-        "datetime": video["publishedAt"],
+        "datetime": video.published_at,
         "format": args.format,
         "game": game,
         "game_slug": utils.slugify(game),
-        "id": video["id"],
+        "id": video.id,
         "time": time,
-        "title": utils.titlify(video["title"]),
-        "title_slug": utils.slugify(video["title"]),
+        "title": utils.titlify(video.title),
+        "title_slug": utils.slugify(video.title),
     }
 
     try:
@@ -183,7 +183,7 @@ def download_one(video: str, args):
     raise ConsoleError("Invalid input: {}".format(video))
 
 
-def _get_clip_url(clip, quality):
+def _get_clip_url(clip, quality) -> str:
     qualities = clip["videoQualities"]
 
     # Quality given as an argument
@@ -211,7 +211,7 @@ def _get_clip_url(clip, quality):
     return selected_quality["sourceURL"]
 
 
-def get_clip_authenticated_url(slug, quality):
+def get_clip_authenticated_url(slug: str, quality: str) -> str:
     print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_clip_access_token(slug)
 
@@ -228,7 +228,7 @@ def get_clip_authenticated_url(slug, quality):
     return "{}?{}".format(url, query)
 
 
-def _download_clip(slug: str, args) -> None:
+def _download_clip(slug: str, args):
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
     game = clip.game.name if clip.game else "Unknown"
@@ -271,8 +271,8 @@ def _download_video(video_id, args) -> None:
     if not video:
         raise ConsoleError("Video {} not found".format(video_id))
 
-    print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
-        video['title'], video['creator']['displayName']))
+    creator = f" by <yellow>{video.creator.display_name}" if video.creator else ""
+    print_out(f"Found: <blue>{video.title}</blue>{creator}")
 
     target = _video_target_filename(video, args)
     print_out("Output: <blue>{}</blue>".format(target))

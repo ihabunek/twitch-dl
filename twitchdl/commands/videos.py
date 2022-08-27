@@ -22,7 +22,7 @@ def videos(args):
         print_json({
             "count": len(videos),
             "totalCount": total_count,
-            "videos": videos
+            "videos": [v.raw for v in videos]
         })
         return
 
@@ -60,10 +60,10 @@ def _get_game_ids(names):
 
     game_ids = []
     for name in names:
-        print_out("<dim>Looking up game '{}'...</dim>".format(name))
-        game_id = twitch.get_game_id(name)
-        if not game_id:
-            raise ConsoleError("Game '{}' not found".format(name))
-        game_ids.append(int(game_id))
+        print_out(f"<dim>Looking up game '{name}'...</dim>")
+        game = twitch.find_game(name)
+        if not game:
+            raise ConsoleError(f"Game '{name}' not found")
+        game_ids.append(int(game.id))
 
     return game_ids
