@@ -36,15 +36,19 @@ def test_get_videos():
 
 
 def test_get_clips():
-    """
-    This test depends on the channel having some videos published.
-    """
-    clips = twitch.get_channel_clips(TEST_CHANNEL, "all_time", 3)
-    assert clips["pageInfo"]
-    assert len(clips["edges"]) > 0
+    page = twitch.get_channel_clips(TEST_CHANNEL, "all_time", 3)
+    assert len(page.clips) > 0
 
-    slug = clips["edges"][0]["node"]["slug"]
+    slug = page.clips[0].slug
     clip = twitch.get_clip(slug)
-    assert clip["slug"] == slug
+    assert clip.slug == slug
 
-    assert get_clip_authenticated_url(slug, "source")
+    assert get_clip_authenticated_url(slug, "source").startswith("https")
+
+
+def test_get_game():
+    game_id = twitch.get_game_id("The Witness")
+    assert game_id == "17324"
+
+    game_id = twitch.get_game_id("Does Not Exist Hoepfully")
+    assert game_id is None
