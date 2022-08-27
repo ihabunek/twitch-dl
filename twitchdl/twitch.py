@@ -6,7 +6,7 @@ import httpx
 
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
-from twitchdl.models import Clip, ClipsPage, ClipGenerator, GameID
+from twitchdl.models import Clip, ClipsPage, ClipGenerator, Game
 from typing import Dict, Optional
 
 
@@ -49,23 +49,29 @@ def gql_query(query: str, headers: Dict[str, str] = {}):
     return response
 
 
-VIDEO_FIELDS = """
+GAME_FIELDS = """
+    id
+    name
+    description
+"""
+
+VIDEO_FIELDS = f"""
     id
     title
     publishedAt
     broadcastType
     lengthSeconds
-    game {
-        name
-    }
-    creator {
+    game {{
+        {GAME_FIELDS}
+    }}
+    creator {{
         login
         displayName
-    }
+    }}
 """
 
 
-CLIP_FIELDS = """
+CLIP_FIELDS = f"""
     id
     slug
     title
@@ -73,19 +79,18 @@ CLIP_FIELDS = """
     viewCount
     durationSeconds
     url
-    videoQualities {
+    videoQualities {{
         frameRate
         quality
         sourceURL
-    }
-    game {
-        id
-        name
-    }
-    broadcaster {
+    }}
+    game {{
+        {GAME_FIELDS}
+    }}
+    broadcaster {{
         login
         displayName
-    }
+    }}
 """
 
 
@@ -345,16 +350,15 @@ def get_playlists(video_id, access_token):
     return response.content.decode('utf-8')
 
 
-def get_game_id(name: str) -> Optional[GameID]:
+def find_game(name: str) -> Optional[Game]:
     query = f"""
     {{
         game(name: "{name.strip()}") {{
-            id
+            {GAME_FIELDS}
         }}
     }}
     """
 
     response = gql_query(query)
-    game = response["data"]["game"]
-    if game:
-        return game["id"]
+    if response["data"]["game"]:
+        return Game.from_json(response["data"]["game"])

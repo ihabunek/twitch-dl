@@ -31,10 +31,11 @@ class VideoQuality():
 class Game():
     id: str
     name: str
+    description: str
 
     @staticmethod
     def from_json(data: Json) -> "Game":
-        return Game(data["id"], data["name"])
+        return Game(data["id"], data["name"], data["description"])
 
 
 @dataclass(frozen=True)

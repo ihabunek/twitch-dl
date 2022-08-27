@@ -6,6 +6,7 @@ import httpx
 import m3u8
 from twitchdl import twitch
 from twitchdl.commands.download import _parse_playlists, get_clip_authenticated_url
+from twitchdl.models import Game
 
 TEST_CHANNEL = "bananasaurus_rex"
 
@@ -47,8 +48,11 @@ def test_get_clips():
 
 
 def test_get_game():
-    game_id = twitch.get_game_id("The Witness")
-    assert game_id == "17324"
+    game = twitch.find_game("The Witness")
+    assert isinstance(game, Game)
+    assert game.id == "17324"
+    assert game.name == "The Witness"
+    assert game.description
 
-    game_id = twitch.get_game_id("Does Not Exist Hoepfully")
-    assert game_id is None
+    game = twitch.find_game("Does Not Exist Hopefully")
+    assert game is None
