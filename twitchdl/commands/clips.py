@@ -7,6 +7,7 @@ from os import path
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
+from twitchdl.models import Clip, ClipGenerator
 from twitchdl.output import print_out, print_clip, print_json
 
 
@@ -17,13 +18,12 @@ def clips(args):
     generator = twitch.channel_clips_generator(args.channel_name, args.period, limit)
 
     if args.json:
-        return print_json(list(generator))
+        return print_json([c.raw for c in generator])
 
     if args.download:
         return _download_clips(generator)
 
     if args.pager:
-        print(args)
         return _print_paged(generator, args.pager)
 
     return _print_all(generator, args)
@@ -40,38 +40,41 @@ def _continue():
     return True
 
 
-def _target_filename(clip):
-    url = clip["videoQualities"][0]["sourceURL"]
+def _target_filename(clip: Clip):
+    url = clip.video_qualities[0].source_url
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
 
-    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", clip["createdAt"])
+    match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", clip.created_at)
+    if not match:
+        raise ValueError(f"Invalid date: {clip.created_at}")
+
     date = "".join(match.groups())
 
     name = "_".join([
         date,
-        clip["id"],
-        clip["broadcaster"]["login"],
-        utils.slugify(clip["title"]),
+        clip.id,
+        clip.broadcaster.login,
+        utils.slugify(clip.title),
     ])
 
     return "{}.{}".format(name, ext)
 
 
-def _download_clips(generator):
-    for clip in generator:
+def _download_clips(clips: ClipGenerator):
+    for clip in clips:
         target = _target_filename(clip)
 
         if path.exists(target):
             print_out("Already downloaded: <green>{}</green>".format(target))
         else:
-            url = get_clip_authenticated_url(clip["slug"], "source")
+            url = get_clip_authenticated_url(clip.slug, "source")
             print_out("Downloading: <yellow>{}</yellow>".format(target))
             download_file(url, target)
 
 
-def _print_all(generator, args):
-    for clip in generator:
+def _print_all(clips: ClipGenerator, args):
+    for clip in clips:
         print_out()
         print_clip(clip)
 
@@ -82,8 +85,8 @@ def _print_all(generator, args):
         )
 
 
-def _print_paged(generator, page_size):
-    iterator = iter(generator)
+def _print_paged(clips: ClipGenerator, page_size: int):
+    iterator = iter(clips)
     page = list(islice(iterator, page_size))
 
     first = 1

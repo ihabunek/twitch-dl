@@ -4,9 +4,10 @@ Twitch API access.
 
 import httpx
 
-from typing import Dict
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
+from twitchdl.models import Clip, ClipsPage, ClipGenerator, GameID
+from typing import Dict, Optional
 
 
 class GQLError(Exception):
@@ -82,8 +83,8 @@ CLIP_FIELDS = """
         name
     }
     broadcaster {
-        displayName
         login
+        displayName
     }
 """
 
@@ -103,7 +104,7 @@ def get_video(video_id):
     return response["data"]["video"]
 
 
-def get_clip(slug):
+def get_clip(slug: str) -> Clip:
     query = """
     {{
         clip(slug: "{}") {{
@@ -113,7 +114,7 @@ def get_clip(slug):
     """
 
     response = gql_query(query.format(slug, fields=CLIP_FIELDS))
-    return response["data"]["clip"]
+    return Clip.from_json(response["data"]["clip"])
 
 
 def get_clip_access_token(slug):
@@ -136,7 +137,7 @@ def get_clip_access_token(slug):
     return response["data"]["clip"]
 
 
-def get_channel_clips(channel_id, period, limit, after=None):
+def get_channel_clips(channel_id, period, limit, after=None) -> ClipsPage:
     """
     List channel clips.
 
@@ -178,44 +179,41 @@ def get_channel_clips(channel_id, period, limit, after=None):
     if not user:
         raise ConsoleError("Channel {} not found".format(channel_id))
 
-    return response["data"]["user"]["clips"]
+    return ClipsPage.from_json(response["data"]["user"]["clips"])
 
 
-def channel_clips_generator(channel_id, period, limit):
-    def _generator(clips, limit):
-        for clip in clips["edges"]:
+def channel_clips_generator(channel_id: str, period, limit: int) -> ClipGenerator:
+    def _generator(page: ClipsPage, limit: int):
+        for clip in page.clips:
             if limit < 1:
                 return
-            yield clip["node"]
+            yield clip
             limit -= 1
 
-        has_next = clips["pageInfo"]["hasNextPage"]
-        if limit < 1 or not has_next:
+        if limit < 1 or not page.has_next_page:
             return
 
         req_limit = min(limit, 100)
-        cursor = clips["edges"][-1]["cursor"]
-        clips = get_channel_clips(channel_id, period, req_limit, cursor)
-        yield from _generator(clips, limit)
+        next_page = get_channel_clips(channel_id, period, req_limit, page.cursor)
+        yield from _generator(next_page, limit)
 
     req_limit = min(limit, 100)
-    clips = get_channel_clips(channel_id, period, req_limit)
-    return _generator(clips, limit)
+    page = get_channel_clips(channel_id, period, req_limit)
+    return _generator(page, limit)
 
 
 def channel_clips_generator_old(channel_id, period, limit):
     cursor = ""
     while True:
-        clips = get_channel_clips(
-            channel_id, period, limit, after=cursor)
+        page = get_channel_clips(channel_id, period, limit, after=cursor)
 
-        if not clips["edges"]:
+        if not page.clips:
             break
 
-        has_next = clips["pageInfo"]["hasNextPage"]
-        cursor = clips["edges"][-1]["cursor"] if has_next else None
+        has_next = page.has_next_page
+        cursor = page.cursor if has_next else None
 
-        yield clips, has_next
+        yield page.clips, has_next
 
         if not cursor:
             break

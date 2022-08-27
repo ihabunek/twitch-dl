@@ -2,6 +2,7 @@ import m3u8
 
 from twitchdl import utils, twitch
 from twitchdl.exceptions import ConsoleError
+from twitchdl.models import Clip
 from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
 
 
@@ -35,7 +36,7 @@ def info(args):
             raise ConsoleError("Clip {} not found".format(clip_slug))
 
         if args.json:
-            print_json(clip)
+            print_json(clip.raw)
         else:
             clip_info(clip)
         return
@@ -69,11 +70,11 @@ def video_json(video, playlists):
     print_json(video)
 
 
-def clip_info(clip):
+def clip_info(clip: Clip):
     print_out()
     print_clip(clip)
     print_out()
     print_out("Download links:")
 
-    for q in clip["videoQualities"]:
-        print_out("<b>{quality}p{frameRate}</b> {sourceURL}".format(**q))
+    for q in clip.video_qualities:
+        print_out(f"<b>{q.quality}p{q.frame_rate}</b> {q.source_url}")

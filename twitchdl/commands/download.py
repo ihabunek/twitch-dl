@@ -16,6 +16,7 @@ from twitchdl import twitch, utils
 from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
+from twitchdl.models import Clip
 from twitchdl.output import print_out
 
 
@@ -107,27 +108,27 @@ def _video_target_filename(video, args):
         raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
 
-def _clip_target_filename(clip, args):
-    date, time = clip["createdAt"].split("T")
-    game = clip["game"]["name"] if clip["game"] else "Unknown"
+def _clip_target_filename(clip: Clip, args) -> str:
+    date, time = clip.created_at.split("T")
+    game = clip.game.name if clip.game else "Unknown"
 
-    url = clip["videoQualities"][0]["sourceURL"]
+    url = clip.video_qualities[0].source_url
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
 
     subs = {
-        "channel": clip["broadcaster"]["displayName"],
-        "channel_login": clip["broadcaster"]["login"],
+        "channel": clip.broadcaster.display_name,
+        "channel_login": clip.broadcaster.login,
         "date": date,
-        "datetime": clip["createdAt"],
+        "datetime": clip.created_at,
         "format": ext,
         "game": game,
         "game_slug": utils.slugify(game),
-        "id": clip["id"],
-        "slug": clip["slug"],
+        "id": clip.id,
+        "slug": clip.slug,
         "time": time,
-        "title": utils.titlify(clip["title"]),
-        "title_slug": utils.slugify(clip["title"]),
+        "title": utils.titlify(clip.title),
+        "title_slug": utils.slugify(clip.title),
     }
 
     try:
@@ -230,16 +231,16 @@ def get_clip_authenticated_url(slug, quality):
 def _download_clip(slug: str, args) -> None:
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
-    game = clip["game"]["name"] if clip["game"] else "Unknown"
+    game = clip.game.name if clip.game else "Unknown"
 
     if not clip:
         raise ConsoleError("Clip '{}' not found".format(slug))
 
     print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
-        clip["title"],
-        clip["broadcaster"]["displayName"],
+        clip.title,
+        clip.broadcaster.display_name,
         game,
-        utils.format_duration(clip["durationSeconds"])
+        utils.format_duration(clip.duration_seconds)
     ))
 
     target = _clip_target_filename(clip, args)

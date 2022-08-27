@@ -6,6 +6,7 @@ import re
 
 from itertools import islice
 from twitchdl import utils
+from twitchdl.models import Clip
 from typing import Any, Match
 
 
@@ -133,23 +134,23 @@ def print_paged_videos(generator, page_size, total_count):
             break
 
 
-def print_clip(clip):
-    published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
-    length = utils.format_duration(clip["durationSeconds"])
-    channel = clip["broadcaster"]["displayName"]
+def print_clip(clip: Clip):
+    published_at = clip.created_at.replace("T", " @ ").replace("Z", "")
+    length = utils.format_time(clip.duration_seconds)
+    channel = clip.broadcaster.display_name
     playing = (
-        "playing <blue>{}</blue>".format(clip["game"]["name"])
-        if clip["game"] else ""
+        "playing <blue>{}</blue>".format(clip.game.name)
+        if clip.game else ""
     )
 
-    print_out("Clip <b>{}</b>".format(clip["slug"]))
-    print_out("<green>{}</green>".format(clip["title"]))
+    print_out("Clip <b>{}</b>".format(clip.slug))
+    print_out("<green>{}</green>".format(clip.title))
     print_out("<blue>{}</blue> {}".format(channel, playing))
     print_out(
-        "Published <blue>{}</blue>"
-        "  Length: <blue>{}</blue>"
-        "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
-    print_out("<i>{}</i>".format(clip["url"]))
+        f"Published: <blue>{published_at}</blue>"
+        f"  Length: <blue>{length}</blue>"
+        f"  Views: <blue>{clip.view_count}</blue>")
+    print_out(f"<i>{clip.url}</i>")
 
 
 def _continue():
