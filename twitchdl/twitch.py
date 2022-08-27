@@ -347,16 +347,16 @@ def get_playlists(video_id, access_token):
     return response.content.decode('utf-8')
 
 
-def get_game_id(name):
-    query = """
+def get_game_id(name: str) -> Optional[GameID]:
+    query = f"""
     {{
-        game(name: "{}") {{
+        game(name: "{name.strip()}") {{
             id
         }}
     }}
     """
 
-    response = gql_query(query.format(name.strip()))
+    response = gql_query(query)
     game = response["data"]["game"]
     if game:
         return game["id"]

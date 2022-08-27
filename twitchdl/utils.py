@@ -24,7 +24,7 @@ def format_size(bytes_, digits=1):
     return _format_size(mega / 1024, digits, "GB")
 
 
-def format_duration(total_seconds):
+def format_duration(total_seconds: int) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -40,7 +40,7 @@ def format_duration(total_seconds):
     return "{} sec".format(seconds)
 
 
-def format_time(total_seconds):
+def format_time(total_seconds: int) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -67,14 +67,14 @@ def read_int(msg, min, max, default):
             pass
 
 
-def slugify(value):
+def slugify(value: str) -> str:
     value = unicodedata.normalize('NFKC', str(value))
     value = re.sub(r'[^\w\s_-]', '', value)
     value = re.sub(r'[\s_-]+', '_', value)
     return value.strip("_").lower()
 
 
-def titlify(value):
+def titlify(value: str) -> str:
     value = unicodedata.normalize('NFKC', str(value))
     value = re.sub(r'[^\w\s\[\]().-]', '', value)
     value = re.sub(r'\s+', ' ', value)
@@ -93,7 +93,7 @@ CLIP_PATTERNS = [
 ]
 
 
-def parse_video_identifier(identifier):
+def parse_video_identifier(identifier: str) -> str:
     """Given a video ID or URL returns the video ID, or null if not matched"""
     for pattern in VIDEO_PATTERNS:
         match = re.match(pattern, identifier)
@@ -101,7 +101,7 @@ def parse_video_identifier(identifier):
             return match.group("id")
 
 
-def parse_clip_identifier(identifier):
+def parse_clip_identifier(identifier: str) -> str:
     """Given a clip slug or URL returns the clip slug, or null if not matched"""
     for pattern in CLIP_PATTERNS:
         match = re.match(pattern, identifier)
