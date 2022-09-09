@@ -1,3 +1,8 @@
+2.0.1:
+  date: 2022-09-09
+  changes:
+    - "Fix an issue where a temp vod file would be renamed while still being open, which caused an exception on Windows (#111)"
+
 2.0.0:
   date: 2022-08-18
   description: |
