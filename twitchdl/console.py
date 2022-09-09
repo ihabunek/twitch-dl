@@ -22,7 +22,7 @@ class Command(NamedTuple):
     arguments: List[Argument]
 
 
-CLIENT_WEBSITE = 'https://github.com/ihabunek/twitch-dl'
+CLIENT_WEBSITE = "https://twitch-dl.bezdomni.net/"
 
 
 def time(value: str) -> int:
