@@ -19,12 +19,13 @@ def videos(args):
 
     if args.json:
         videos = list(generator)
-        print_json({
+        data = {
             "count": len(videos),
             "totalCount": total_count,
             "videos": videos
-        })
-        return
+        }
+        print_json(data)
+        return data
 
     if total_count == 0:
         print_out("<yellow>No videos found</yellow>")
