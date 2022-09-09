@@ -83,7 +83,7 @@ async def download(
                 token_bucket.advance(size)
                 progress.advance(task_id, size)
             progress.end(task_id)
-        os.rename(tmp_target, target)
+    os.rename(tmp_target, target)
 
 
 async def download_with_retries(
