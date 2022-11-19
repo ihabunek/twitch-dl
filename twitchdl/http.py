@@ -117,7 +117,7 @@ async def download_all(
     sources: List[str],
     targets: List[str],
     workers: int,
-    /, *,
+    *,
     rate_limit: Optional[int] = None
 ):
     progress = Progress(len(sources))
