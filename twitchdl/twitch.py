@@ -3,6 +3,7 @@ Twitch API access.
 """
 
 import httpx
+import json
 
 from typing import Dict
 from twitchdl import CLIENT_ID
@@ -360,3 +361,32 @@ def get_game_id(name):
     game = response["data"]["game"]
     if game:
         return game["id"]
+
+
+def get_video_chapters(video_id):
+    query = {
+        "operationName": "VideoPlayer_ChapterSelectButtonVideo",
+        "variables":
+        {
+            "includePrivate": False,
+            "videoID": video_id
+        },
+        "extensions":
+        {
+            "persistedQuery":
+            {
+                "version": 1,
+                "sha256Hash": "8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41"
+            }
+        }
+    }
+
+    response = gql_post(json.dumps(query))
+    return list(_chapter_nodes(response["data"]["video"]["moments"]))
+
+
+def _chapter_nodes(collection):
+    for edge in collection["edges"]:
+        node = edge["node"]
+        del node["moments"]
+        yield node
