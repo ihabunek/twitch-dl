@@ -282,6 +282,9 @@ def _download_video(video_id, args) -> None:
             raise ConsoleError("Aborted")
         args.overwrite = True
 
+    # Chapter select or manual offset
+    start, end = _determine_time_range(video_id, args)
+
     print_out("<dim>Fetching access token...</dim>")
     access_token = twitch.get_access_token(video_id, auth_token=args.auth_token)
 
@@ -298,7 +301,7 @@ def _download_video(video_id, args) -> None:
 
     base_uri = re.sub("/[^/]+$", "/", playlist_uri)
     target_dir = _crete_temp_dir(base_uri)
-    vod_paths = _get_vod_paths(playlist, args.start, args.end)
+    vod_paths = _get_vod_paths(playlist, start, end)
 
     # Save playlists for debugging purposes
     with open(path.join(target_dir, "playlists.m3u8"), "w") as f:
@@ -341,3 +344,40 @@ def _download_video(video_id, args) -> None:
         shutil.rmtree(target_dir)
 
     print_out("\nDownloaded: <green>{}</green>".format(target))
+
+
+def _determine_time_range(video_id, args):
+    if args.start or args.end:
+        return args.start, args.end
+
+    if args.chapter is not None:
+        print_out("<dim>Fetching chapters...</dim>")
+        chapters = twitch.get_video_chapters(video_id)
+
+        if not chapters:
+            raise ConsoleError("This video has no chapters")
+
+        if args.chapter == 0:
+            chapter = _choose_chapter_interactive(chapters)
+        else:
+            try:
+                chapter = chapters[args.chapter - 1]
+            except IndexError:
+                raise ConsoleError(f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters.")
+
+        print_out(f'Selected chapter: <blue>{chapter["description"]}</blue>')
+        start = chapter["positionMilliseconds"] // 1000
+        duration = chapter["durationMilliseconds"] // 1000
+        return start, start + duration
+
+    return None, None
+
+
+def _choose_chapter_interactive(chapters):
+    print_out("\nChapters:")
+    for index, chapter in enumerate(chapters):
+        duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
+        print_out(f'<b>{index + 1})</b> <green>{chapter["description"]}</green> <dim>({duration})</dim>')
+    index = utils.read_int("Select a chapter", 1, len(chapters))
+    chapter = chapters[index - 1]
+    return chapter

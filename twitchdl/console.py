@@ -233,6 +233,13 @@ COMMANDS = [
                         "Use 'k' and 'm' suffixes for kbps and mbps.",
                 "type": rate,
             }),
+            (["-c", "--chapter"], {
+                "help": "Download a single chapter of the video. Specify the chapter number or "
+                        "use the flag without a number to display a chapter select prompt.",
+                "type": int,
+                "nargs": "?",
+                "const": 0
+            }),
         ],
     ),
     Command(

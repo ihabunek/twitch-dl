@@ -53,13 +53,16 @@ def format_time(total_seconds, force_hours=False):
     return f"{minutes:02}:{seconds:02}"
 
 
-def read_int(msg, min, max, default):
-    msg = msg + " [default {}]: ".format(default)
+def read_int(msg, min, max, default=None):
+    if default:
+        msg = msg + f" [default {default}]"
+
+    msg += ": "
 
     while True:
         try:
             val = input(msg)
-            if not val:
+            if default and not val:
                 return default
             if min <= int(val) <= max:
                 return int(val)
