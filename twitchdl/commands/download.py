@@ -51,9 +51,9 @@ def _select_playlist_interactive(playlists):
     print_out("\nAvailable qualities:")
     for n, (name, resolution, uri) in enumerate(playlists):
         if resolution:
-            print_out("{}) {} [{}]".format(n + 1, name, resolution))
+            print_out("{}) <b>{}</b> <dim>({})</dim>".format(n + 1, name, resolution))
         else:
-            print_out("{}) {}".format(n + 1, name))
+            print_out("{}) <b>{}</b>".format(n + 1, name))
 
     no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
     _, _, uri = playlists[no - 1]
@@ -365,7 +365,7 @@ def _determine_time_range(video_id, args):
             except IndexError:
                 raise ConsoleError(f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters.")
 
-        print_out(f'Selected chapter: <blue>{chapter["description"]}</blue>')
+        print_out(f'Chapter selected: <blue>{chapter["description"]}</blue>\n')
         start = chapter["positionMilliseconds"] // 1000
         duration = chapter["durationMilliseconds"] // 1000
         return start, start + duration
@@ -377,7 +377,7 @@ def _choose_chapter_interactive(chapters):
     print_out("\nChapters:")
     for index, chapter in enumerate(chapters):
         duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
-        print_out(f'<b>{index + 1})</b> <green>{chapter["description"]}</green> <dim>({duration})</dim>')
+        print_out(f'{index + 1}) <b>{chapter["description"]}</b> <dim>({duration})</dim>')
     index = utils.read_int("Select a chapter", 1, len(chapters))
     chapter = chapters[index - 1]
     return chapter
