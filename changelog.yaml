@@ -1,3 +1,9 @@
+2.1.0:
+  date: 2022-11-20
+  changes:
+    - "Add chapter list to `info` command"
+    - "Add `--chapter` option to `download` command for downloading a single chapter"
+
 2.0.1:
   date: 2022-09-09
   changes:

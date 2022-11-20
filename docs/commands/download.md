@@ -84,6 +84,11 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
     <td class="code">-r, --rate-limit</td>
     <td>Limit the maximum download speed in bytes per second. Use &#x27;k&#x27; and &#x27;m&#x27; suffixes for kbps and mbps.</td>
 </tr>
+
+<tr>
+    <td class="code">-c, --chapter</td>
+    <td>Download a single chapter of the video. Specify the chapter number or use the flag without a number to display a chapter select prompt.</td>
+</tr>
 </tbody>
 </table>
 
