@@ -1,8 +1,14 @@
+2.1.1:
+  date: 2022-11-20
+  changes:
+    - "Fix Python 3.7 compatibility (#117, thanks @eliduvid)"
+    - "Fix default value for game_ids (#102, thanks @FunnyPocketBook)"
+
 2.1.0:
   date: 2022-11-20
   changes:
     - "Add chapter list to `info` command"
-    - "Add `--chapter` option to `download` command for downloading a single chapter"
+    - "Add `download --chapter` option for downloading a single chapter"
 
 2.0.1:
   date: 2022-09-09
