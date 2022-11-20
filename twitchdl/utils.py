@@ -40,14 +40,14 @@ def format_duration(total_seconds):
     return "{} sec".format(seconds)
 
 
-def format_time(total_seconds):
+def format_time(total_seconds, force_hours=False):
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
     minutes = remainder // 60
     seconds = total_seconds % 60
 
-    if hours:
+    if hours or force_hours:
         return f"{hours:02}:{minutes:02}:{seconds:02}"
 
     return f"{minutes:02}:{seconds:02}"

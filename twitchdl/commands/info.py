@@ -20,12 +20,14 @@ def info(args):
         print_log("Fetching playlists...")
         playlists = twitch.get_playlists(video_id, access_token)
 
-        if video:
-            if args.json:
-                video_json(video, playlists)
-            else:
-                video_info(video, playlists)
-            return
+        print_log("Fetching chapters...")
+        chapters = twitch.get_video_chapters(video_id)
+
+        if args.json:
+            video_json(video, playlists, chapters)
+        else:
+            video_info(video, playlists, chapters)
+        return
 
     clip_slug = utils.parse_clip_identifier(args.video)
     if clip_slug:
@@ -43,7 +45,7 @@ def info(args):
     raise ConsoleError("Invalid input: {}".format(args.video))
 
 
-def video_info(video, playlists):
+def video_info(video, playlists, chapters):
     print_out()
     print_video(video)
 
@@ -52,8 +54,16 @@ def video_info(video, playlists):
     for p in m3u8.loads(playlists).playlists:
         print_out("<b>{}</b> {}".format(p.stream_info.video, p.uri))
 
+    if chapters:
+        print_out()
+        print_out("Chapters:")
+        for chapter in chapters:
+            start = utils.format_time(chapter["positionMilliseconds"] // 1000, force_hours=True)
+            duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
+            print_out(f'{start} <b>{chapter["description"]}</b> ({duration})')
 
-def video_json(video, playlists):
+
+def video_json(video, playlists, chapters):
     playlists = m3u8.loads(playlists).playlists
 
     video["playlists"] = [
@@ -65,6 +75,8 @@ def video_json(video, playlists):
             "uri": p.uri
         } for p in playlists
     ]
+
+    video["chapters"] = chapters
 
     print_json(video)
 
