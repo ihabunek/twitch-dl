@@ -87,7 +87,7 @@ COMMANDS = [
                 "type": str,
             }),
             (["-l", "--limit"], {
-                "help": "Number of videos to fetch. Defaults to 40 in copmpact mode, 10 otherwise.",
+                "help": "Number of videos to fetch. Defaults to 40 in compact mode, 10 otherwise.",
                 "type": pos_integer,
             }),
             (["-a", "--all"], {
@@ -142,6 +142,12 @@ COMMANDS = [
                 "help": "Fetch all videos, overrides --limit",
                 "action": "store_true",
                 "default": False,
+            }),
+            (["-s", "--sort"], {
+                "help": "Order in which to return clips. Defaults to `views-desc`.",
+                "type": str,
+                "choices": ["views-desc", "views-asc", "date-desc", "date-asc"],
+                "default": "views-desc",
             }),
             (["-P", "--period"], {
                 "help": "Period from which to return clips. Defaults to `all_time`.",
