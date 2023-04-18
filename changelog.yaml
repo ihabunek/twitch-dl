@@ -1,3 +1,8 @@
+2.1.2:
+  date: 2023-04-18
+  changes:
+    - "Fix error caused by twitch changing the Usher domain (thanks @adsa95)"
+
 2.1.1:
   date: 2022-11-20
   changes:
