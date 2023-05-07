@@ -1,3 +1,8 @@
+2.1.3:
+  date: 2023-05-07
+  changes:
+    - "Replace client ID with one that works for now (thanks @mwhite34)"
+
 2.1.2:
   date: 2023-04-18
   changes:
