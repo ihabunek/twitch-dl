@@ -245,11 +245,30 @@ def _download_clip(slug: str, args) -> None:
     target = _clip_target_filename(clip, args)
     print_out("Target: <blue>{}</blue>".format(target))
 
-    if not args.overwrite and path.exists(target):
-        response = input("File exists. Overwrite? [Y/n]: ")
-        if response.lower().strip() not in ["", "y"]:
-            raise ConsoleError("Aborted")
-        args.overwrite = True
+    if path.exists(target):
+        if args.skipall:
+            print("Target file exists. Skipping.")
+            return
+        if not args.overwrite:
+            while True:
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip,  a\033[4mb\033[0mort ]: ")
+                match response.lower().strip():
+                    case "y":
+                        break # Just continue
+                    case "a":
+                        args.overwrite = True
+                        break
+                    case "s":
+                        print("Skipping.")
+                        return
+                    case "k":
+                        print("Skipping.")
+                        args.skipall  = True
+                        return
+                    case "b":
+                        raise ConsoleError("Aborted")
+                    case _:
+                        print("Invalid input.")
 
     url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
@@ -276,11 +295,28 @@ def _download_video(video_id, args) -> None:
     target = _video_target_filename(video, args)
     print_out("Output: <blue>{}</blue>".format(target))
 
-    if not args.overwrite and path.exists(target):
-        response = input("File exists. Overwrite? [Y/n]: ")
-        if response.lower().strip() not in ["", "y"]:
-            raise ConsoleError("Aborted")
-        args.overwrite = True
+    if path.exists(target):
+        if args.skipall:
+            print("Target file exists. Skipping.")
+            return
+        if not args.overwrite:
+            while True:
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip,  a\033[4mb\033[0mort ]: ")
+                match response.lower().strip():
+                    case "y":
+                        break # Just continue
+                    case "a":
+                        args.overwrite = True
+                        break
+                    case "s":
+                        return
+                    case "k":
+                        args.skipall  = True
+                        return
+                    case "b":
+                        raise ConsoleError("Aborted")
+                    case _:
+                        print("Invalid input.")
 
     # Chapter select or manual offset
     start, end = _determine_time_range(video_id, args)
