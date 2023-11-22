@@ -251,7 +251,7 @@ def _download_clip(slug: str, args) -> None:
             return
         if not args.overwrite:
             while True:
-                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip,  a\033[4mb\033[0mort ]: ")
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip, a\033[4mb\033[0mort ]: ")
                 match response.lower().strip():
                     case "y":
                         break # Just continue
@@ -301,7 +301,7 @@ def _download_video(video_id, args) -> None:
             return
         if not args.overwrite:
             while True:
-                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip,  a\033[4mb\033[0mort ]: ")
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip, a\033[4mb\033[0mort ]: ")
                 match response.lower().strip():
                     case "y":
                         break # Just continue
