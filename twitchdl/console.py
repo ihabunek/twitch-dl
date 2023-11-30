@@ -240,6 +240,12 @@ COMMANDS = [
                 "nargs": "?",
                 "const": 0
             }),
+            (["-d", "--dry-run"], {
+                "help": "argument provides users with a simulation mode, them to "
+                        "preview the download process without actually downloading any files",
+                "action": "store_true",
+                "default": False,
+            }),
         ],
     ),
     Command(

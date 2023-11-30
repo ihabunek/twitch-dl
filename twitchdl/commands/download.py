@@ -255,7 +255,9 @@ def _download_clip(slug: str, args) -> None:
     print_out("<dim>Selected URL: {}</dim>".format(url))
 
     print_out("<dim>Downloading clip...</dim>")
-    download_file(url, target)
+
+    if (args.dry_run is False):
+        download_file(url, target)
 
     print_out("Downloaded: <blue>{}</blue>".format(target))
 
