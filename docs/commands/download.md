@@ -35,8 +35,23 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
 </tr>
 
 <tr>
+    <td class="code">--skipall</td>
+    <td>Skip the current file if it already exists without prompting.</td>
+</tr>
+
+<tr>
     <td class="code">--overwrite</td>
     <td>Overwrite the target file if it already exists without prompting.</td>
+</tr>
+
+<tr>
+    <td class="code">-x, --all</td>
+    <td>Download all videos on the channel. Overrides all other arguments. Pass in the channel name as the &#x27;videos&#x27; argument.</td>
+</tr>
+
+<tr>
+    <td class="code">-y, --skip-latest</td>
+    <td>Skip downloading the latest video. Only makes sense with the --all flag.</td>
 </tr>
 </tbody>
 </table>
@@ -67,7 +82,7 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
 
 <tr>
     <td class="code">-q, --quality</td>
-    <td>Video quality, e.g. 720p. Set to &#x27;source&#x27; to get best quality.</td>
+    <td>Video quality, e.g. 720p30 or 720p60. Set to &#x27;source&#x27; to get best quality.</td>
 </tr>
 
 <tr>
@@ -88,6 +103,26 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
 <tr>
     <td class="code">-c, --chapter</td>
     <td>Download a single chapter of the video. Specify the chapter number or use the flag without a number to display a chapter select prompt.</td>
+</tr>
+
+<tr>
+    <td class="code">-t, --tempdir</td>
+    <td>Override the temp dir path.</td>
+</tr>
+
+<tr>
+    <td class="code">-d, --output-dir</td>
+    <td>Customize location of the output directory. Defaults to the current directory.</td>
+</tr>
+
+<tr>
+    <td class="code">-u, --execute-after</td>
+    <td>Run a CLI command after each file is downloaded and processed. In your command, use ^p for the absolute path to the file that was downloaded, and ^f for just the file name.</td>
+</tr>
+
+<tr>
+    <td class="code">-z, --execute-before</td>
+    <td>Run a CLI command before each file is downloaded. Return an exit code of 0 to indicate you want to download the file, or nonzero to indicate you want to skip the file. In your command, use ^p for the absolute path to the file that was downloaded, and ^f for just the file name.</td>
 </tr>
 </tbody>
 </table>

@@ -160,11 +160,6 @@ COMMANDS = [
                 "nargs": "?",
                 "const": 10,
             }),
-            (["-d", "--download"], {
-                "help": "Download all videos in given period (in source quality)",
-                "action": "store_true",
-                "default": False,
-            }),
         ],
     ),
     Command(
@@ -203,7 +198,7 @@ COMMANDS = [
                 "default": False,
             }),
             (["-q", "--quality"], {
-                "help": "Video quality, e.g. 720p. Set to 'source' to get best quality.",
+                "help": "Video quality, e.g. 720p30 or 720p60. Set to 'source' to get best quality.",
                 "type": str,
             }),
             (["-a", "--auth-token"], {
@@ -244,6 +239,36 @@ COMMANDS = [
                 "type": int,
                 "nargs": "?",
                 "const": 0
+            }),
+            (["-x", "--all"], {
+                "help": "Download all videos on the channel. Overrides all other arguments. Pass in the channel name as the 'videos' argument.",
+                "action": "store_true",
+                "default": False,
+            }),
+            (["-y", "--skip-latest"], {
+                "help": "Skip downloading the latest video. Only makes sense with the --all flag.",
+                "action": "store_true",
+                "default": False,
+            }),
+            (["-t", "--tempdir"], {
+                "help": "Override the temp dir path.",
+                "type": str,
+                "default": ""
+            }),
+            (["-d", "--output-dir"], {
+                "help": "Customize location of the output directory. Defaults to the current directory.",
+                "type": str,
+                "default": "."
+            }),
+            (["-u", "--execute-after"], {
+                "help": "Run a CLI command after each file is downloaded and processed. In your command, use ^p for the absolute path to the file that was downloaded, and ^f for just the file name. An example use case is in examples/s3_upload_nuke.sh in the GitHub repository.",
+                "type": str,
+                "default": None
+            }),
+            (["-z", "--execute-before"], {
+                "help": "Run a CLI command before each file is downloaded. Return an exit code of 0 to indicate you want to download the file, or nonzero to indicate you want to skip the file. In your command, use ^p for the absolute path to the file that was downloaded, and ^f for just the file name. An example use case is in examples/s3_search.sh in the GitHub repository.",
+                "type": str,
+                "default": None
             }),
         ],
     ),

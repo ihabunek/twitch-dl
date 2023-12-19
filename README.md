@@ -50,6 +50,12 @@ or by ID
 twitch-dl download 1418494769
 ```
 
+or all videos from a channel
+
+```
+twitch-dl download bananasaurus_rex --all
+```
+
 Download a clip by URL
 
 ```
