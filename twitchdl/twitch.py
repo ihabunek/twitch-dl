@@ -335,7 +335,7 @@ def get_playlists(video_id, access_token):
     """
     For a given video return a playlist which contains possible video qualities.
     """
-    url = "http://usher.ttvnw.net/vod/{}".format(video_id)
+    url = "https://usher.ttvnw.net/vod/{}".format(video_id)
 
     response = httpx.get(url, params={
         "nauth": access_token['value'],
