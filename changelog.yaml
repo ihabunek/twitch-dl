@@ -1,3 +1,8 @@
+2.1.4:
+  date: 2024-01-06
+  changes:
+    - "Fix error caused by twitch requiring https for the usher api (thanks @deanpcmad)"
+
 2.1.3:
   date: 2023-05-07
   changes:
