@@ -1,4 +1,5 @@
 pytest
+pyyaml
+setuptools
 twine
 wheel
-pyyaml
