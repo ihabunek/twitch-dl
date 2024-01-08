@@ -33,11 +33,6 @@ twitch-dl clips <channel_name> [FLAGS] [OPTIONS]
     <td class="code">-j, --json</td>
     <td>Show results as JSON. Ignores <code>--pager</code>.</td>
 </tr>
-
-<tr>
-    <td class="code">-d, --download</td>
-    <td>Download all videos in given period (in source quality)</td>
-</tr>
 </tbody>
 </table>
 

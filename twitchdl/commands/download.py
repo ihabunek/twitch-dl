@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import httpx
 import m3u8
 import os
@@ -6,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import shlex
 
 from os import path
 from pathlib import Path
@@ -16,7 +18,18 @@ from twitchdl import twitch, utils
 from twitchdl.download import download_file
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
-from twitchdl.output import print_out
+from twitchdl.output import print_err, print_out
+
+def _execute_download_command(file_path: str, command_template: str) -> bool:
+    print_out(f"file_path: {file_path}")
+    file_name = os.path.basename(file_path)
+    qfp = shlex.quote(str(file_path))
+    qfn = shlex.quote(file_name)
+    command = command_template.replace("^p", qfp).replace("^f", qfn)
+    
+    compl = subprocess.run(command, shell=True, check=False)
+    print_out(f"Executed command: {command}")
+    return compl.returncode == 0
 
 
 def _parse_playlists(playlists_m3u8):
@@ -101,7 +114,8 @@ def _video_target_filename(video, args):
     }
 
     try:
-        return args.output.format(**subs)
+        target = args.output.format(**subs)
+        return Path(args.output_dir, target) if args.output_dir else target
     except KeyError as e:
         supported = ", ".join(subs.keys())
         raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
@@ -131,7 +145,8 @@ def _clip_target_filename(clip, args):
     }
 
     try:
-        return args.output.format(**subs)
+        target = args.output.format(**subs)
+        return Path(args.output_dir, target) if args.output_dir else target
     except KeyError as e:
         supported = ", ".join(subs.keys())
         raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
@@ -157,17 +172,36 @@ def _get_vod_paths(playlist, start: Optional[int], end: Optional[int]) -> List[s
     return files
 
 
-def _crete_temp_dir(base_uri: str) -> str:
+def _crete_temp_dir(base_uri: str, args) -> str:
     """Create a temp dir to store downloads if it doesn't exist."""
     path = urlparse(base_uri).path.lstrip("/")
-    temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
+    temp_dir = Path(args.tempdir if args.tempdir else tempfile.gettempdir(), "twitch-dl", path)
     temp_dir.mkdir(parents=True, exist_ok=True)
     return str(temp_dir)
 
+def _download_all_videos(channel_name, args):
+    print_out(f"<dim>Fetching all videos for channel: {channel_name}...</dim>")
+    total_count, video_generator = twitch.channel_videos_generator(channel_name, sys.maxsize, 'time', 'archive')
+    print_out(f"<dim>Found {total_count} videos to download...</dim>")
+
+    if args.skip_latest:
+        next(video_generator)  # Skip the latest video
+
+    for video in video_generator:
+        #Skip execution if the pre-execute command returns non-zero status
+        target_filename = _video_target_filename(video, args)
+        if not args.execute_before or (args.execute_before and _execute_download_command(target_filename, args.execute_before)):
+            _download_video(video['id'], args)
+        else:
+            print_out(f"<dim>Skipping video due to pre-execute returning nonzero: {video['id']}...</dim>")
 
 def download(args):
-    for video_id in args.videos:
-        download_one(video_id, args)
+    if args.all:
+        # Assuming the channel name is passed in args.videos[0]
+        _download_all_videos(args.videos[0], args)
+    else:
+        for video_id in args.videos:
+            download_one(video_id, args)
 
 
 def download_one(video: str, args):
@@ -245,11 +279,30 @@ def _download_clip(slug: str, args) -> None:
     target = _clip_target_filename(clip, args)
     print_out("Target: <blue>{}</blue>".format(target))
 
-    if not args.overwrite and path.exists(target):
-        response = input("File exists. Overwrite? [Y/n]: ")
-        if response.lower().strip() not in ["", "y"]:
-            raise ConsoleError("Aborted")
-        args.overwrite = True
+    if path.exists(target):
+        if args.skipall:
+            print("Target file exists. Skipping.")
+            return
+        if not args.overwrite:
+            while True:
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip, a\033[4mb\033[0mort ]: ")
+                match response.lower().strip():
+                    case "y":
+                        break # Just continue
+                    case "a":
+                        args.overwrite = True
+                        break
+                    case "s":
+                        print("Skipping.")
+                        return
+                    case "k":
+                        print("Skipping.")
+                        args.skipall  = True
+                        return
+                    case "b":
+                        raise ConsoleError("Aborted")
+                    case _:
+                        print("Invalid input.")
 
     url = get_clip_authenticated_url(slug, args.quality)
     print_out("<dim>Selected URL: {}</dim>".format(url))
@@ -258,6 +311,9 @@ def _download_clip(slug: str, args) -> None:
     download_file(url, target)
 
     print_out("Downloaded: <blue>{}</blue>".format(target))
+
+    if args.execute_after:
+        _execute_download_command(target, args.execute_after)
 
 
 def _download_video(video_id, args) -> None:
@@ -276,11 +332,28 @@ def _download_video(video_id, args) -> None:
     target = _video_target_filename(video, args)
     print_out("Output: <blue>{}</blue>".format(target))
 
-    if not args.overwrite and path.exists(target):
-        response = input("File exists. Overwrite? [Y/n]: ")
-        if response.lower().strip() not in ["", "y"]:
-            raise ConsoleError("Aborted")
-        args.overwrite = True
+    if path.exists(target):
+        if args.skipall:
+            print("Target file exists. Skipping.")
+            return
+        if not args.overwrite:
+            while True:
+                response = input("File exists. Overwrite? [ \033[4mY\033[0mes, \033[4ma\033[0mlways yes, \033[4ms\033[0mkip, always s\033[4mk\033[0mip, a\033[4mb\033[0mort ]: ")
+                match response.lower().strip():
+                    case "y":
+                        break # Just continue
+                    case "a":
+                        args.overwrite = True
+                        break
+                    case "s":
+                        return
+                    case "k":
+                        args.skipall  = True
+                        return
+                    case "b":
+                        raise ConsoleError("Aborted")
+                    case _:
+                        print("Invalid input.")
 
     # Chapter select or manual offset
     start, end = _determine_time_range(video_id, args)
@@ -300,7 +373,7 @@ def _download_video(video_id, args) -> None:
     playlist = m3u8.loads(response.text)
 
     base_uri = re.sub("/[^/]+$", "/", playlist_uri)
-    target_dir = _crete_temp_dir(base_uri)
+    target_dir = _crete_temp_dir(base_uri, args)
     vod_paths = _get_vod_paths(playlist, start, end)
 
     # Save playlists for debugging purposes
@@ -344,6 +417,9 @@ def _download_video(video_id, args) -> None:
         shutil.rmtree(target_dir)
 
     print_out("\nDownloaded: <green>{}</green>".format(target))
+
+    if args.execute_after:
+        _execute_download_command(target, args.execute_after)
 
 
 def _determine_time_range(video_id, args):
