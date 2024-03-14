@@ -16,6 +16,15 @@ def clips(args):
 
     generator = twitch.channel_clips_generator(args.channel_name, args.period, limit)
 
+    if args.sort != "views-desc":
+        match args.sort:
+            case "views-asc":
+                generator = sorted(list(generator), key=lambda x: x['viewCount'])
+            case "date-desc":
+                generator = sorted(list(generator), key=lambda x: x['createdAt'], reverse=True)
+            case "date-asc":
+                generator = sorted(list(generator), key=lambda x: x['createdAt'])
+
     if args.json:
         return print_json(list(generator))
 
