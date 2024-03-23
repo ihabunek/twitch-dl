@@ -20,8 +20,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "m3u8>=1.0.0,<4.0.0",
+    "click>=8.0.0,<9.0.0",
     "httpx>=0.17.0,<1.0.0",
+    "m3u8>=1.0.0,<4.0.0",
 ]
 
 [tool.setuptools]
