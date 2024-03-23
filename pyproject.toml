@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twitch-dl"
+authors = [{ name="Ivan Habunek", email="ivan@habunek.com" }]
+description = "Quickly download videos from twitch.tv from the comort of your terminal emulator"
+keywords=["twitch", "vod", "video", "download"]
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "m3u8>=1.0.0,<4.0.0",
+    "httpx>=0.17.0,<1.0.0",
+]
+
+[tool.setuptools]
+packages = [
+    "twitchdl",
+    "twitchdl.commands",
+]
+
+[tool.setuptools_scm]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "pytest",
+    "pyyaml",
+    "setuptools",
+    "twine",
+    "vermin",
+]
+
+[project.urls]
+"Homepage" = "https://twitch-dl.bezdomni.net/"
+"Source" = "https://github.com/ihabunek/twitch-dl"
+
+[project.scripts]
+twitch-dl = "twitchdl.console:main"
+
+[tool.pyright]
+include = ["twitchdl"]
+typeCheckingMode = "strict"
+
+[tool.ruff]
+line-length = 100
