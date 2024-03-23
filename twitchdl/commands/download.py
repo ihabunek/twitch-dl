@@ -14,9 +14,27 @@ from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
 from twitchdl.download import download_file
+from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import print_out
+
+
+def download(ids, args: DownloadOptions):
+    for video_id in ids:
+        download_one(video_id, args)
+
+
+def download_one(video: str, args: DownloadOptions):
+    video_id = utils.parse_video_identifier(video)
+    if video_id:
+        return _download_video(video_id, args)
+
+    clip_slug = utils.parse_clip_identifier(video)
+    if clip_slug:
+        return _download_clip(clip_slug, args)
+
+    raise ConsoleError("Invalid input: {}".format(video))
 
 
 def _parse_playlists(playlists_m3u8):
@@ -82,7 +100,7 @@ def _join_vods(playlist_path, target, overwrite, video):
         raise ConsoleError("Joining files failed")
 
 
-def _video_target_filename(video, args):
+def _video_target_filename(video, args: DownloadOptions):
     date, time = video['publishedAt'].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
@@ -107,7 +125,7 @@ def _video_target_filename(video, args):
         raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
 
-def _clip_target_filename(clip, args):
+def _clip_target_filename(clip, args: DownloadOptions):
     date, time = clip["createdAt"].split("T")
     game = clip["game"]["name"] if clip["game"] else "Unknown"
 
@@ -165,23 +183,6 @@ def _crete_temp_dir(base_uri: str) -> str:
     return str(temp_dir)
 
 
-def download(args):
-    for video_id in args.videos:
-        download_one(video_id, args)
-
-
-def download_one(video: str, args):
-    video_id = utils.parse_video_identifier(video)
-    if video_id:
-        return _download_video(video_id, args)
-
-    clip_slug = utils.parse_clip_identifier(video)
-    if clip_slug:
-        return _download_clip(clip_slug, args)
-
-    raise ConsoleError("Invalid input: {}".format(video))
-
-
 def _get_clip_url(clip, quality):
     qualities = clip["videoQualities"]
 
@@ -227,7 +228,7 @@ def get_clip_authenticated_url(slug, quality):
     return "{}?{}".format(url, query)
 
 
-def _download_clip(slug: str, args) -> None:
+def _download_clip(slug: str, args: DownloadOptions) -> None:
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
     game = clip["game"]["name"] if clip["game"] else "Unknown"

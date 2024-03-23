@@ -5,19 +5,30 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_out, print_paged_videos, print_video, print_json, print_video_compact
 
 
-def videos(args):
-    game_ids = _get_game_ids(args.game)
+def videos(
+    channel_name: str,
+    *,
+    all: bool,
+    compact: bool,
+    games: list[str],
+    json: bool,
+    limit: int | None,
+    pager: int | None,
+    sort: str,
+    type: str,
+):
+    game_ids = _get_game_ids(games)
 
     # Set different defaults for limit for compact display
-    limit = args.limit or (40 if args.compact else 10)
+    limit = limit or (40 if compact else 10)
 
     # Ignore --limit if --pager or --all are given
-    max_videos = sys.maxsize if args.all or args.pager else limit
+    max_videos = sys.maxsize if all or pager else limit
 
     total_count, generator = twitch.channel_videos_generator(
-        args.channel_name, max_videos, args.sort, args.type, game_ids=game_ids)
+        channel_name, max_videos, sort, type, game_ids=game_ids)
 
-    if args.json:
+    if json:
         videos = list(generator)
         print_json({
             "count": len(videos),
@@ -30,13 +41,13 @@ def videos(args):
         print_out("<yellow>No videos found</yellow>")
         return
 
-    if args.pager:
-        print_paged_videos(generator, args.pager, total_count)
+    if pager:
+        print_paged_videos(generator, pager, total_count)
         return
 
     count = 0
     for video in generator:
-        if args.compact:
+        if compact:
             print_video_compact(video)
         else:
             print_out()

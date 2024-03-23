@@ -5,8 +5,8 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
 
 
-def info(args):
-    video_id = utils.parse_video_identifier(args.video)
+def info(id: str, *, json: bool = False):
+    video_id = utils.parse_video_identifier(id)
     if video_id:
         print_log("Fetching video...")
         video = twitch.get_video(video_id)
@@ -23,26 +23,26 @@ def info(args):
         print_log("Fetching chapters...")
         chapters = twitch.get_video_chapters(video_id)
 
-        if args.json:
+        if json:
             video_json(video, playlists, chapters)
         else:
             video_info(video, playlists, chapters)
         return
 
-    clip_slug = utils.parse_clip_identifier(args.video)
+    clip_slug = utils.parse_clip_identifier(id)
     if clip_slug:
         print_log("Fetching clip...")
         clip = twitch.get_clip(clip_slug)
         if not clip:
             raise ConsoleError("Clip {} not found".format(clip_slug))
 
-        if args.json:
+        if json:
             print_json(clip)
         else:
             clip_info(clip)
         return
 
-    raise ConsoleError("Invalid input: {}".format(args.video))
+    raise ConsoleError("Invalid input: {}".format(id))
 
 
 def video_info(video, playlists, chapters):

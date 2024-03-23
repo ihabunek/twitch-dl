@@ -48,7 +48,7 @@ dev = [
 "Source" = "https://github.com/ihabunek/twitch-dl"
 
 [project.scripts]
-twitch-dl = "twitchdl.console:main"
+twitch-dl = "twitchdl.cli:cli"
 
 [tool.pyright]
 include = ["twitchdl"]
