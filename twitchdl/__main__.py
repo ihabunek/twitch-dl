@@ -1,3 +1,3 @@
-from twitchdl.console import main
+from twitchdl.cli import cli
 
-main()
+cli()

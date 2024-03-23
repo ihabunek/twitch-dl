@@ -1,6 +1,7 @@
 import re
 import sys
 
+from typing import Literal
 from itertools import islice
 from os import path
 
@@ -9,24 +10,34 @@ from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
 from twitchdl.output import print_out, print_clip, print_json
 
+ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 
-def clips(args):
+
+def clips(
+    channel_name: str,
+    *,
+    all: bool = False,
+    download: bool = False,
+    json: bool = False,
+    limit: int = 10,
+    pager: int | None = None,
+    period: ClipsPeriod = "all_time",
+):
     # Ignore --limit if --pager or --all are given
-    limit = sys.maxsize if args.all or args.pager else args.limit
+    limit = sys.maxsize if all or pager else limit
 
-    generator = twitch.channel_clips_generator(args.channel_name, args.period, limit)
+    generator = twitch.channel_clips_generator(channel_name, period, limit)
 
-    if args.json:
+    if json:
         return print_json(list(generator))
 
-    if args.download:
+    if download:
         return _download_clips(generator)
 
-    if args.pager:
-        print(args)
-        return _print_paged(generator, args.pager)
+    if pager:
+        return _print_paged(generator, pager)
 
-    return _print_all(generator, args)
+    return _print_all(generator, all)
 
 
 def _continue():
@@ -46,6 +57,8 @@ def _target_filename(clip):
     ext = ext.lstrip(".")
 
     match = re.search(r"^(\d{4})-(\d{2})-(\d{2})T", clip["createdAt"])
+    if not match:
+        raise ValueError(f"Failed parsing date from: {clip['createdAt']}")
     date = "".join(match.groups())
 
     name = "_".join([
@@ -70,12 +83,12 @@ def _download_clips(generator):
             download_file(url, target)
 
 
-def _print_all(generator, args):
+def _print_all(generator, all: bool):
     for clip in generator:
         print_out()
         print_clip(clip)
 
-    if not args.all:
+    if not all:
         print_out(
             "\n<dim>There may be more clips. " +
             "Increase the --limit, use --all or --pager to see the rest.</dim>"
