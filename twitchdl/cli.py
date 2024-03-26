@@ -281,9 +281,9 @@ def download(
 @cli.command()
 def env():
     """Print environment information for inclusion in bug reports."""
-    click.echo(f"toot {__version__}")
+    click.echo(f"twitch-dl {__version__}")
     click.echo(f"Python {sys.version}")
-    click.echo(platform.platform())
+    click.echo(f"Platform: {platform.platform()}")
 
 
 @cli.command()
