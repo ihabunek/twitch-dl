@@ -160,7 +160,7 @@ def clips(
     "-a",
     "--auth-token",
     help="""Authentication token, passed to Twitch to access subscriber only
-         VODs. Can be copied from the 'auth_token' cookie in any browser logged
+         VODs. Can be copied from the `auth_token` cookie in any browser logged
          in on Twitch.""",
 )
 @click.option(
@@ -216,7 +216,7 @@ def clips(
 @click.option(
     "-q",
     "--quality",
-    help="Video quality, e.g. 720p. Set to 'source' to get best quality.",
+    help="Video quality, e.g. `720p`. Set to `source` to get best quality.",
 )
 @click.option(
     "-r",
