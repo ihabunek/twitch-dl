@@ -2,14 +2,14 @@ import re
 import unicodedata
 
 
-def _format_size(value, digits, unit):
+def _format_size(value: float, digits: int, unit: str):
     if digits > 0:
         return "{{:.{}f}}{}".format(digits, unit).format(value)
     else:
         return "{{:d}}{}".format(unit).format(value)
 
 
-def format_size(bytes_, digits=1):
+def format_size(bytes_: int, digits: int = 1):
     if bytes_ < 1024:
         return _format_size(bytes_, digits, "B")
 
@@ -24,7 +24,7 @@ def format_size(bytes_, digits=1):
     return _format_size(mega / 1024, digits, "GB")
 
 
-def format_duration(total_seconds):
+def format_duration(total_seconds: int | float) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -40,7 +40,7 @@ def format_duration(total_seconds):
     return "{} sec".format(seconds)
 
 
-def format_time(total_seconds, force_hours=False):
+def format_time(total_seconds: int | float, force_hours: bool = False) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -53,7 +53,7 @@ def format_time(total_seconds, force_hours=False):
     return f"{minutes:02}:{seconds:02}"
 
 
-def read_int(msg, min, max, default=None):
+def read_int(msg: str, min: int, max: int, default: int | None = None) -> int:
     if default:
         msg = msg + f" [default {default}]"
 
@@ -70,14 +70,14 @@ def read_int(msg, min, max, default=None):
             pass
 
 
-def slugify(value):
+def slugify(value: str) -> str:
     value = unicodedata.normalize('NFKC', str(value))
     value = re.sub(r'[^\w\s_-]', '', value)
     value = re.sub(r'[\s_-]+', '_', value)
     return value.strip("_").lower()
 
 
-def titlify(value):
+def titlify(value: str) -> str:
     value = unicodedata.normalize('NFKC', str(value))
     value = re.sub(r'[^\w\s\[\]().-]', '', value)
     value = re.sub(r'\s+', ' ', value)
@@ -96,7 +96,7 @@ CLIP_PATTERNS = [
 ]
 
 
-def parse_video_identifier(identifier):
+def parse_video_identifier(identifier: str) -> str | None:
     """Given a video ID or URL returns the video ID, or null if not matched"""
     for pattern in VIDEO_PATTERNS:
         match = re.match(pattern, identifier)
@@ -104,7 +104,7 @@ def parse_video_identifier(identifier):
             return match.group("id")
 
 
-def parse_clip_identifier(identifier):
+def parse_clip_identifier(identifier: str) -> str | None:
     """Given a clip slug or URL returns the clip slug, or null if not matched"""
     for pattern in CLIP_PATTERNS:
         match = re.match(pattern, identifier)

@@ -21,7 +21,7 @@ class Task:
     size: int
     downloaded: int = 0
 
-    def advance(self, size):
+    def advance(self, size: int):
         self.downloaded += size
 
 
