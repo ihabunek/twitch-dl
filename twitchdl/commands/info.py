@@ -4,7 +4,6 @@ from twitchdl import utils, twitch
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
 
-
 def info(id: str, *, json: bool = False):
     video_id = utils.parse_video_identifier(id)
     if video_id:
