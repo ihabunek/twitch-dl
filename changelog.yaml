@@ -1,3 +1,10 @@
+3.0.0:
+  date: TBA
+  changes:
+    - "BREAKING: Requires python 3.8 or later"
+    - "Migrated to click lib for cli parsing"
+    - "Add shell auto completion"
+
 2.1.4:
   date: 2024-01-06
   changes:
