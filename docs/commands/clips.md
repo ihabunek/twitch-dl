@@ -1,63 +1,46 @@
 <!-- ------------------- generated docs start ------------------- -->
 # twitch-dl clips
 
-List or download clips for a channel.
+List or download clips for given CHANNEL_NAME.
 
 ### USAGE
 
 ```
-twitch-dl clips <channel_name> [FLAGS] [OPTIONS]
+twitch-dl clips [OPTIONS] CHANNEL_NAME
 ```
-
-### ARGUMENTS
-
-<table>
-<tbody>
-<tr>
-    <td class="code">&lt;channel_name&gt;</td>
-    <td>Name of the channel to list clips for.</td>
-</tr>
-</tbody>
-</table>
-
-### FLAGS
-
-<table>
-<tbody>
-<tr>
-    <td class="code">-a, --all</td>
-    <td>Fetch all videos, overrides --limit</td>
-</tr>
-
-<tr>
-    <td class="code">-j, --json</td>
-    <td>Show results as JSON. Ignores <code>--pager</code>.</td>
-</tr>
-
-<tr>
-    <td class="code">-d, --download</td>
-    <td>Download all videos in given period (in source quality)</td>
-</tr>
-</tbody>
-</table>
 
 ### OPTIONS
 
 <table>
 <tbody>
 <tr>
-    <td class="code">-l, --limit</td>
-    <td>Number of videos to fetch (default 10, max 100)</td>
+    <td class="code">-a, --all</td>
+    <td>Fetch all clips, overrides --limit</td>
 </tr>
 
 <tr>
-    <td class="code">-P, --period</td>
-    <td>Period from which to return clips. Defaults to <code>all_time</code>. Possible values: <code>last_day</code>, <code>last_week</code>, <code>last_month</code>, <code>all_time</code>.</td>
+    <td class="code">-d, --download</td>
+    <td>Download clips in given period (in source quality)</td>
 </tr>
 
 <tr>
-    <td class="code">-p, --pager</td>
+    <td class="code">-l, --limit INTEGER</td>
+    <td>Number of clips to fetch [max: 100] [default: <code>10</code>]</td>
+</tr>
+
+<tr>
+    <td class="code">-p, --pager INTEGER</td>
     <td>Number of clips to show per page. Disabled by default.</td>
+</tr>
+
+<tr>
+    <td class="code">-P, --period TEXT</td>
+    <td>Period from which to return clips Possible values: <code>last_day</code>, <code>last_week</code>, <code>last_month</code>, <code>all_time</code>. [default: <code>all_time</code>]</td>
+</tr>
+
+<tr>
+    <td class="code">--json</td>
+    <td>Print data as JSON rather than human readable text</td>
 </tr>
 </tbody>
 </table>

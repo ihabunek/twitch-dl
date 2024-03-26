@@ -6,27 +6,16 @@ Print information for a given Twitch URL, video ID or clip slug.
 ### USAGE
 
 ```
-twitch-dl info <video> [FLAGS]
+twitch-dl info [OPTIONS] ID
 ```
 
-### ARGUMENTS
+### OPTIONS
 
 <table>
 <tbody>
 <tr>
-    <td class="code">&lt;video&gt;</td>
-    <td>Video ID, clip slug, or URL</td>
-</tr>
-</tbody>
-</table>
-
-### FLAGS
-
-<table>
-<tbody>
-<tr>
-    <td class="code">-j, --json</td>
-    <td>Show results as JSON</td>
+    <td class="code">--json</td>
+    <td>Print data as JSON rather than human readable text</td>
 </tr>
 </tbody>
 </table>

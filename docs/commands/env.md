@@ -6,7 +6,7 @@ Print environment information for inclusion in bug reports.
 ### USAGE
 
 ```
-twitch-dl env 
+twitch-dl env [OPTIONS]
 ```
 
 <!-- ------------------- generated docs end ------------------- -->
