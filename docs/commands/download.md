@@ -3,27 +3,44 @@
 
 Download videos or clips.
 
+    Pass one or more video ID, clip slug or Twitch URL to download.
+    
+
 ### USAGE
 
 ```
-twitch-dl download <videos> [FLAGS] [OPTIONS]
+twitch-dl download [OPTIONS] [IDS]...
 ```
 
-### ARGUMENTS
+### OPTIONS
 
 <table>
 <tbody>
 <tr>
-    <td class="code">&lt;videos&gt;</td>
-    <td>One or more video ID, clip slug or twitch URL to download.</td>
+    <td class="code">-a, --auth-token TEXT</td>
+    <td>Authentication token, passed to Twitch to access subscriber only VODs. Can be copied from the <code>auth_token</code> cookie in any browser logged in on Twitch.</td>
 </tr>
-</tbody>
-</table>
 
-### FLAGS
+<tr>
+    <td class="code">-c, --chapter INTEGER</td>
+    <td>Download a single chapter of the video. Specify the chapter number or use the flag without a number to display a chapter select prompt.</td>
+</tr>
 
-<table>
-<tbody>
+<tr>
+    <td class="code">-d, --dry-run</td>
+    <td>Simulate the download provcess without actually downloading any files.</td>
+</tr>
+
+<tr>
+    <td class="code">-e, --end TEXT</td>
+    <td>Download video up to this time (hh:mm or hh:mm:ss)</td>
+</tr>
+
+<tr>
+    <td class="code">-f, --format TEXT</td>
+    <td>Video format to convert into, passed to ffmpeg as the target file extension. [default: <code>mkv</code>]</td>
+</tr>
+
 <tr>
     <td class="code">-k, --keep</td>
     <td>Don&#x27;t delete downloaded VODs and playlists after merging.</td>
@@ -38,56 +55,30 @@ twitch-dl download <videos> [FLAGS] [OPTIONS]
     <td class="code">--overwrite</td>
     <td>Overwrite the target file if it already exists without prompting.</td>
 </tr>
-</tbody>
-</table>
 
-### OPTIONS
-
-<table>
-<tbody>
 <tr>
-    <td class="code">-w, --max-workers</td>
-    <td>Number of workers for downloading vods concurrently (default 5)</td>
+    <td class="code">-o, --output TEXT</td>
+    <td>Output file name template. See docs for details. [default: <code>{date}_{id}_{channel_login}_{title_slug}.{format}</code>]</td>
 </tr>
 
 <tr>
-    <td class="code">-s, --start</td>
-    <td>Download video from this time (hh:mm or hh:mm:ss)</td>
+    <td class="code">-q, --quality TEXT</td>
+    <td>Video quality, e.g. <code>720p</code>. Set to <code>source</code> to get best quality.</td>
 </tr>
 
 <tr>
-    <td class="code">-e, --end</td>
-    <td>Download video up to this time (hh:mm or hh:mm:ss)</td>
-</tr>
-
-<tr>
-    <td class="code">-f, --format</td>
-    <td>Video format to convert into, passed to ffmpeg as the target file extension. Defaults to <code>mkv</code>.</td>
-</tr>
-
-<tr>
-    <td class="code">-q, --quality</td>
-    <td>Video quality, e.g. 720p. Set to &#x27;source&#x27; to get best quality.</td>
-</tr>
-
-<tr>
-    <td class="code">-a, --auth-token</td>
-    <td>Authentication token, passed to Twitch to access subscriber only VODs. Can be copied from the &#x27;auth_token&#x27; cookie in any browser logged in on Twitch.</td>
-</tr>
-
-<tr>
-    <td class="code">-o, --output</td>
-    <td>Output file name template. See docs for details.</td>
-</tr>
-
-<tr>
-    <td class="code">-r, --rate-limit</td>
+    <td class="code">-r, --rate-limit TEXT</td>
     <td>Limit the maximum download speed in bytes per second. Use &#x27;k&#x27; and &#x27;m&#x27; suffixes for kbps and mbps.</td>
 </tr>
 
 <tr>
-    <td class="code">-c, --chapter</td>
-    <td>Download a single chapter of the video. Specify the chapter number or use the flag without a number to display a chapter select prompt.</td>
+    <td class="code">-s, --start TEXT</td>
+    <td>Download video from this time (hh:mm or hh:mm:ss)</td>
+</tr>
+
+<tr>
+    <td class="code">-w, --max-workers INTEGER</td>
+    <td>Number of workers for downloading vods concurrently [default: <code>5</code>]</td>
 </tr>
 </tbody>
 </table>
