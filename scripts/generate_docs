@@ -4,13 +4,16 @@
 Auto-generates documentation from command defs in console.py.
 """
 
+import click
 import html
 import os
 import re
 import shutil
 import textwrap
 
-from twitchdl.console import COMMANDS
+from click import Command
+
+from twitchdl.cli import cli
 
 
 START_MARKER = "<!-- ------------------- generated docs start ------------------- -->"
@@ -19,8 +22,11 @@ END_MARKER = "<!-- ------------------- generated docs end ------------------- --
 
 def main():
     update_changelog()
-    for command in COMMANDS:
-        update_docs(command)
+
+    parent_ctx = click.Context(cli, info_name="twitch-dl")
+    for name, command in cli.commands.items():
+        ctx = click.Context(cli, info_name=name, parent=parent_ctx)
+        update_docs(command, ctx)
 
 
 def update_changelog():
@@ -31,9 +37,9 @@ def update_changelog():
     shutil.copy(source, target)
 
 
-def update_docs(command):
+def update_docs(command: Command, ctx: click.Context):
     path = os.path.join("docs", "commands", f"{command.name}.md")
-    content = render_command(command)
+    content = render_command(command, ctx)
 
     if not os.path.exists(path):
         print(f"Creating: {path}")
@@ -45,87 +51,29 @@ def update_docs(command):
         write(path, content)
 
 
-def render_command(command):
+def render_command(command: Command, ctx: click.Context):
     content = START_MARKER
     content += f"\n# twitch-dl {command.name}\n\n"
-    content += command.description + "\n\n"
-    content += render_usage(command)
-    content += render_arguments(command)
-    content += render_flags(command)
-    content += render_options(command)
+
+    if command.help:
+        content += command.help + "\n\n"
+
+    content += render_usage(ctx, command)
+    content += render_options(ctx, command)
     return content
 
 
-def render_usage(command):
-    arguments = get_arguments(command)
-    arguments = " ".join(f"<{name}>" for [name, _] in arguments)
-    flags = get_flags(command)
-    options = get_options(command)
-
+def render_usage(ctx: click.Context, command: Command):
     content = "### USAGE\n\n"
     content += "```\n"
-    content += f"twitch-dl {command.name} {arguments}"
-
-    if flags:
-        content += " [FLAGS]"
-
-    if options:
-        content += " [OPTIONS]"
+    content += command.get_usage(ctx).replace("Usage: ", "")
 
     content += "\n```\n\n"
-
     return content
 
 
-def render_arguments(command):
-    arguments = get_arguments(command)
-
-    if not arguments:
-        return ""
-
-    content = "### ARGUMENTS\n\n"
-
-    content += "<table>\n"
-    content += "<tbody>"
-    for [name, params] in arguments:
-        content += textwrap.dedent(f"""
-        <tr>
-            <td class="code">&lt;{escape(name)}&gt;</td>
-            <td>{escape(params['help'])}</td>
-        </tr>
-        """)
-    content += "</tbody>\n"
-    content += "</table>\n\n"
-
-    return content
-
-
-def render_flags(command):
-    flags = get_flags(command)
-
-    if not flags:
-        return ""
-
-    content = "### FLAGS\n\n"
-
-    content += "<table>\n"
-    content += "<tbody>"
-    for [names, params] in flags:
-        names = ", ".join(f"{name}" for name in names)
-        content += textwrap.dedent(f"""
-        <tr>
-            <td class="code">{escape(names)}</td>
-            <td>{escape(params['help'])}</td>
-        </tr>
-        """)
-    content += "</tbody>\n"
-    content += "</table>\n\n"
-
-    return content
-
-
-def render_options(command):
-    options = get_options(command)
+def render_options(ctx, command: Command):
+    options = list(get_options(command))
 
     if not options:
         return ""
@@ -134,12 +82,11 @@ def render_options(command):
 
     content += "<table>\n"
     content += "<tbody>"
-    for [names, params] in options:
-        names = ", ".join(f"{name}" for name in names)
+    for opts, help in options:
         content += textwrap.dedent(f"""
         <tr>
-            <td class="code">{escape(names)}</td>
-            <td>{escape(params['help'])}{choices(params)}</td>
+            <td class="code">{escape(opts)}</td>
+            <td>{escape(help)}</td>
         </tr>
         """)
     content += "</tbody>\n"
@@ -148,35 +95,37 @@ def render_options(command):
     return content
 
 
-def choices(params):
-    if "choices" in params:
-        choices = ", ".join(code(c) for c in params["choices"])
+def get_options(command: Command):
+    for option in command.params:
+        if isinstance(option, click.Option):
+            opts = ", ".join(option.opts)
+            opts += option_type(option)
+
+            help = option.help or ""
+            help = re.sub(r"\s+", " ", help)
+            help += choices(option)
+            if option.default:
+                help += f" [default: `{option.default}`]"
+
+            yield opts, help
+
+
+def option_type(option: click.Option):
+    match option.type:
+        case click.types.StringParamType():
+            return " TEXT"
+        case click.types.Choice():
+            return " TEXT"
+        case click.types.IntParamType():
+            return " INTEGER"
+        case _:
+            return ""
+
+def choices(option: click.Option):
+    if isinstance(option.type, click.Choice):
+        choices = ", ".join(f"`{c}`" for c in option.type.choices)
         return f" Possible values: {choices}."
     return ""
-
-
-def get_arguments(command):
-    return [
-        [names[0], options]
-        for names, options in command.arguments
-        if len(names) == 1 and not names[0].startswith("-")
-    ]
-
-
-def get_flags(command):
-    return [
-        [names, options]
-        for names, options in command.arguments
-        if names[0].startswith("-") and "type" not in options
-    ]
-
-
-def get_options(command):
-    return [
-        [names, options]
-        for names, options in command.arguments
-        if names[0].startswith("-") and "type" in options
-    ]
 
 
 def read(path):
@@ -187,10 +136,6 @@ def read(path):
 def write(path, content):
     with open(path, "w") as f:
         return f.write(content)
-
-
-def code(string):
-    return f"<code>{string}</code>"
 
 
 def escape(text: str):
