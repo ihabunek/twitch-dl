@@ -1,3 +1,4 @@
+import tempfile
 import click
 import logging
 import platform
@@ -174,6 +175,11 @@ def clips(
     flag_value=0,
 )
 @click.option(
+    "--concat",
+    is_flag=True,
+    help="Do not use ffmpeg to join files, concat them instead",
+)
+@click.option(
     "-d",
     "--dry-run",
     help="Simulate the download provcess without actually downloading any files.",
@@ -241,6 +247,7 @@ def download(
     ids: tuple[str, ...],
     auth_token: str | None,
     chapter: int | None,
+    concat: bool,
     dry_run: bool,
     end: int | None,
     format: str,
@@ -261,6 +268,7 @@ def download(
     options = DownloadOptions(
         auth_token=auth_token,
         chapter=chapter,
+        concat=concat,
         dry_run=dry_run,
         end=end,
         format=format,
@@ -275,7 +283,7 @@ def download(
     )
 
     from twitchdl.commands.download import download
-    download(ids, options)
+    download(list(ids), options)
 
 
 @cli.command()
