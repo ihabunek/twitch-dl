@@ -4,16 +4,19 @@ Twitch API access.
 
 import httpx
 import json
+import click
 
 from typing import Dict
 from twitchdl import CLIENT_ID
 from twitchdl.exceptions import ConsoleError
 
 
-class GQLError(Exception):
-    def __init__(self, errors):
-        super().__init__("GraphQL query failed")
-        self.errors = errors
+class GQLError(click.ClickException):
+    def __init__(self, errors: list[str]):
+        message = "GraphQL query failed."
+        for error in errors:
+            message += f"\n* {error}"
+        super().__init__(message)
 
 
 def authenticated_post(url, data=None, json=None, headers={}):
@@ -29,24 +32,25 @@ def authenticated_post(url, data=None, json=None, headers={}):
     return response
 
 
-def gql_post(query):
+def gql_post(query: str):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, data=query).json()
-
-    if "errors" in response:
-        raise GQLError(response["errors"])
-
-    return response
+    response = authenticated_post(url, data=query)
+    gql_raise_on_error(response)
+    return response.json()
 
 
 def gql_query(query: str, headers: Dict[str, str] = {}):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, json={"query": query}, headers=headers).json()
+    response = authenticated_post(url, json={"query": query}, headers=headers)
+    gql_raise_on_error(response)
+    return response.json()
 
-    if "errors" in response:
-        raise GQLError(response["errors"])
 
-    return response
+def gql_raise_on_error(response: httpx.Response):
+    data = response.json()
+    if "errors" in data:
+        errors = [e["message"] for e in data["errors"]]
+        raise GQLError(errors)
 
 
 VIDEO_FIELDS = """
