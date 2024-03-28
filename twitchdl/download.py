@@ -1,13 +1,11 @@
 import os
 import httpx
 
+from twitchdl.exceptions import ConsoleError
+
 CHUNK_SIZE = 1024
 CONNECT_TIMEOUT = 5
 RETRY_COUNT = 5
-
-
-class DownloadFailed(Exception):
-    pass
 
 
 def _download(url: str, path: str):
@@ -35,4 +33,4 @@ def download_file(url: str, path: str, retries: int = RETRY_COUNT):
         except httpx.RequestError:
             pass
 
-    raise DownloadFailed(":(")
+    raise ConsoleError(f"Failed downloading after {retries} attempts: {url}")
