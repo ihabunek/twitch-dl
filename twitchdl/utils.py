@@ -4,9 +4,9 @@ import unicodedata
 
 def _format_size(value: float, digits: int, unit: str):
     if digits > 0:
-        return "{{:.{}f}}{}".format(digits, unit).format(value)
+        return f"{{:.{digits}f}}{unit}".format(value)
     else:
-        return "{{:d}}{}".format(unit).format(value)
+        return f"{int(value)}{unit}"
 
 
 def format_size(bytes_: int, digits: int = 1):
@@ -32,12 +32,12 @@ def format_duration(total_seconds: int | float) -> str:
     seconds = total_seconds % 60
 
     if hours:
-        return "{} h {} min".format(hours, minutes)
+        return f"{hours} h {minutes} min"
 
     if minutes:
-        return "{} min {} sec".format(minutes, seconds)
+        return f"{minutes} min {seconds} sec"
 
-    return "{} sec".format(seconds)
+    return f"{seconds} sec"
 
 
 def format_time(total_seconds: int | float, force_hours: bool = False) -> str:

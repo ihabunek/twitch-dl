@@ -89,36 +89,34 @@ CLIP_FIELDS = """
 """
 
 
-def get_video(video_id):
-    query = """
+def get_video(video_id: str):
+    query = f"""
     {{
         video(id: "{video_id}") {{
-            {fields}
+            {VIDEO_FIELDS}
         }}
     }}
     """
-
-    query = query.format(video_id=video_id, fields=VIDEO_FIELDS)
 
     response = gql_query(query)
     return response["data"]["video"]
 
 
-def get_clip(slug):
-    query = """
+def get_clip(slug: str):
+    query = f"""
     {{
-        clip(slug: "{}") {{
-            {fields}
+        clip(slug: "{slug}") {{
+            {CLIP_FIELDS}
         }}
     }}
     """
 
-    response = gql_query(query.format(slug, fields=CLIP_FIELDS))
+    response = gql_query(query)
     return response["data"]["clip"]
 
 
-def get_clip_access_token(slug):
-    query = """
+def get_clip_access_token(slug: str):
+    query = f"""
     {{
         "operationName": "VideoAccessToken_Clip",
         "variables": {{
@@ -133,11 +131,11 @@ def get_clip_access_token(slug):
     }}
     """
 
-    response = gql_post(query.format(slug=slug).strip())
+    response = gql_post(query.strip())
     return response["data"]["clip"]
 
 
-def get_channel_clips(channel_id, period, limit, after=None):
+def get_channel_clips(channel_id: str, period: str, limit: int, after: str | None= None):
     """
     List channel clips.
 
@@ -147,10 +145,10 @@ def get_channel_clips(channel_id, period, limit, after=None):
     * sorting by VIEWS_DESC and TRENDING returns the same results
     * there is no totalCount
     """
-    query = """
+    query = f"""
     {{
       user(login: "{channel_id}") {{
-        clips(first: {limit}, after: "{after}", criteria: {{ period: {period}, sort: VIEWS_DESC }}) {{
+        clips(first: {limit}, after: "{after or ''}", criteria: {{ period: {period.upper()}, sort: VIEWS_DESC }}) {{
           pageInfo {{
             hasNextPage
             hasPreviousPage
@@ -158,7 +156,7 @@ def get_channel_clips(channel_id, period, limit, after=None):
           edges {{
             cursor
             node {{
-              {fields}
+              {CLIP_FIELDS}
             }}
           }}
         }}
@@ -166,18 +164,10 @@ def get_channel_clips(channel_id, period, limit, after=None):
     }}
     """
 
-    query = query.format(
-        channel_id=channel_id,
-        after=after if after else "",
-        limit=limit,
-        period=period.upper(),
-        fields=CLIP_FIELDS
-    )
-
     response = gql_query(query)
     user = response["data"]["user"]
     if not user:
-        raise ConsoleError("Channel {} not found".format(channel_id))
+        raise ConsoleError(f"Channel {channel_id} not found")
 
     return response["data"]["user"]["clips"]
 
@@ -222,15 +212,24 @@ def channel_clips_generator_old(channel_id, period, limit):
             break
 
 
-def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], after=None):
-    query = """
+def get_channel_videos(
+    channel_id: str,
+    limit: int,
+    sort: str,
+    type: str = "archive",
+    game_ids: list[str] | None = None,
+    after: str | None = None
+):
+    game_ids = game_ids or []
+
+    query = f"""
     {{
         user(login: "{channel_id}") {{
             videos(
                 first: {limit},
-                type: {type},
-                sort: {sort},
-                after: "{after}",
+                type: {type.upper()},
+                sort: {sort.upper()},
+                after: "{after or ''}",
                 options: {{
                     gameIDs: {game_ids}
                 }}
@@ -242,7 +241,7 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
                 edges {{
                     cursor
                     node {{
-                        {fields}
+                        {VIDEO_FIELDS}
                     }}
                 }}
             }}
@@ -250,20 +249,10 @@ def get_channel_videos(channel_id, limit, sort, type="archive", game_ids=[], aft
     }}
     """
 
-    query = query.format(
-        channel_id=channel_id,
-        game_ids=game_ids,
-        after=after if after else "",
-        limit=limit,
-        sort=sort.upper(),
-        type=type.upper(),
-        fields=VIDEO_FIELDS
-    )
-
     response = gql_query(query)
 
     if not response["data"]["user"]:
-        raise ConsoleError("Channel {} not found".format(channel_id))
+        raise ConsoleError(f"Channel {channel_id} not found")
 
     return response["data"]["user"]["videos"]
 
@@ -291,7 +280,7 @@ def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=[]):
 
 
 def get_access_token(video_id, auth_token=None):
-    query = """
+    query = f"""
     {{
         videoPlaybackAccessToken(
             id: {video_id},
@@ -306,8 +295,6 @@ def get_access_token(video_id, auth_token=None):
         }}
     }}
     """
-
-    query = query.format(video_id=video_id)
 
     headers = {}
     if auth_token is not None:
@@ -335,7 +322,7 @@ def get_playlists(video_id, access_token):
     """
     For a given video return a playlist which contains possible video qualities.
     """
-    url = "https://usher.ttvnw.net/vod/{}".format(video_id)
+    url = f"https://usher.ttvnw.net/vod/{video_id}"
 
     response = httpx.get(url, params={
         "nauth": access_token['value'],
@@ -349,21 +336,21 @@ def get_playlists(video_id, access_token):
 
 
 def get_game_id(name):
-    query = """
+    query = f"""
     {{
-        game(name: "{}") {{
+        game(name: "{name.strip()}") {{
             id
         }}
     }}
     """
 
-    response = gql_query(query.format(name.strip()))
+    response = gql_query(query)
     game = response["data"]["game"]
     if game:
         return game["id"]
 
 
-def get_video_chapters(video_id):
+def get_video_chapters(video_id: str):
     query = {
         "operationName": "VideoPlayer_ChapterSelectButtonVideo",
         "variables":

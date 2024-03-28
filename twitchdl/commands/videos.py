@@ -56,7 +56,7 @@ def videos(
 
     print_out()
     print_out("-" * 80)
-    print_out("<yellow>Videos {}-{} of {}</yellow>".format(1, count, total_count))
+    print_out(f"<yellow>Videos 1-{count} of {total_count}</yellow>")
 
     if total_count > count:
         print_out()
@@ -71,10 +71,10 @@ def _get_game_ids(names):
 
     game_ids = []
     for name in names:
-        print_out("<dim>Looking up game '{}'...</dim>".format(name))
+        print_out(f"<dim>Looking up game '{name}'...</dim>")
         game_id = twitch.get_game_id(name)
         if not game_id:
-            raise ConsoleError("Game '{}' not found".format(name))
+            raise ConsoleError(f"Game '{name}' not found")
         game_ids.append(int(game_id))
 
     return game_ids

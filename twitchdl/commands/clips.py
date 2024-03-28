@@ -68,7 +68,7 @@ def _target_filename(clip):
         utils.slugify(clip["title"]),
     ])
 
-    return "{}.{}".format(name, ext)
+    return f"{name}.{ext}"
 
 
 def _download_clips(generator):
@@ -76,10 +76,10 @@ def _download_clips(generator):
         target = _target_filename(clip)
 
         if path.exists(target):
-            print_out("Already downloaded: <green>{}</green>".format(target))
+            print_out(f"Already downloaded: <green>{target}</green>")
         else:
             url = get_clip_authenticated_url(clip["slug"], "source")
-            print_out("Downloading: <yellow>{}</yellow>".format(target))
+            print_out(f"Downloading: <yellow>{target}</yellow>")
             download_file(url, target)
 
 
@@ -113,7 +113,7 @@ def _print_paged(generator, page_size):
         last = first + len(page) - 1
 
         print_out("-" * 80)
-        print_out("<yellow>Clips {}-{}</yellow>".format(first, last))
+        print_out(f"<yellow>Clips {first}-{last}</yellow>")
 
         first = first + len(page)
         last = first + 1
