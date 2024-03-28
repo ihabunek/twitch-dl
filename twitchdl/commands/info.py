@@ -11,7 +11,7 @@ def info(id: str, *, json: bool = False):
         video = twitch.get_video(video_id)
 
         if not video:
-            raise ConsoleError("Video {} not found".format(video_id))
+            raise ConsoleError(f"Video {video_id} not found")
 
         print_log("Fetching access token...")
         access_token = twitch.get_access_token(video_id)
@@ -33,7 +33,7 @@ def info(id: str, *, json: bool = False):
         print_log("Fetching clip...")
         clip = twitch.get_clip(clip_slug)
         if not clip:
-            raise ConsoleError("Clip {} not found".format(clip_slug))
+            raise ConsoleError(f"Clip {clip_slug} not found")
 
         if json:
             print_json(clip)
@@ -41,7 +41,7 @@ def info(id: str, *, json: bool = False):
             clip_info(clip)
         return
 
-    raise ConsoleError("Invalid input: {}".format(id))
+    raise ConsoleError(f"Invalid input: {id}")
 
 
 def video_info(video, playlists, chapters):
@@ -51,7 +51,7 @@ def video_info(video, playlists, chapters):
     print_out()
     print_out("Playlists:")
     for p in m3u8.loads(playlists).playlists:
-        print_out("<b>{}</b> {}".format(p.stream_info.video, p.uri))
+        print_out(f"<b>{p.stream_info.video}</b> {p.uri}")
 
     if chapters:
         print_out()

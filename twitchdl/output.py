@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 import sys
 import re
@@ -66,13 +64,13 @@ def print_json(data: Any):
 
 
 def print_err(*args, **kwargs):
-    args = ["<red>{}</red>".format(a) for a in args]
+    args = [f"<red>{arg}</red>" for arg in args]
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
     print(*args, file=sys.stderr, **kwargs)
 
 
 def print_log(*args, **kwargs):
-    args = ["<dim>{}</dim>".format(a) for a in args]
+    args = [f"<dim>{a}</dim>" for a in args]
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
     print(*args, file=sys.stderr, **kwargs)
 
@@ -81,20 +79,20 @@ def print_video(video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
 
-    channel = "<blue>{}</blue>".format(video["creator"]["displayName"]) if video["creator"] else ""
-    playing = "playing <blue>{}</blue>".format(video["game"]["name"]) if video["game"] else ""
+    channel = f"<blue>{video['creator']['displayName']}</blue>" if video["creator"] else ""
+    playing = f"playing <blue>{video['game']['name']}</blue>" if video["game"] else ""
 
     # Can't find URL in video object, strange
-    url = "https://www.twitch.tv/videos/{}".format(video["id"])
+    url = f"https://www.twitch.tv/videos/{video['id']}"
 
-    print_out("<b>Video {}</b>".format(video["id"]))
-    print_out("<green>{}</green>".format(video["title"]))
+    print_out(f"<b>Video {video['id']}</b>")
+    print_out(f"<green>{video['title']}</green>")
 
     if channel or playing:
         print_out(" ".join([channel, playing]))
 
-    print_out("Published <blue>{}</blue>  Length: <blue>{}</blue> ".format(published_at, length))
-    print_out("<i>{}</i>".format(url))
+    print_out(f"Published <blue>{published_at}</blue>  Length: <blue>{length}</blue> ")
+    print_out(f"<i>{url}</i>")
 
 
 def print_video_compact(video):
@@ -123,7 +121,7 @@ def print_paged_videos(generator, page_size, total_count):
         last = first + len(page) - 1
 
         print_out("-" * 80)
-        print_out("<yellow>Videos {}-{} of {}</yellow>".format(first, last, total_count))
+        print_out(f"<yellow>Videos {first}-{last} of {total_count}</yellow>")
 
         first = first + len(page)
         last = first + 1
@@ -138,18 +136,19 @@ def print_clip(clip):
     length = utils.format_duration(clip["durationSeconds"])
     channel = clip["broadcaster"]["displayName"]
     playing = (
-        "playing <blue>{}</blue>".format(clip["game"]["name"])
+        f"playing <blue>{clip['game']['name']}</blue>"
         if clip["game"] else ""
     )
 
-    print_out("Clip <b>{}</b>".format(clip["slug"]))
-    print_out("<green>{}</green>".format(clip["title"]))
-    print_out("<blue>{}</blue> {}".format(channel, playing))
+    print_out(f"Clip <b>{clip['slug']}</b>")
+    print_out(f"<green>{clip['title']}</green>")
+    print_out(f"<blue>{channel}</blue> {playing}")
     print_out(
-        "Published <blue>{}</blue>"
-        "  Length: <blue>{}</blue>"
-        "  Views: <blue>{}</blue>".format(published_at, length, clip["viewCount"]))
-    print_out("<i>{}</i>".format(clip["url"]))
+        f"Published <blue>{published_at}</blue>" +
+        f"  Length: <blue>{length}</blue>" +
+        f"  Views: <blue>{clip["viewCount"]}</blue>"
+    )
+    print_out(f"<i>{clip['url']}</i>")
 
 
 def _continue():

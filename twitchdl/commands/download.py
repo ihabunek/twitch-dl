@@ -34,7 +34,7 @@ def download_one(video: str, args: DownloadOptions):
     if clip_slug:
         return _download_clip(clip_slug, args)
 
-    raise ConsoleError("Invalid input: {}".format(video))
+    raise ConsoleError(f"Invalid input: {video}")
 
 
 def _parse_playlists(playlists_m3u8):
@@ -61,7 +61,7 @@ def _get_playlist_by_name(playlists, quality):
             return uri
 
     available = ", ".join([name for (name, _, _) in playlists])
-    msg = "Quality '{}' not found. Available qualities are: {}".format(quality, available)
+    msg = f"Quality '{quality}' not found. Available qualities are: {available}"
     raise ConsoleError(msg)
 
 
@@ -69,9 +69,9 @@ def _select_playlist_interactive(playlists):
     print_out("\nAvailable qualities:")
     for n, (name, resolution, uri) in enumerate(playlists):
         if resolution:
-            print_out("{}) <b>{}</b> <dim>({})</dim>".format(n + 1, name, resolution))
+            print_out(f"{n + 1}) <b>{name}</b> <dim>({resolution})</dim>")
         else:
-            print_out("{}) <b>{}</b>".format(n + 1, name))
+            print_out(f"{n + 1}) <b>{name}</b>")
 
     no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
     _, _, uri = playlists[no - 1]
@@ -83,18 +83,18 @@ def _join_vods(playlist_path, target, overwrite, video):
         "ffmpeg",
         "-i", playlist_path,
         "-c", "copy",
-        "-metadata", "artist={}".format(video["creator"]["displayName"]),
-        "-metadata", "title={}".format(video["title"]),
+        "-metadata", f"artist={video['creator']['displayName']}",
+        "-metadata", f"title={video['title']}",
         "-metadata", "encoded_by=twitch-dl",
         "-stats",
         "-loglevel", "warning",
-        "file:{}".format(target),
+        f"file:{target}",
     ]
 
     if overwrite:
         command.append("-y")
 
-    print_out("<dim>{}</dim>".format(" ".join(command)))
+    print_out(f"<dim>{' '.join(command)}</dim>")
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
@@ -122,7 +122,7 @@ def _video_target_filename(video, args: DownloadOptions):
         return args.output.format(**subs)
     except KeyError as e:
         supported = ", ".join(subs.keys())
-        raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
+        raise ConsoleError(f"Invalid key {e} used in --output. Supported keys are: {supported}")
 
 
 def _clip_target_filename(clip, args: DownloadOptions):
@@ -152,7 +152,7 @@ def _clip_target_filename(clip, args: DownloadOptions):
         return args.output.format(**subs)
     except KeyError as e:
         supported = ", ".join(subs.keys())
-        raise ConsoleError("Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
+        raise ConsoleError(f"Invalid key {e} used in --output. Supported keys are: {supported}")
 
 
 def _get_vod_paths(playlist, start: Optional[int], end: Optional[int]) -> List[str]:
@@ -197,13 +197,13 @@ def _get_clip_url(clip, quality):
                 return q["sourceURL"]
 
         available = ", ".join([str(q["quality"]) for q in qualities])
-        msg = "Quality '{}' not found. Available qualities are: {}".format(quality, available)
+        msg = f"Quality '{quality}' not found. Available qualities are: {available}"
         raise ConsoleError(msg)
 
     # Ask user to select quality
     print_out("\nAvailable qualities:")
     for n, q in enumerate(qualities):
-        print_out("{}) {} [{} fps]".format(n + 1, q["quality"], q["frameRate"]))
+        print_out(f"{n + 1}) {q['quality']} [{q['frameRate']} fps]")
     print_out()
 
     no = utils.read_int("Choose quality", min=1, max=len(qualities), default=1)
@@ -216,7 +216,7 @@ def get_clip_authenticated_url(slug, quality):
     access_token = twitch.get_clip_access_token(slug)
 
     if not access_token:
-        raise ConsoleError("Access token not found for slug '{}'".format(slug))
+        raise ConsoleError(f"Access token not found for slug '{slug}'")
 
     url = _get_clip_url(access_token, quality)
 
@@ -225,26 +225,29 @@ def get_clip_authenticated_url(slug, quality):
         "token": access_token["playbackAccessToken"]["value"],
     })
 
-    return "{}?{}".format(url, query)
+    return f"{url}?{query}"
 
 
 def _download_clip(slug: str, args: DownloadOptions) -> None:
     print_out("<dim>Looking up clip...</dim>")
     clip = twitch.get_clip(slug)
-    game = clip["game"]["name"] if clip["game"] else "Unknown"
 
     if not clip:
-        raise ConsoleError("Clip '{}' not found".format(slug))
+        raise ConsoleError(f"Clip '{slug}' not found")
 
-    print_out("Found: <green>{}</green> by <yellow>{}</yellow>, playing <blue>{}</blue> ({})".format(
-        clip["title"],
-        clip["broadcaster"]["displayName"],
-        game,
-        utils.format_duration(clip["durationSeconds"])
-    ))
+
+    title = clip["title"]
+    user = clip["broadcaster"]["displayName"]
+    game = clip["game"]["name"] if clip["game"] else "Unknown"
+    duration = utils.format_duration(clip["durationSeconds"])
+
+    print_out(
+        f"Found: <green>{title}</green> by <yellow>{user}</yellow>, "+
+        f"playing <blue>{game}</blue> ({duration})"
+    )
 
     target = _clip_target_filename(clip, args)
-    print_out("Target: <blue>{}</blue>".format(target))
+    print_out(f"Target: <blue>{target}</blue>")
 
     if not args.overwrite and path.exists(target):
         response = input("File exists. Overwrite? [Y/n]: ")
@@ -253,17 +256,17 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
         args.overwrite = True
 
     url = get_clip_authenticated_url(slug, args.quality)
-    print_out("<dim>Selected URL: {}</dim>".format(url))
+    print_out(f"<dim>Selected URL: {url}</dim>")
 
     print_out("<dim>Downloading clip...</dim>")
 
     if (args.dry_run is False):
         download_file(url, target)
 
-    print_out("Downloaded: <blue>{}</blue>".format(target))
+    print_out(f"Downloaded: <blue>{target}</blue>")
 
 
-def _download_video(video_id, args) -> None:
+def _download_video(video_id, args: DownloadOptions) -> None:
     if args.start and args.end and args.end <= args.start:
         raise ConsoleError("End time must be greater than start time")
 
@@ -271,13 +274,14 @@ def _download_video(video_id, args) -> None:
     video = twitch.get_video(video_id)
 
     if not video:
-        raise ConsoleError("Video {} not found".format(video_id))
+        raise ConsoleError(f"Video {video_id} not found")
 
-    print_out("Found: <blue>{}</blue> by <yellow>{}</yellow>".format(
-        video['title'], video['creator']['displayName']))
+    title = video['title']
+    user = video['creator']['displayName']
+    print_out(f"Found: <blue>{title}</blue> by <yellow>{user}</yellow>")
 
     target = _video_target_filename(video, args)
-    print_out("Output: <blue>{}</blue>".format(target))
+    print_out(f"Output: <blue>{target}</blue>")
 
     if not args.overwrite and path.exists(target):
         response = input("File exists. Overwrite? [Y/n]: ")
@@ -312,10 +316,9 @@ def _download_video(video_id, args) -> None:
     with open(path.join(target_dir, "playlist.m3u8"), "w") as f:
         f.write(response.text)
 
-    print_out("\nDownloading {} VODs using {} workers to {}".format(
-        len(vod_paths), args.max_workers, target_dir))
+    print_out(f"\nDownloading {len(vod_paths)} VODs using {args.max_workers} workers to {target_dir}")
     sources = [base_uri + path for path in vod_paths]
-    targets = [os.path.join(target_dir, "{:05d}.ts".format(k)) for k, _ in enumerate(vod_paths)]
+    targets = [os.path.join(target_dir, f"{k:05d}.ts") for k, _ in enumerate(vod_paths)]
     asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
 
     # Make a modified playlist which references downloaded VODs
@@ -334,22 +337,22 @@ def _download_video(video_id, args) -> None:
 
     if args.no_join:
         print_out("\n\n<dim>Skipping joining files...</dim>")
-        print_out("VODs downloaded to:\n<blue>{}</blue>".format(target_dir))
+        print_out(f"VODs downloaded to:\n<blue>{target_dir}</blue>")
         return
 
     print_out("\n\nJoining files...")
     _join_vods(playlist_path, target, args.overwrite, video)
 
     if args.keep:
-        print_out("\n<dim>Temporary files not deleted: {}</dim>".format(target_dir))
+        print_out(f"\n<dim>Temporary files not deleted: {target_dir}</dim>")
     else:
         print_out("\n<dim>Deleting temporary files...</dim>")
         shutil.rmtree(target_dir)
 
-    print_out("\nDownloaded: <green>{}</green>".format(target))
+    print_out(f"\nDownloaded: <green>{target}</green>")
 
 
-def _determine_time_range(video_id, args):
+def _determine_time_range(video_id, args: DownloadOptions):
     if args.start or args.end:
         return args.start, args.end
 
