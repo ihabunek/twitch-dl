@@ -1,10 +1,11 @@
 import m3u8
 
 from twitchdl import utils, twitch
+from twitchdl.commands.download import get_video_substitutions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
 
-def info(id: str, *, json: bool = False):
+def info(id: str, *, json: bool = False, format="mkv"):
     video_id = utils.parse_video_identifier(id)
     if video_id:
         print_log("Fetching video...")
@@ -22,10 +23,16 @@ def info(id: str, *, json: bool = False):
         print_log("Fetching chapters...")
         chapters = twitch.get_video_chapters(video_id)
 
+        substitutions = get_video_substitutions(video, format)
+
         if json:
             video_json(video, playlists, chapters)
         else:
             video_info(video, playlists, chapters)
+
+            print_out("\nOutput format placeholders:")
+            for k, v in substitutions.items():
+                print(f" * {k} = {v}")
         return
 
     clip_slug = utils.parse_clip_identifier(id)
