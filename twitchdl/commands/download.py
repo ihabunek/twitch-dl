@@ -81,12 +81,16 @@ def _select_playlist_interactive(playlists):
 
 
 def _join_vods(playlist_path: str, target: str, overwrite: bool, video):
+    description = video["description"] or ""
+    description = description.strip()
+
     command = [
         "ffmpeg",
         "-i", playlist_path,
         "-c", "copy",
         "-metadata", f"artist={video['creator']['displayName']}",
         "-metadata", f"title={video['title']}",
+        "-metadata", f"description={description}",
         "-metadata", "encoded_by=twitch-dl",
         "-stats",
         "-loglevel", "warning",

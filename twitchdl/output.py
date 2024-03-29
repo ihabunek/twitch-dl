@@ -91,6 +91,9 @@ def print_video(video):
     if channel or playing:
         print_out(" ".join([channel, playing]))
 
+    if video["description"]:
+        print_out(f"Description: {video['description']}")
+
     print_out(f"Published <blue>{published_at}</blue>  Length: <blue>{length}</blue> ")
     print_out(f"<i>{url}</i>")
 

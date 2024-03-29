@@ -56,6 +56,7 @@ def gql_raise_on_error(response: httpx.Response):
 VIDEO_FIELDS = """
     id
     title
+    description
     publishedAt
     broadcastType
     lengthSeconds
