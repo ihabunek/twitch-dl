@@ -1,4 +1,6 @@
 import asyncio
+import platform
+import click
 import httpx
 import m3u8
 import os
@@ -20,7 +22,7 @@ from twitchdl.http import download_all
 from twitchdl.output import print_out
 
 
-def download(ids, args: DownloadOptions):
+def download(ids: list[str], args: DownloadOptions):
     for video_id in ids:
         download_one(video_id, args)
 
@@ -78,7 +80,7 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path, target, overwrite, video):
+def _join_vods(playlist_path: str, target: str, overwrite: bool, video):
     command = [
         "ffmpeg",
         "-i", playlist_path,
@@ -98,6 +100,15 @@ def _join_vods(playlist_path, target, overwrite, video):
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
+
+def _concat_vods(vod_paths: list[str], target: str):
+    tool = "type" if platform.system() == "Windows" else "cat"
+    command = [tool] + vod_paths
+
+    with open(target, "wb") as target_file:
+        result = subprocess.run(command, stdout=target_file)
+        if result.returncode != 0:
+            raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
 def _video_target_filename(video, args: DownloadOptions):
@@ -335,13 +346,19 @@ def _download_video(video_id, args: DownloadOptions) -> None:
     playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
     playlist.dump(playlist_path)
 
+    print_out("")
+
     if args.no_join:
-        print_out("\n\n<dim>Skipping joining files...</dim>")
+        print_out("<dim>Skipping joining files...</dim>")
         print_out(f"VODs downloaded to:\n<blue>{target_dir}</blue>")
         return
 
-    print_out("\n\nJoining files...")
-    _join_vods(playlist_path, target, args.overwrite, video)
+    if args.concat:
+        print_out("<dim>Concating files...</dim>")
+        _concat_vods(targets, target)
+    else:
+        print_out("<dim>Joining files...</dim>")
+        _join_vods(playlist_path, target, args.overwrite, video)
 
     if args.keep:
         print_out(f"\n<dim>Temporary files not deleted: {target_dir}</dim>")

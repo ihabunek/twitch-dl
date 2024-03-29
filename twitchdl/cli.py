@@ -174,6 +174,11 @@ def clips(
     flag_value=0,
 )
 @click.option(
+    "--concat",
+    is_flag=True,
+    help="Do not use ffmpeg to join files, concat them instead",
+)
+@click.option(
     "-d",
     "--dry-run",
     help="Simulate the download provcess without actually downloading any files.",
@@ -188,8 +193,9 @@ def clips(
 @click.option(
     "-f",
     "--format",
-    help="Video format to convert into, passed to ffmpeg as the target file extension.",
-    default="mkv",
+    help="""Video format to convert into, passed to ffmpeg as the target file
+         extension. Defaults to `mkv`. If `--concat` is passed, defaults to
+         `ts`.""",
 )
 @click.option(
     "-k",
@@ -241,6 +247,7 @@ def download(
     ids: tuple[str, ...],
     auth_token: str | None,
     chapter: int | None,
+    concat: bool,
     dry_run: bool,
     end: int | None,
     format: str,
@@ -257,10 +264,15 @@ def download(
 
     Pass one or more video ID, clip slug or Twitch URL to download.
     """
+    from twitchdl.commands.download import download
+
+    if not format:
+        format = "ts" if concat else "mkv"
 
     options = DownloadOptions(
         auth_token=auth_token,
         chapter=chapter,
+        concat=concat,
         dry_run=dry_run,
         end=end,
         format=format,
@@ -274,8 +286,7 @@ def download(
         max_workers=max_workers,
     )
 
-    from twitchdl.commands.download import download
-    download(ids, options)
+    download(list(ids), options)
 
 
 @cli.command()

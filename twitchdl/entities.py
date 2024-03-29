@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class DownloadOptions:
     auth_token: str | None
     chapter: int | None
+    concat: bool
     dry_run: bool
     end: int | None
     format: str
