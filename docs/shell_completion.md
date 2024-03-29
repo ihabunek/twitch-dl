@@ -1,6 +1,6 @@
 # Shell completion
 
-> Introduced in twitch-dl 3.0.0
+> Introduced in twitch-dl 2.2.0
 
 twitch-dl uses [Click shell completion](https://click.palletsprojects.com/en/8.1.x/shell-completion/) which works on Bash, Fish and Zsh.
 

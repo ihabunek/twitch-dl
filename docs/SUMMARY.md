@@ -9,6 +9,8 @@
     - [twitch-dl clips](commands/clips.md)
     - [twitch-dl info](commands/info.md)
     - [twitch-dl env](commands/env.md)
+- [Environemnt variables](environment_variables.md)
+- [Shell completion](shell_completion.md)
 - [Advanced](advanced.md)
 
 [License](license.md)

@@ -176,7 +176,8 @@ def clips(
 @click.option(
     "--concat",
     is_flag=True,
-    help="Do not use ffmpeg to join files, concat them instead",
+    help="""Do not use ffmpeg to join files, concat them instead. This will
+         produce a .ts file by default.""",
 )
 @click.option(
     "-d",
@@ -227,7 +228,8 @@ def clips(
 @click.option(
     "-r",
     "--rate-limit",
-    help="Limit the maximum download speed in bytes per second. Use 'k' and 'm' suffixes for kbps and mbps.",
+    help="""Limit the maximum download speed in bytes per second. Use 'k' and
+         'm' suffixes for kbps and mbps.""",
     callback=validate_rate,
 )
 @click.option(

@@ -27,6 +27,11 @@ twitch-dl download [OPTIONS] [IDS]...
 </tr>
 
 <tr>
+    <td class="code">--concat</td>
+    <td>Do not use ffmpeg to join files, concat them instead</td>
+</tr>
+
+<tr>
     <td class="code">-d, --dry-run</td>
     <td>Simulate the download provcess without actually downloading any files.</td>
 </tr>
@@ -38,7 +43,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">-f, --format TEXT</td>
-    <td>Video format to convert into, passed to ffmpeg as the target file extension. [default: <code>mkv</code>]</td>
+    <td>Video format to convert into, passed to ffmpeg as the target file extension. Defaults to <code>mkv</code>. If <code>--concat</code> is passed, defaults to <code>ts</code>.</td>
 </tr>
 
 <tr>

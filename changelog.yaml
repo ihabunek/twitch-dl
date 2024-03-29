@@ -1,9 +1,11 @@
-3.0.0:
+2.2.0:
   date: TBA
   changes:
-    - "BREAKING: Requires python 3.8 or later"
-    - "Migrated to click lib for cli parsing"
-    - "Add shell auto completion"
+    - "**Requires python 3.8 or later**"
+    - "Migrated to Click library for generating the commandline interface"
+    - "Add shell auto completion, see: https://twitch-dl.bezdomni.net/shell_completion.html"
+    - "Add setting defaults via environment variables, see: https://twitch-dl.bezdomni.net/environment_variables.html"
+    - "Add `download --concat` option to avoid using ffmeg for joinig vods and concat them instead. This will produce a `.ts` file by default."
 
 2.1.4:
   date: 2024-01-06
