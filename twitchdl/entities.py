@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -17,3 +18,8 @@ class DownloadOptions:
     rate_limit: str | None
     start: int | None
     max_workers: int
+
+
+# Type for annotating decoded JSON
+# TODO: make data classes for common structs
+Data = dict[str, Any]

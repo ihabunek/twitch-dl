@@ -1,8 +1,9 @@
 import m3u8
 
 from twitchdl import utils, twitch
+from twitchdl.commands.download import get_video_placeholders
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_video, print_clip, print_json, print_out, print_log
+from twitchdl.output import print_table, print_video, print_clip, print_json, print_out, print_log
 
 def info(id: str, *, json: bool = False):
     video_id = utils.parse_video_identifier(id)
@@ -60,6 +61,11 @@ def video_info(video, playlists, chapters):
             start = utils.format_time(chapter["positionMilliseconds"] // 1000, force_hours=True)
             duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
             print_out(f'{start} <b>{chapter["description"]}</b> ({duration})')
+
+    placeholders = get_video_placeholders(video, format = "mkv")
+    placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
+    print_out("")
+    print_table(["Placeholder", "Value"], placeholders)
 
 
 def video_json(video, playlists, chapters):

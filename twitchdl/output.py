@@ -1,6 +1,7 @@
+import click
 import json
-import sys
 import re
+import sys
 
 from itertools import islice
 from twitchdl import utils
@@ -73,6 +74,25 @@ def print_log(*args, **kwargs):
     args = [f"<dim>{a}</dim>" for a in args]
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
     print(*args, file=sys.stderr, **kwargs)
+
+
+def print_table(headers: list[str], data: list[list[str]]):
+    widths = [[len(cell) for cell in row] for row in data + [headers]]
+    widths = [max(width) for width in zip(*widths)]
+    underlines = ["-" * width for width in widths]
+
+    def print_row(row: list[str]):
+        for idx, cell in enumerate(row):
+            width = widths[idx]
+            click.echo(cell.ljust(width), nl=False)
+            click.echo("  ", nl=False)
+        click.echo()
+
+    print_row(headers)
+    print_row(underlines)
+
+    for row in data:
+        print_row(row)
 
 
 def print_video(video):

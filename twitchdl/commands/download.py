@@ -1,6 +1,5 @@
 import asyncio
 import platform
-import click
 import httpx
 import m3u8
 import os
@@ -16,7 +15,7 @@ from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
 from twitchdl.download import download_file
-from twitchdl.entities import DownloadOptions
+from twitchdl.entities import Data, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import print_out
@@ -115,16 +114,16 @@ def _concat_vods(vod_paths: list[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def _video_target_filename(video, args: DownloadOptions):
+def get_video_placeholders(video: Data, format: str) -> Data:
     date, time = video['publishedAt'].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
-    subs = {
+    return {
         "channel": video["creator"]["displayName"],
         "channel_login": video["creator"]["login"],
         "date": date,
         "datetime": video["publishedAt"],
-        "format": args.format,
+        "format": format,
         "game": game,
         "game_slug": utils.slugify(game),
         "id": video["id"],
@@ -132,6 +131,10 @@ def _video_target_filename(video, args: DownloadOptions):
         "title": utils.titlify(video["title"]),
         "title_slug": utils.slugify(video["title"]),
     }
+
+
+def _video_target_filename(video: Data, args: DownloadOptions):
+    subs = get_video_placeholders(video, args.format)
 
     try:
         return args.output.format(**subs)
