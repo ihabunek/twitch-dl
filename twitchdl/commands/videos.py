@@ -14,8 +14,8 @@ def videos(
     json: bool,
     limit: int | None,
     pager: int | None,
-    sort: str,
-    type: str,
+    sort: twitch.VideosSort,
+    type: twitch.VideosType,
 ):
     game_ids = _get_game_ids(games)
 
@@ -65,7 +65,7 @@ def videos(
         )
 
 
-def _get_game_ids(names):
+def _get_game_ids(names: list[str]) -> list[str]:
     if not names:
         return []
 

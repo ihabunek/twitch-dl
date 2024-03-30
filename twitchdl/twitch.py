@@ -6,8 +6,9 @@ import httpx
 import json
 import click
 
-from typing import Dict
+from typing import Dict, Generator, Literal
 from twitchdl import CLIENT_ID
+from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
 
 
@@ -262,8 +263,20 @@ def get_channel_videos(
     return response["data"]["user"]["videos"]
 
 
-def channel_videos_generator(channel_id, max_videos, sort, type, game_ids=[]):
-    def _generator(videos, max_videos):
+VideosSort = Literal["views", "time"]
+VideosType = Literal["archive", "highlight", "upload"]
+
+
+def channel_videos_generator(
+    channel_id: str,
+    max_videos: int,
+    sort: VideosSort,
+    type: VideosType,
+    game_ids: list[str] | None = None
+) -> tuple[int, Generator[Data, None, None]]:
+    game_ids = game_ids or []
+
+    def _generator(videos: Data, max_videos: int) -> Generator[Data, None, None]:
         for video in videos["edges"]:
             if max_videos < 1:
                 return

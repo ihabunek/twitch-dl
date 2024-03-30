@@ -61,7 +61,7 @@ def print_out(*args, **kwargs):
 
 
 def print_json(data: Any):
-    print(json.dumps(data))
+    click.echo(json.dumps(data))
 
 
 def print_err(*args, **kwargs):
@@ -126,7 +126,7 @@ def print_video_compact(video):
     print_out(f'<b>{id}</b> {date} <green>{title}</green> <blue>{game}</blue>')
 
 
-def print_paged_videos(generator, page_size, total_count):
+def print_paged_videos(generator, page_size: int, total_count: int):
     iterator = iter(generator)
     page = list(islice(iterator, page_size))
 
