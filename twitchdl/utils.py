@@ -1,6 +1,8 @@
 import re
 import unicodedata
 
+import click
+
 
 def _format_size(value: float, digits: int, unit: str):
     if digits > 0:
@@ -54,14 +56,9 @@ def format_time(total_seconds: int | float, force_hours: bool = False) -> str:
 
 
 def read_int(msg: str, min: int, max: int, default: int | None = None) -> int:
-    if default:
-        msg = msg + f" [default {default}]"
-
-    msg += ": "
-
     while True:
         try:
-            val = input(msg)
+            val = click.prompt(msg, default=default, type=int)
             if default and not val:
                 return default
             if min <= int(val) <= max:

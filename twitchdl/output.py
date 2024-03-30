@@ -64,10 +64,8 @@ def print_json(data: Any):
     click.echo(json.dumps(data))
 
 
-def print_log(*args, **kwargs):
-    args = [f"<dim>{a}</dim>" for a in args]
-    args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
-    print(*args, file=sys.stderr, **kwargs)
+def print_log(message: Any):
+    click.secho(message, err=True, dim=True)
 
 
 def print_table(headers: list[str], data: list[list[str]]):
@@ -177,3 +175,29 @@ def _continue():
         return False
 
     return True
+
+
+# Shorthand functions for coloring output
+
+def blue(text: Any) -> str:
+    return click.style(text, fg="blue")
+
+
+def cyan(text: Any) -> str:
+    return click.style(text, fg="cyan")
+
+
+def green(text: Any) -> str:
+    return click.style(text, fg="green")
+
+
+def yellow(text: Any) -> str:
+    return click.style(text, fg="yellow")
+
+
+def bold(text: Any) -> str:
+    return click.style(text, bold=True)
+
+
+def dim(text: Any) -> str:
+    return click.style(text, dim=True)

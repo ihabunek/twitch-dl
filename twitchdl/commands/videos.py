@@ -2,7 +2,7 @@ import sys
 
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_out, print_paged_videos, print_video, print_json, print_video_compact
+from twitchdl.output import print_log, print_out, print_paged_videos, print_video, print_json, print_video_compact
 
 
 def videos(
@@ -71,7 +71,7 @@ def _get_game_ids(names: list[str]) -> list[str]:
 
     game_ids = []
     for name in names:
-        print_out(f"<dim>Looking up game '{name}'...</dim>")
+        print_log(f"Looking up game '{name}'...")
         game_id = twitch.get_game_id(name)
         if not game_id:
             raise ConsoleError(f"Game '{name}' not found")
