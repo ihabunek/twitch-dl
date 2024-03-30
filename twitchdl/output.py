@@ -64,12 +64,6 @@ def print_json(data: Any):
     click.echo(json.dumps(data))
 
 
-def print_err(*args, **kwargs):
-    args = [f"<red>{arg}</red>" for arg in args]
-    args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
-    print(*args, file=sys.stderr, **kwargs)
-
-
 def print_log(*args, **kwargs):
     args = [f"<dim>{a}</dim>" for a in args]
     args = [colorize(a) if USE_ANSI_COLOR else strip_tags(a) for a in args]
