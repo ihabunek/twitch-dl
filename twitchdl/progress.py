@@ -1,3 +1,4 @@
+import click
 import logging
 import time
 
@@ -6,7 +7,7 @@ from dataclasses import dataclass, field
 from statistics import mean
 from typing import Dict, NamedTuple, Optional, Deque
 
-from twitchdl.output import print_out
+from twitchdl.output import blue
 from twitchdl.utils import format_size, format_time
 
 logger = logging.getLogger(__name__)
@@ -127,11 +128,11 @@ class Progress:
 
         progress = " ".join([
             f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
-            f"<blue>{self.progress_perc}%</blue>",
-            f"of <blue>~{format_size(self.estimated_total)}</blue>" if self.estimated_total else "",
-            f"at <blue>{format_size(self.speed)}/s</blue>" if self.speed else "",
-            f"ETA <blue>{format_time(self.remaining_time)}</blue>" if self.remaining_time is not None else "",
+            blue(self.progress_perc),
+            f"of ~{blue(format_size(self.estimated_total))}" if self.estimated_total else "",
+            f"at {blue(format_size(self.speed))}/s" if self.speed else "",
+            f"ETA {blue(format_time(self.remaining_time))}" if self.remaining_time is not None else "",
         ])
 
-        print_out(f"\r{progress}     ", end="")
+        click.echo(f"\r{progress}     ", nl=False)
         self.last_printed = now

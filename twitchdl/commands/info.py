@@ -1,9 +1,11 @@
+import click
 import m3u8
 
 from twitchdl import utils, twitch
 from twitchdl.commands.download import get_video_placeholders
+from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_table, print_video, print_clip, print_json, print_out, print_log
+from twitchdl.output import bold, print_table, print_video, print_clip, print_json, print_log
 
 def info(id: str, *, json: bool = False):
     video_id = utils.parse_video_identifier(id)
@@ -46,25 +48,25 @@ def info(id: str, *, json: bool = False):
 
 
 def video_info(video, playlists, chapters):
-    print_out()
+    click.echo()
     print_video(video)
 
-    print_out()
-    print_out("Playlists:")
+    click.echo()
+    click.echo("Playlists:")
     for p in m3u8.loads(playlists).playlists:
-        print_out(f"<b>{p.stream_info.video}</b> {p.uri}")
+        click.echo(f"{bold(p.stream_info.video)} {p.uri}")
 
     if chapters:
-        print_out()
-        print_out("Chapters:")
+        click.echo()
+        click.echo("Chapters:")
         for chapter in chapters:
             start = utils.format_time(chapter["positionMilliseconds"] // 1000, force_hours=True)
             duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
-            print_out(f'{start} <b>{chapter["description"]}</b> ({duration})')
+            click.echo(f'{start} {bold(chapter["description"])} ({duration})')
 
     placeholders = get_video_placeholders(video, format = "mkv")
     placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
-    print_out("")
+    click.echo("")
     print_table(["Placeholder", "Value"], placeholders)
 
 
@@ -86,11 +88,11 @@ def video_json(video, playlists, chapters):
     print_json(video)
 
 
-def clip_info(clip):
-    print_out()
+def clip_info(clip: Data):
+    click.echo()
     print_clip(clip)
-    print_out()
-    print_out("Download links:")
+    click.echo()
+    click.echo("Download links:")
 
     for q in clip["videoQualities"]:
-        print_out("<b>{quality}p{frameRate}</b> {sourceURL}".format(**q))
+        click.echo(f"{bold(q['quality'])} [{q['frameRate']} fps] {q['sourceURL']}")

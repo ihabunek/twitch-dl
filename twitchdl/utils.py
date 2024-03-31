@@ -11,7 +11,7 @@ def _format_size(value: float, digits: int, unit: str):
         return f"{int(value)}{unit}"
 
 
-def format_size(bytes_: int, digits: int = 1):
+def format_size(bytes_: int | float, digits: int = 1):
     if bytes_ < 1024:
         return _format_size(bytes_, digits, "B")
 

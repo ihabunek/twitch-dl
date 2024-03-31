@@ -5,10 +5,12 @@ from typing import Literal
 from itertools import islice
 from os import path
 
+import click
+
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
-from twitchdl.output import print_out, print_clip, print_json
+from twitchdl.output import green, print_clip, print_json, yellow
 
 ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 
@@ -41,7 +43,9 @@ def clips(
 
 
 def _continue():
-    print_out("Press <green><b>Enter</green> to continue, <yellow><b>Ctrl+C</yellow> to break.")
+    enter = click.style("Enter", bold=True, fg="green")
+    ctrl_c = click.style("Ctrl+C", bold=True, fg="yellow")
+    click.echo(f"Press {enter} to continue, {ctrl_c} to break.")
 
     try:
         input()
@@ -76,22 +80,23 @@ def _download_clips(generator):
         target = _target_filename(clip)
 
         if path.exists(target):
-            print_out(f"Already downloaded: <green>{target}</green>")
+            click.echo(f"Already downloaded: {green(target)}")
         else:
             url = get_clip_authenticated_url(clip["slug"], "source")
-            print_out(f"Downloading: <yellow>{target}</yellow>")
+            click.echo(f"Downloading: {yellow(target)}")
             download_file(url, target)
 
 
 def _print_all(generator, all: bool):
     for clip in generator:
-        print_out()
+        click.echo()
         print_clip(clip)
 
     if not all:
-        print_out(
-            "\n<dim>There may be more clips. " +
-            "Increase the --limit, use --all or --pager to see the rest.</dim>"
+        click.secho(
+            "\nThere may be more clips. " +
+            "Increase the --limit, use --all or --pager to see the rest.",
+            dim=True
         )
 
 
@@ -103,17 +108,17 @@ def _print_paged(generator, page_size):
     last = first + len(page) - 1
 
     while True:
-        print_out("-" * 80)
+        click.echo("-" * 80)
 
-        print_out()
+        click.echo()
         for clip in page:
             print_clip(clip)
-            print_out()
+            click.echo()
 
         last = first + len(page) - 1
 
-        print_out("-" * 80)
-        print_out(f"<yellow>Clips {first}-{last}</yellow>")
+        click.echo("-" * 80)
+        click.echo(f"Clips {first}-{last} of ???")
 
         first = first + len(page)
         last = first + 1

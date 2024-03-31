@@ -19,7 +19,7 @@ from twitchdl.download import download_file
 from twitchdl.entities import Data, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
-from twitchdl.output import blue, bold, dim, green, print_log, print_out, yellow
+from twitchdl.output import blue, bold, dim, green, print_log, yellow
 
 
 def download(ids: list[str], args: DownloadOptions):

@@ -1,8 +1,10 @@
 import sys
 
+import click
+
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_log, print_out, print_paged_videos, print_video, print_json, print_video_compact
+from twitchdl.output import print_log, print_paged_videos, print_video, print_json, print_video_compact
 
 
 def videos(
@@ -38,7 +40,7 @@ def videos(
         return
 
     if total_count == 0:
-        print_out("<yellow>No videos found</yellow>")
+        click.echo("No videos found")
         return
 
     if pager:
@@ -50,18 +52,18 @@ def videos(
         if compact:
             print_video_compact(video)
         else:
-            print_out()
+            click.echo()
             print_video(video)
         count += 1
 
-    print_out()
-    print_out("-" * 80)
-    print_out(f"<yellow>Videos 1-{count} of {total_count}</yellow>")
+    click.echo()
+    click.echo("-" * 80)
+    click.echo(f"Videos 1-{count} of {total_count}")
 
     if total_count > count:
-        print_out()
-        print_out(
-            "<dim>There are more videos. Increase the --limit, use --all or --pager to see the rest.</dim>"
+        click.secho(
+            "\nThere are more videos. Increase the --limit, use --all or --pager to see the rest.",
+            dim=True
         )
 
 
