@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 
@@ -23,3 +24,30 @@ class DownloadOptions:
 # Type for annotating decoded JSON
 # TODO: make data classes for common structs
 Data = dict[str, Any]
+
+
+@dataclass
+class User:
+    login: str
+    display_name: str
+
+@dataclass
+class Game:
+    name: str
+
+@dataclass
+class Video:
+    id: str
+    title: str
+    description: str
+    published_at: datetime
+    broadcast_type: str
+    length_seconds: int
+    game: Game
+    creator: User
+
+
+@dataclass
+class AccessToken:
+    signature: str
+    value: str

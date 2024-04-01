@@ -8,7 +8,7 @@ import click
 
 from typing import Dict, Generator, Literal
 from twitchdl import CLIENT_ID
-from twitchdl.entities import Data
+from twitchdl.entities import AccessToken, Data
 from twitchdl.exceptions import ConsoleError
 
 
@@ -298,7 +298,7 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id, auth_token=None):
+def get_access_token(video_id: str, auth_token: str | None = None) -> AccessToken:
     query = f"""
     {{
         videoPlaybackAccessToken(
@@ -321,7 +321,11 @@ def get_access_token(video_id, auth_token=None):
 
     try:
         response = gql_query(query, headers=headers)
-        return response["data"]["videoPlaybackAccessToken"]
+        return AccessToken(
+            response["data"]["videoPlaybackAccessToken"]["signature"],
+            response["data"]["videoPlaybackAccessToken"]["value"],
+        )
+
     except httpx.HTTPStatusError as error:
         # Provide a more useful error message when server returns HTTP 401
         # Unauthorized while using a user-provided auth token.
@@ -337,15 +341,15 @@ def get_access_token(video_id, auth_token=None):
         raise
 
 
-def get_playlists(video_id, access_token):
+def get_playlists(video_id: str, access_token: AccessToken):
     """
     For a given video return a playlist which contains possible video qualities.
     """
     url = f"https://usher.ttvnw.net/vod/{video_id}"
 
     response = httpx.get(url, params={
-        "nauth": access_token['value'],
-        "nauthsig": access_token['signature'],
+        "nauth": access_token.value,
+        "nauthsig": access_token.signature,
         "allow_audio_only": "true",
         "allow_source": "true",
         "player": "twitchweb",

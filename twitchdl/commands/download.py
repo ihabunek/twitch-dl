@@ -15,8 +15,9 @@ from typing import List, Optional, OrderedDict
 from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
+from twitchdl.conversion import from_dict
 from twitchdl.download import download_file
-from twitchdl.entities import Data, DownloadOptions
+from twitchdl.entities import Data, DownloadOptions, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, dim, green, print_log, yellow
@@ -80,16 +81,16 @@ def _select_playlist_interactive(playlists):
     return uri
 
 
-def _join_vods(playlist_path: str, target: str, overwrite: bool, video):
-    description = video["description"] or ""
+def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
+    description = video.description or ""
     description = description.strip()
 
     command = [
         "ffmpeg",
         "-i", playlist_path,
         "-c", "copy",
-        "-metadata", f"artist={video['creator']['displayName']}",
-        "-metadata", f"title={video['title']}",
+        "-metadata", f"artist={video.creator.display_name}",
+        "-metadata", f"title={video.title}",
         "-metadata", f"description={description}",
         "-metadata", "encoded_by=twitch-dl",
         "-stats",
@@ -115,26 +116,28 @@ def _concat_vods(vod_paths: list[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def get_video_placeholders(video: Data, format: str) -> Data:
-    date, time = video['publishedAt'].split("T")
-    game = video["game"]["name"] if video["game"] else "Unknown"
+def get_video_placeholders(video: Video, format: str) -> Data:
+    date = video.published_at.date().isoformat()
+    time = video.published_at.time().isoformat()
+    datetime = video.published_at.isoformat().replace("+00:00", "Z")
+    game = video.game.name if video.game else "Unknown"
 
     return {
-        "channel": video["creator"]["displayName"],
-        "channel_login": video["creator"]["login"],
+        "channel": video.creator.display_name,
+        "channel_login": video.creator.login,
         "date": date,
-        "datetime": video["publishedAt"],
+        "datetime": datetime,
         "format": format,
         "game": game,
         "game_slug": utils.slugify(game),
-        "id": video["id"],
+        "id": video.id,
         "time": time,
-        "title": utils.titlify(video["title"]),
-        "title_slug": utils.slugify(video["title"]),
+        "title": utils.titlify(video.title),
+        "title_slug": utils.slugify(video.title),
     }
 
 
-def _video_target_filename(video: Data, args: DownloadOptions):
+def _video_target_filename(video: Video, args: DownloadOptions):
     subs = get_video_placeholders(video, args.format)
 
     try:
@@ -280,19 +283,18 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
         click.echo(f"Downloaded: {blue(target)}")
 
 
-def _download_video(video_id, args: DownloadOptions) -> None:
+def _download_video(video_id: str, args: DownloadOptions) -> None:
     if args.start and args.end and args.end <= args.start:
         raise ConsoleError("End time must be greater than start time")
 
     print_log("Looking up video...")
-    video = twitch.get_video(video_id)
+    response = twitch.get_video(video_id)
 
-    if not video:
+    if not response:
         raise ConsoleError(f"Video {video_id} not found")
 
-    title = video["title"]
-    user = video["creator"]["displayName"]
-    click.echo(f"Found: {blue(title)} by {yellow(user)}")
+    video = from_dict(Video, response)
+    click.echo(f"Found: {blue(video.title)} by {yellow(video.creator.display_name)}")
 
     target = _video_target_filename(video, args)
     click.echo(f"Output: {blue(target)}")

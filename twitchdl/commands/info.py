@@ -3,17 +3,19 @@ import m3u8
 
 from twitchdl import utils, twitch
 from twitchdl.commands.download import get_video_placeholders
-from twitchdl.entities import Data
+from twitchdl.conversion import from_dict
+from twitchdl.entities import Data, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import bold, print_table, print_video, print_clip, print_json, print_log
+
 
 def info(id: str, *, json: bool = False):
     video_id = utils.parse_video_identifier(id)
     if video_id:
         print_log("Fetching video...")
-        video = twitch.get_video(video_id)
+        response = twitch.get_video(video_id)
 
-        if not video:
+        if not response:
             raise ConsoleError(f"Video {video_id} not found")
 
         print_log("Fetching access token...")
@@ -26,8 +28,9 @@ def info(id: str, *, json: bool = False):
         chapters = twitch.get_video_chapters(video_id)
 
         if json:
-            video_json(video, playlists, chapters)
+            video_json(response, playlists, chapters)
         else:
+            video = from_dict(Video, response)
             video_info(video, playlists, chapters)
         return
 
@@ -47,7 +50,7 @@ def info(id: str, *, json: bool = False):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video, playlists, chapters):
+def video_info(video: Video, playlists, chapters):
     click.echo()
     print_video(video)
 

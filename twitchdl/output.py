@@ -5,7 +5,7 @@ from itertools import islice
 from twitchdl import utils
 from typing import Any, Callable, Generator, TypeVar
 
-from twitchdl.entities import Data
+from twitchdl.entities import Data, Video
 
 T = TypeVar("T")
 
@@ -78,24 +78,24 @@ def print_paged(
 
 
 
-def print_video(video: Data):
-    published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
-    length = utils.format_duration(video["lengthSeconds"])
+def print_video(video: Video):
+    published_at = str(video.published_at.astimezone())
+    length = utils.format_duration(video.length_seconds)
 
-    channel = blue(video['creator']['displayName']) if video["creator"] else ""
-    playing = f"playing {blue(video['game']['name'])}" if video["game"] else ""
+    channel = blue(video.creator.display_name) if video.creator else ""
+    playing = f"playing {blue(video.game.name)}" if video.game else ""
 
     # Can't find URL in video object, strange
-    url = f"https://www.twitch.tv/videos/{video['id']}"
+    url = f"https://www.twitch.tv/videos/{video.id}"
 
-    click.secho(f"Video {video['id']}", bold=True)
-    click.secho(f"{video['title']}", fg="green")
+    click.secho(f"Video {video.id}", bold=True)
+    click.secho(f"{video.title}", fg="green")
 
     if channel or playing:
         click.echo(" ".join([channel, playing]))
 
-    if video["description"]:
-        click.echo(f"Description: {video['description']}")
+    if video.description:
+        click.echo(f"Description: {video.description}")
 
     click.echo(f"Published {blue(published_at)}  Length: {blue(length)} ")
     click.secho(url, italic=True)
