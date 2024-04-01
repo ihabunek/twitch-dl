@@ -5,8 +5,8 @@ import re
 import sys
 
 from twitchdl import __version__
-from twitchdl.commands.clips import ClipsPeriod
 from twitchdl.entities import DownloadOptions
+from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 
 # Tweak the Click context
 # https://click.palletsprojects.com/en/8.1.x/api/#context
@@ -369,8 +369,8 @@ def videos(
     json: bool,
     limit: int | None,
     pager: int | None,
-    sort: str,
-    type: str,
+    sort: VideosSort,
+    type: VideosType,
 ):
     """List or download clips for given CHANNEL_NAME."""
     from twitchdl.commands.videos import videos

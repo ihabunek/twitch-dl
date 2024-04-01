@@ -12,6 +12,11 @@ from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
 
 
+ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
+VideosSort = Literal["views", "time"]
+VideosType = Literal["archive", "highlight", "upload"]
+
+
 class GQLError(click.ClickException):
     def __init__(self, errors: list[str]):
         message = "GraphQL query failed."
@@ -141,7 +146,7 @@ def get_clip_access_token(slug: str):
     return response["data"]["clip"]
 
 
-def get_channel_clips(channel_id: str, period: str, limit: int, after: str | None= None):
+def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None= None):
     """
     List channel clips.
 
@@ -178,8 +183,8 @@ def get_channel_clips(channel_id: str, period: str, limit: int, after: str | Non
     return response["data"]["user"]["clips"]
 
 
-def channel_clips_generator(channel_id, period, limit):
-    def _generator(clips, limit):
+def channel_clips_generator(channel_id: str, period: str, limit: int) -> Generator[Data, None, None]:
+    def _generator(clips: Data, limit: int) -> Generator[Data, None, None]:
         for clip in clips["edges"]:
             if limit < 1:
                 return
@@ -261,10 +266,6 @@ def get_channel_videos(
         raise ConsoleError(f"Channel {channel_id} not found")
 
     return response["data"]["user"]["videos"]
-
-
-VideosSort = Literal["views", "time"]
-VideosType = Literal["archive", "highlight", "upload"]
 
 
 def channel_videos_generator(

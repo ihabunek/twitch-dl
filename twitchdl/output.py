@@ -3,9 +3,11 @@ import json
 
 from itertools import islice
 from twitchdl import utils
-from typing import Any, Generator
+from typing import Any, Callable, Generator, TypeVar
 
 from twitchdl.entities import Data
+
+T = TypeVar("T")
 
 
 def truncate(string: str, length: int) -> str:
@@ -42,6 +44,40 @@ def print_table(headers: list[str], data: list[list[str]]):
         print_row(row)
 
 
+def print_paged(
+    label: str,
+    generator: Generator[T, Any, Any],
+    print_fn: Callable[[T], None],
+    page_size: int,
+    total_count: int | None = None,
+):
+    iterator = iter(generator)
+    page = list(islice(iterator, page_size))
+
+    first = 1
+    last = first + len(page) - 1
+
+    while True:
+        click.echo("-" * 80)
+
+        click.echo()
+        for item in page:
+            print_fn(item)
+
+        last = first + len(page) - 1
+
+        click.echo("-" * 80)
+        click.echo(f"{label} {first}-{last} of {total_count or '???'}")
+
+        first = first + len(page)
+        last = first + 1
+
+        page = list(islice(iterator, page_size))
+        if not page or not prompt_continue():
+            break
+
+
+
 def print_video(video: Data):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
@@ -63,6 +99,7 @@ def print_video(video: Data):
 
     click.echo(f"Published {blue(published_at)}  Length: {blue(length)} ")
     click.secho(url, italic=True)
+    click.echo()
 
 
 def print_video_compact(video: Data):
@@ -71,34 +108,6 @@ def print_video_compact(video: Data):
     game = video["game"]["name"] if video["game"] else ""
     title = truncate(video["title"], 80).ljust(80)
     click.echo(f"{bold(id)} {date} {green(title)} {blue(game)}")
-
-
-def print_paged_videos(generator: Generator[Data, None, None], page_size: int, total_count: int):
-    iterator = iter(generator)
-    page = list(islice(iterator, page_size))
-
-    first = 1
-    last = first + len(page) - 1
-
-    while True:
-        click.echo("-" * 80)
-
-        click.echo()
-        for video in page:
-            print_video(video)
-            click.echo()
-
-        last = first + len(page) - 1
-
-        click.echo("-" * 80)
-        click.echo(f"Videos {first}-{last} of {total_count}")
-
-        first = first + len(page)
-        last = first + 1
-
-        page = list(islice(iterator, page_size))
-        if not page or not _continue():
-            break
 
 
 def print_clip(clip: Data):
@@ -118,7 +127,7 @@ def print_clip(clip: Data):
     click.secho(clip["url"], italic=True)
 
 
-def _continue():
+def prompt_continue():
     enter = click.style("Enter", bold=True, fg="green")
     ctrl_c = click.style("Ctrl+C", bold=True, fg="yellow")
     click.echo(f"Press {enter} to continue, {ctrl_c} to break.")

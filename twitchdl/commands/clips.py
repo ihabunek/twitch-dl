@@ -1,18 +1,17 @@
+from typing import Generator
+import click
 import re
 import sys
 
-from typing import Literal
 from itertools import islice
 from os import path
-
-import click
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
-from twitchdl.output import green, print_clip, print_json, yellow
+from twitchdl.entities import Data
+from twitchdl.output import green, print_clip, print_json, print_paged, yellow
 
-ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 
 
 def clips(
@@ -23,7 +22,7 @@ def clips(
     json: bool = False,
     limit: int = 10,
     pager: int | None = None,
-    period: ClipsPeriod = "all_time",
+    period: twitch.ClipsPeriod = "all_time",
 ):
     # Ignore --limit if --pager or --all are given
     limit = sys.maxsize if all or pager else limit
@@ -37,7 +36,7 @@ def clips(
         return _download_clips(generator)
 
     if pager:
-        return _print_paged(generator, pager)
+        return print_paged("Clips", generator, print_clip, pager)
 
     return _print_all(generator, all)
 
@@ -55,7 +54,7 @@ def _continue():
     return True
 
 
-def _target_filename(clip):
+def _target_filename(clip: Data):
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
@@ -75,7 +74,7 @@ def _target_filename(clip):
     return f"{name}.{ext}"
 
 
-def _download_clips(generator):
+def _download_clips(generator: Generator[Data, None, None]):
     for clip in generator:
         target = _target_filename(clip)
 
@@ -87,7 +86,7 @@ def _download_clips(generator):
             download_file(url, target)
 
 
-def _print_all(generator, all: bool):
+def _print_all(generator: Generator[Data, None, None], all: bool):
     for clip in generator:
         click.echo()
         print_clip(clip)
@@ -98,31 +97,3 @@ def _print_all(generator, all: bool):
             "Increase the --limit, use --all or --pager to see the rest.",
             dim=True
         )
-
-
-def _print_paged(generator, page_size):
-    iterator = iter(generator)
-    page = list(islice(iterator, page_size))
-
-    first = 1
-    last = first + len(page) - 1
-
-    while True:
-        click.echo("-" * 80)
-
-        click.echo()
-        for clip in page:
-            print_clip(clip)
-            click.echo()
-
-        last = first + len(page) - 1
-
-        click.echo("-" * 80)
-        click.echo(f"Clips {first}-{last} of ???")
-
-        first = first + len(page)
-        last = first + 1
-
-        page = list(islice(iterator, page_size))
-        if not page or not _continue():
-            break

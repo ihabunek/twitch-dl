@@ -4,7 +4,7 @@ import click
 
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_log, print_paged_videos, print_video, print_json, print_video_compact
+from twitchdl.output import print_log, print_paged, print_video, print_json, print_video_compact
 
 
 def videos(
@@ -44,7 +44,8 @@ def videos(
         return
 
     if pager:
-        print_paged_videos(generator, pager, total_count)
+        print_fn = print_video_compact if compact else print_video
+        print_paged("Videos", generator, print_fn, pager, total_count)
         return
 
     count = 0

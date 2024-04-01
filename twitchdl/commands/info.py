@@ -51,7 +51,6 @@ def video_info(video, playlists, chapters):
     click.echo()
     print_video(video)
 
-    click.echo()
     click.echo("Playlists:")
     for p in m3u8.loads(playlists).playlists:
         click.echo(f"{bold(p.stream_info.video)} {p.uri}")
