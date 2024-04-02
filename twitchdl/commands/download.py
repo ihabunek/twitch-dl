@@ -16,7 +16,7 @@ from urllib.parse import urlparse, urlencode
 
 from twitchdl import twitch, utils
 from twitchdl.download import download_file
-from twitchdl.entities import Data, DownloadOptions
+from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, dim, green, print_log, yellow
@@ -116,7 +116,7 @@ def _concat_vods(vod_paths: list[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def get_video_placeholders(video: Video, format: str) -> Data:
+def get_video_placeholders(video: Video, format: str) -> dict[str, str]:
     date, time = video['publishedAt'].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 

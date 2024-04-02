@@ -1,17 +1,15 @@
-from typing import Generator
 import click
 import re
 import sys
 
-from itertools import islice
 from os import path
+from typing import Generator
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
-from twitchdl.entities import Data
 from twitchdl.output import green, print_clip, print_json, print_paged, yellow
-
+from twitchdl.twitch import Clip
 
 
 def clips(
@@ -54,7 +52,7 @@ def _continue():
     return True
 
 
-def _target_filename(clip: Data):
+def _target_filename(clip: Clip):
     url = clip["videoQualities"][0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
@@ -74,7 +72,7 @@ def _target_filename(clip: Data):
     return f"{name}.{ext}"
 
 
-def _download_clips(generator: Generator[Data, None, None]):
+def _download_clips(generator: Generator[Clip, None, None]):
     for clip in generator:
         target = _target_filename(clip)
 
@@ -86,7 +84,7 @@ def _download_clips(generator: Generator[Data, None, None]):
             download_file(url, target)
 
 
-def _print_all(generator: Generator[Data, None, None], all: bool):
+def _print_all(generator: Generator[Clip, None, None], all: bool):
     for clip in generator:
         click.echo()
         print_clip(clip)

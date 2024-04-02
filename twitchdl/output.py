@@ -5,8 +5,7 @@ from itertools import islice
 from twitchdl import utils
 from typing import Any, Callable, Generator, TypeVar
 
-from twitchdl.entities import Data
-from twitchdl.twitch import Video
+from twitchdl.twitch import Clip, Video
 
 T = TypeVar("T")
 
@@ -111,7 +110,7 @@ def print_video_compact(video: Video):
     click.echo(f"{bold(id)} {date} {green(title)} {blue(game)}")
 
 
-def print_clip(clip: Data):
+def print_clip(clip: Clip):
     published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(clip["durationSeconds"])
     channel = clip["broadcaster"]["displayName"]

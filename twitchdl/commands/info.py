@@ -3,9 +3,10 @@ import m3u8
 
 from twitchdl import utils, twitch
 from twitchdl.commands.download import get_video_placeholders
-from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import bold, print_table, print_video, print_clip, print_json, print_log
+from twitchdl.twitch import Clip, Video
+
 
 def info(id: str, *, json: bool = False):
     video_id = utils.parse_video_identifier(id)
@@ -87,7 +88,7 @@ def video_json(video, playlists, chapters):
     print_json(video)
 
 
-def clip_info(clip: Data):
+def clip_info(clip: Clip):
     click.echo()
     print_clip(clip)
     click.echo()

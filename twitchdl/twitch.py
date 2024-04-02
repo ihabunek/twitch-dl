@@ -26,6 +26,25 @@ class Game(TypedDict):
     name: str
 
 
+class VideoQuality(TypedDict):
+    frameRate: str
+    quality: str
+    sourceURL: str
+
+
+class Clip(TypedDict):
+    id: str
+    slug: str
+    title: str
+    createdAt: str
+    viewCount: int
+    durationSeconds: int
+    url: str
+    videoQualities: list[VideoQuality]
+    game: Game
+    broadcaster: User
+
+
 class Video(TypedDict):
     id: str
     title: str
@@ -134,7 +153,7 @@ def get_video(video_id: str) -> Video | None:
     return response["data"]["video"]
 
 
-def get_clip(slug: str):
+def get_clip(slug: str) -> Clip | None:
     query = f"""
     {{
         clip(slug: "{slug}") {{
@@ -204,8 +223,12 @@ def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: s
     return response["data"]["user"]["clips"]
 
 
-def channel_clips_generator(channel_id: str, period: str, limit: int) -> Generator[Data, None, None]:
-    def _generator(clips: Data, limit: int) -> Generator[Data, None, None]:
+def channel_clips_generator(
+    channel_id: str,
+    period: ClipsPeriod,
+    limit: int
+) -> Generator[Clip, None, None]:
+    def _generator(clips: Data, limit: int) -> Generator[Clip, None, None]:
         for clip in clips["edges"]:
             if limit < 1:
                 return
@@ -226,11 +249,10 @@ def channel_clips_generator(channel_id: str, period: str, limit: int) -> Generat
     return _generator(clips, limit)
 
 
-def channel_clips_generator_old(channel_id, period, limit):
+def channel_clips_generator_old(channel_id: str, period: ClipsPeriod, limit: int):
     cursor = ""
     while True:
-        clips = get_channel_clips(
-            channel_id, period, limit, after=cursor)
+        clips = get_channel_clips(channel_id, period, limit, after=cursor)
 
         if not clips["edges"]:
             break
