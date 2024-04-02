@@ -47,7 +47,7 @@ def info(id: str, *, json: bool = False):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video, playlists, chapters):
+def video_info(video: Video, playlists, chapters):
     click.echo()
     print_video(video)
 

@@ -6,7 +6,7 @@ import httpx
 import json
 import click
 
-from typing import Dict, Generator, Literal
+from typing import Dict, Generator, Literal, TypedDict
 from twitchdl import CLIENT_ID
 from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
@@ -15,6 +15,26 @@ from twitchdl.exceptions import ConsoleError
 ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 VideosSort = Literal["views", "time"]
 VideosType = Literal["archive", "highlight", "upload"]
+
+class User(TypedDict):
+    login: str
+    displayName: str
+
+
+class Game(TypedDict):
+    id: str
+    name: str
+
+
+class Video(TypedDict):
+    id: str
+    title: str
+    description: str
+    publishedAt: str
+    broadcastType: str
+    lengthSeconds: int
+    game: Game
+    creator: User
 
 
 class GQLError(click.ClickException):
@@ -67,6 +87,7 @@ VIDEO_FIELDS = """
     broadcastType
     lengthSeconds
     game {
+        id
         name
     }
     creator {
@@ -100,7 +121,7 @@ CLIP_FIELDS = """
 """
 
 
-def get_video(video_id: str):
+def get_video(video_id: str) -> Video | None:
     query = f"""
     {{
         video(id: "{video_id}") {{
@@ -274,10 +295,10 @@ def channel_videos_generator(
     sort: VideosSort,
     type: VideosType,
     game_ids: list[str] | None = None
-) -> tuple[int, Generator[Data, None, None]]:
+) -> tuple[int, Generator[Video, None, None]]:
     game_ids = game_ids or []
 
-    def _generator(videos: Data, max_videos: int) -> Generator[Data, None, None]:
+    def _generator(videos: Data, max_videos: int) -> Generator[Video, None, None]:
         for video in videos["edges"]:
             if max_videos < 1:
                 return
@@ -298,7 +319,7 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id, auth_token=None):
+def get_access_token(video_id: str, auth_token: str | None = None):
     query = f"""
     {{
         videoPlaybackAccessToken(
@@ -315,7 +336,7 @@ def get_access_token(video_id, auth_token=None):
     }}
     """
 
-    headers = {}
+    headers: dict[str, str] = {}
     if auth_token is not None:
         headers['authorization'] = f'OAuth {auth_token}'
 

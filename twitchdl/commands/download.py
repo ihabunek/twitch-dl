@@ -20,6 +20,7 @@ from twitchdl.entities import Data, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, dim, green, print_log, yellow
+from twitchdl.twitch import Video
 
 
 def download(ids: list[str], args: DownloadOptions):
@@ -115,7 +116,7 @@ def _concat_vods(vod_paths: list[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def get_video_placeholders(video: Data, format: str) -> Data:
+def get_video_placeholders(video: Video, format: str) -> Data:
     date, time = video['publishedAt'].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
@@ -134,7 +135,7 @@ def get_video_placeholders(video: Data, format: str) -> Data:
     }
 
 
-def _video_target_filename(video: Data, args: DownloadOptions):
+def _video_target_filename(video: Video, args: DownloadOptions):
     subs = get_video_placeholders(video, args.format)
 
     try:

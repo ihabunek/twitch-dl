@@ -6,6 +6,7 @@ from twitchdl import utils
 from typing import Any, Callable, Generator, TypeVar
 
 from twitchdl.entities import Data
+from twitchdl.twitch import Video
 
 T = TypeVar("T")
 
@@ -78,7 +79,7 @@ def print_paged(
 
 
 
-def print_video(video: Data):
+def print_video(video: Video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
 
@@ -89,7 +90,7 @@ def print_video(video: Data):
     url = f"https://www.twitch.tv/videos/{video['id']}"
 
     click.secho(f"Video {video['id']}", bold=True)
-    click.secho(f"{video['title']}", fg="green")
+    click.secho(video["title"], fg="green")
 
     if channel or playing:
         click.echo(" ".join([channel, playing]))
@@ -102,7 +103,7 @@ def print_video(video: Data):
     click.echo()
 
 
-def print_video_compact(video: Data):
+def print_video_compact(video: Video):
     id = video["id"]
     date = video["publishedAt"][:10]
     game = video["game"]["name"] if video["game"] else ""
