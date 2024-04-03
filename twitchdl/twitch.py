@@ -62,6 +62,17 @@ class Video(TypedDict):
     creator: User
 
 
+class Chapter(TypedDict):
+    id: str
+    durationMilliseconds: int
+    positionMilliseconds: int
+    type: str
+    description: str
+    subDescription: str
+    thumbnailURL: str
+    game: Game
+
+
 class GQLError(click.ClickException):
     def __init__(self, errors: list[str]):
         message = "GraphQL query failed."
@@ -71,7 +82,7 @@ class GQLError(click.ClickException):
 
 
 def authenticated_post(url, data=None, json=None, headers={}):
-    headers['Client-ID'] = CLIENT_ID
+    headers["Client-ID"] = CLIENT_ID
 
     response = httpx.post(url, data=data, json=json, headers=headers)
     if response.status_code == 400:
@@ -400,7 +411,7 @@ def get_playlists(video_id: str, access_token: AccessToken):
         "player": "twitchweb",
     })
     response.raise_for_status()
-    return response.content.decode('utf-8')
+    return response.content.decode("utf-8")
 
 
 def get_game_id(name: str):
@@ -418,7 +429,7 @@ def get_game_id(name: str):
         return game["id"]
 
 
-def get_video_chapters(video_id: str):
+def get_video_chapters(video_id: str) -> list[Chapter]:
     query = {
         "operationName": "VideoPlayer_ChapterSelectButtonVideo",
         "variables":
@@ -440,8 +451,10 @@ def get_video_chapters(video_id: str):
     return list(_chapter_nodes(response["data"]["video"]["moments"]))
 
 
-def _chapter_nodes(collection):
-    for edge in collection["edges"]:
+def _chapter_nodes(moments: Data) -> Generator[Chapter, None, None]:
+    for edge in moments["edges"]:
         node = edge["node"]
+        node["game"] = node["details"]["game"]
+        del node["details"]
         del node["moments"]
         yield node

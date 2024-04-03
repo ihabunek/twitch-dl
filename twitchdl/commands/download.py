@@ -20,7 +20,7 @@ from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, dim, green, print_log, yellow
-from twitchdl.twitch import Clip, Video
+from twitchdl.twitch import Chapter, Clip, Video
 
 
 def download(ids: list[str], args: DownloadOptions):
@@ -375,7 +375,7 @@ def _download_video(video_id, args: DownloadOptions) -> None:
     click.echo(f"\nDownloaded: {green(target)}")
 
 
-def _determine_time_range(video_id, args: DownloadOptions):
+def _determine_time_range(video_id: str, args: DownloadOptions):
     if args.start or args.end:
         return args.start, args.end
 
@@ -402,7 +402,7 @@ def _determine_time_range(video_id, args: DownloadOptions):
     return None, None
 
 
-def _choose_chapter_interactive(chapters):
+def _choose_chapter_interactive(chapters: list[Chapter]):
     click.echo("\nChapters:")
     for index, chapter in enumerate(chapters):
         duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
