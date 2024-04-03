@@ -16,6 +16,12 @@ ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 VideosSort = Literal["views", "time"]
 VideosType = Literal["archive", "highlight", "upload"]
 
+
+class AccessToken(TypedDict):
+    signature: str
+    value: str
+
+
 class User(TypedDict):
     login: str
     displayName: str
@@ -166,7 +172,7 @@ def get_clip(slug: str) -> Clip | None:
     return response["data"]["clip"]
 
 
-def get_clip_access_token(slug: str):
+def get_clip_access_token(slug: str) -> AccessToken:
     query = f"""
     {{
         "operationName": "VideoAccessToken_Clip",
@@ -183,7 +189,7 @@ def get_clip_access_token(slug: str):
     """
 
     response = gql_post(query.strip())
-    return response["data"]["clip"]
+    return response["data"]["clip"]["playbackAccessToken"]
 
 
 def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None= None):
@@ -341,7 +347,7 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id: str, auth_token: str | None = None):
+def get_access_token(video_id: str, auth_token: str | None = None) -> AccessToken:
     query = f"""
     {{
         videoPlaybackAccessToken(
@@ -360,7 +366,7 @@ def get_access_token(video_id: str, auth_token: str | None = None):
 
     headers: dict[str, str] = {}
     if auth_token is not None:
-        headers['authorization'] = f'OAuth {auth_token}'
+        headers["authorization"] = f"OAuth {auth_token}"
 
     try:
         response = gql_query(query, headers=headers)
@@ -380,15 +386,15 @@ def get_access_token(video_id: str, auth_token: str | None = None):
         raise
 
 
-def get_playlists(video_id, access_token):
+def get_playlists(video_id: str, access_token: AccessToken):
     """
     For a given video return a playlist which contains possible video qualities.
     """
     url = f"https://usher.ttvnw.net/vod/{video_id}"
 
     response = httpx.get(url, params={
-        "nauth": access_token['value'],
-        "nauthsig": access_token['signature'],
+        "nauth": access_token["value"],
+        "nauthsig": access_token["signature"],
         "allow_audio_only": "true",
         "allow_source": "true",
         "player": "twitchweb",
@@ -397,7 +403,7 @@ def get_playlists(video_id, access_token):
     return response.content.decode('utf-8')
 
 
-def get_game_id(name):
+def get_game_id(name: str):
     query = f"""
     {{
         game(name: "{name.strip()}") {{
