@@ -4,7 +4,7 @@ import click
 
 from twitchdl import twitch
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import print_log, print_paged, print_video, print_json, print_video_compact
+from twitchdl.output import print_json, print_log, print_paged, print_video, print_video_compact
 
 
 def videos(
@@ -28,15 +28,12 @@ def videos(
     max_videos = sys.maxsize if all or pager else limit
 
     total_count, generator = twitch.channel_videos_generator(
-        channel_name, max_videos, sort, type, game_ids=game_ids)
+        channel_name, max_videos, sort, type, game_ids=game_ids
+    )
 
     if json:
         videos = list(generator)
-        print_json({
-            "count": len(videos),
-            "totalCount": total_count,
-            "videos": videos
-        })
+        print_json({"count": len(videos), "totalCount": total_count, "videos": videos})
         return
 
     if total_count == 0:
@@ -63,8 +60,9 @@ def videos(
 
     if total_count > count:
         click.secho(
-            "\nThere are more videos. Increase the --limit, use --all or --pager to see the rest.",
-            dim=True
+            "\nThere are more videos. "
+            + "Increase the --limit, use --all or --pager to see the rest.",
+            dim=True,
         )
 
 

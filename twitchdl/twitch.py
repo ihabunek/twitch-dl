@@ -2,15 +2,15 @@
 Twitch API access.
 """
 
-import httpx
 import json
-import click
-
 from typing import Dict, Generator, Literal, TypedDict
+
+import click
+import httpx
+
 from twitchdl import CLIENT_ID
 from twitchdl.entities import Data
 from twitchdl.exceptions import ConsoleError
-
 
 ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
 VideosSort = Literal["views", "time"]
@@ -203,7 +203,7 @@ def get_clip_access_token(slug: str) -> AccessToken:
     return response["data"]["clip"]["playbackAccessToken"]
 
 
-def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None= None):
+def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None = None):
     """
     List channel clips.
 
@@ -243,7 +243,7 @@ def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: s
 def channel_clips_generator(
     channel_id: str,
     period: ClipsPeriod,
-    limit: int
+    limit: int,
 ) -> Generator[Clip, None, None]:
     def _generator(clips: Data, limit: int) -> Generator[Clip, None, None]:
         for clip in clips["edges"]:
@@ -289,7 +289,7 @@ def get_channel_videos(
     sort: str,
     type: str = "archive",
     game_ids: list[str] | None = None,
-    after: str | None = None
+    after: str | None = None,
 ):
     game_ids = game_ids or []
 
@@ -333,7 +333,7 @@ def channel_videos_generator(
     max_videos: int,
     sort: VideosSort,
     type: VideosType,
-    game_ids: list[str] | None = None
+    game_ids: list[str] | None = None,
 ) -> tuple[int, Generator[Video, None, None]]:
     game_ids = game_ids or []
 
@@ -403,13 +403,16 @@ def get_playlists(video_id: str, access_token: AccessToken):
     """
     url = f"https://usher.ttvnw.net/vod/{video_id}"
 
-    response = httpx.get(url, params={
-        "nauth": access_token["value"],
-        "nauthsig": access_token["signature"],
-        "allow_audio_only": "true",
-        "allow_source": "true",
-        "player": "twitchweb",
-    })
+    response = httpx.get(
+        url,
+        params={
+            "nauth": access_token["value"],
+            "nauthsig": access_token["signature"],
+            "allow_audio_only": "true",
+            "allow_source": "true",
+            "player": "twitchweb",
+        },
+    )
     response.raise_for_status()
     return response.content.decode("utf-8")
 
@@ -432,19 +435,16 @@ def get_game_id(name: str):
 def get_video_chapters(video_id: str) -> list[Chapter]:
     query = {
         "operationName": "VideoPlayer_ChapterSelectButtonVideo",
-        "variables":
-        {
+        "variables": {
             "includePrivate": False,
-            "videoID": video_id
+            "videoID": video_id,
         },
-        "extensions":
-        {
-            "persistedQuery":
-            {
+        "extensions": {
+            "persistedQuery": {
                 "version": 1,
-                "sha256Hash": "8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41"
+                "sha256Hash": "8d2793384aac3773beab5e59bd5d6f585aedb923d292800119e03d40cd0f9b41",
             }
-        }
+        },
     }
 
     response = gql_post(json.dumps(query))

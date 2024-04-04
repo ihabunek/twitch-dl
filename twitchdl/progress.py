@@ -1,11 +1,11 @@
-import click
 import logging
 import time
-
 from collections import deque
 from dataclasses import dataclass, field
 from statistics import mean
-from typing import Dict, NamedTuple, Optional, Deque
+from typing import Deque, Dict, NamedTuple, Optional
+
+import click
 
 from twitchdl.output import blue
 from twitchdl.utils import format_size, format_time
@@ -94,18 +94,28 @@ class Progress:
 
         task = self.tasks[task_id]
         if task.size != task.downloaded:
-            logger.warn(f"Taks {task_id} ended with {task.downloaded}b downloaded, expected {task.size}b.")
+            logger.warn(
+                f"Taks {task_id} ended with {task.downloaded}b downloaded, expected {task.size}b."
+            )
 
         self.vod_downloaded_count += 1
         self.print()
 
     def _calculate_total(self):
-        self.estimated_total = int(mean(t.size for t in self.tasks.values()) * self.vod_count) if self.tasks else None
+        self.estimated_total = (
+            int(mean(t.size for t in self.tasks.values()) * self.vod_count) if self.tasks else None
+        )
 
     def _calculate_progress(self):
         self.speed = self._calculate_speed()
-        self.progress_perc = int(100 * self.progress_bytes / self.estimated_total) if self.estimated_total else 0
-        self.remaining_time = int((self.estimated_total - self.progress_bytes) / self.speed) if self.estimated_total and self.speed else None
+        self.progress_perc = (
+            int(100 * self.progress_bytes / self.estimated_total) if self.estimated_total else 0
+        )
+        self.remaining_time = (
+            int((self.estimated_total - self.progress_bytes) / self.speed)
+            if self.estimated_total and self.speed
+            else None
+        )
 
     def _calculate_speed(self):
         if len(self.samples) < 2:
@@ -126,13 +136,17 @@ class Progress:
         if now - self.last_printed < 0.1:
             return
 
-        progress = " ".join([
-            f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
-            blue(self.progress_perc),
-            f"of ~{blue(format_size(self.estimated_total))}" if self.estimated_total else "",
-            f"at {blue(format_size(self.speed))}/s" if self.speed else "",
-            f"ETA {blue(format_time(self.remaining_time))}" if self.remaining_time is not None else "",
-        ])
+        progress = " ".join(
+            [
+                f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
+                f"{blue(self.progress_perc)}%",
+                f"of ~{blue(format_size(self.estimated_total))}" if self.estimated_total else "",
+                f"at {blue(format_size(self.speed))}/s" if self.speed else "",
+                f"ETA {blue(format_time(self.remaining_time))}"
+                if self.remaining_time is not None
+                else "",
+            ]
+        )
 
         click.echo(f"\r{progress}     ", nl=False)
         self.last_printed = now

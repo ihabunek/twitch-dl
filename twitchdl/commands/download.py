@@ -1,18 +1,18 @@
 import asyncio
-import platform
-import click
-import httpx
-import m3u8
 import os
+import platform
 import re
 import shutil
 import subprocess
 import tempfile
-
 from os import path
 from pathlib import Path
 from typing import List, Optional, OrderedDict
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlencode, urlparse
+
+import click
+import httpx
+import m3u8
 
 from twitchdl import twitch, utils
 from twitchdl.download import download_file
@@ -87,24 +87,32 @@ def _join_vods(playlist_path: str, target: str, overwrite: bool, video):
 
     command = [
         "ffmpeg",
-        "-i", playlist_path,
-        "-c", "copy",
-        "-metadata", f"artist={video['creator']['displayName']}",
-        "-metadata", f"title={video['title']}",
-        "-metadata", f"description={description}",
-        "-metadata", "encoded_by=twitch-dl",
+        "-i",
+        playlist_path,
+        "-c",
+        "copy",
+        "-metadata",
+        f"artist={video['creator']['displayName']}",
+        "-metadata",
+        f"title={video['title']}",
+        "-metadata",
+        f"description={description}",
+        "-metadata",
+        "encoded_by=twitch-dl",
         "-stats",
-        "-loglevel", "warning",
+        "-loglevel",
+        "warning",
         f"file:{target}",
     ]
 
     if overwrite:
         command.append("-y")
 
-    click.secho(f"{' '.join(command)}", dim = True)
+    click.secho(f"{' '.join(command)}", dim=True)
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
+
 
 def _concat_vods(vod_paths: list[str], target: str):
     tool = "type" if platform.system() == "Windows" else "cat"
@@ -117,7 +125,7 @@ def _concat_vods(vod_paths: list[str], target: str):
 
 
 def get_video_placeholders(video: Video, format: str) -> dict[str, str]:
-    date, time = video['publishedAt'].split("T")
+    date, time = video["publishedAt"].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
     return {
@@ -145,7 +153,7 @@ def _video_target_filename(video: Video, args: DownloadOptions):
         raise ConsoleError(f"Invalid key {e} used in --output. Supported keys are: {supported}")
 
 
-def _clip_target_filename(clip, args: DownloadOptions):
+def _clip_target_filename(clip: Clip, args: DownloadOptions):
     date, time = clip["createdAt"].split("T")
     game = clip["game"]["name"] if clip["game"] else "Unknown"
 
@@ -240,10 +248,12 @@ def get_clip_authenticated_url(slug: str, quality: str):
 
     url = _get_clip_url(access_token, quality)
 
-    query = urlencode({
-        "sig": access_token["signature"],
-        "token": access_token["value"],
-    })
+    query = urlencode(
+        {
+            "sig": access_token["signature"],
+            "token": access_token["value"],
+        }
+    )
 
     return f"{url}?{query}"
 
@@ -313,8 +323,11 @@ def _download_video(video_id, args: DownloadOptions) -> None:
     print_log("Fetching playlists...")
     playlists_m3u8 = twitch.get_playlists(video_id, access_token)
     playlists = list(_parse_playlists(playlists_m3u8))
-    playlist_uri = (_get_playlist_by_name(playlists, args.quality) if args.quality
-            else _select_playlist_interactive(playlists))
+    playlist_uri = (
+        _get_playlist_by_name(playlists, args.quality)
+        if args.quality
+        else _select_playlist_interactive(playlists)
+    )
 
     print_log("Fetching playlist...")
     response = httpx.get(playlist_uri)
@@ -331,7 +344,9 @@ def _download_video(video_id, args: DownloadOptions) -> None:
     with open(path.join(target_dir, "playlist.m3u8"), "w") as f:
         f.write(response.text)
 
-    click.echo(f"\nDownloading {len(vod_paths)} VODs using {args.max_workers} workers to {target_dir}")
+    click.echo(
+        f"\nDownloading {len(vod_paths)} VODs using {args.max_workers} workers to {target_dir}"
+    )
     sources = [base_uri + path for path in vod_paths]
     targets = [os.path.join(target_dir, f"{k:05d}.ts") for k, _ in enumerate(vod_paths)]
     asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
@@ -392,7 +407,9 @@ def _determine_time_range(video_id: str, args: DownloadOptions):
             try:
                 chapter = chapters[args.chapter - 1]
             except IndexError:
-                raise ConsoleError(f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters.")
+                raise ConsoleError(
+                    f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters."
+                )
 
         click.echo(f'Chapter selected: {blue(chapter["description"])}\n')
         start = chapter["positionMilliseconds"] // 1000

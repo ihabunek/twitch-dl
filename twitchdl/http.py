@@ -1,11 +1,11 @@
 import asyncio
-import httpx
 import logging
 import os
 import time
-
 from abc import ABC, abstractmethod
 from typing import List, Optional
+
+import httpx
 
 from twitchdl.progress import Progress
 
@@ -62,6 +62,7 @@ class LimitingTokenBucket(TokenBucket):
 
 class EndlessTokenBucket(TokenBucket):
     """Used when download speed is not limited."""
+
     def advance(self, size: int):
         pass
 
@@ -122,12 +123,22 @@ async def download_all(
     targets: List[str],
     workers: int,
     *,
-    rate_limit: Optional[int] = None
+    rate_limit: Optional[int] = None,
 ):
     progress = Progress(len(sources))
     token_bucket = LimitingTokenBucket(rate_limit) if rate_limit else EndlessTokenBucket()
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         semaphore = asyncio.Semaphore(workers)
-        tasks = [download_with_retries(client, semaphore, task_id, source, target, progress, token_bucket)
-                 for task_id, (source, target) in enumerate(zip(sources, targets))]
+        tasks = [
+            download_with_retries(
+                client,
+                semaphore,
+                task_id,
+                source,
+                target,
+                progress,
+                token_bucket,
+            )
+            for task_id, (source, target) in enumerate(zip(sources, targets))
+        ]
         await asyncio.gather(*tasks)

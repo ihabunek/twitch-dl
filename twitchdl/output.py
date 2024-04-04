@@ -12,7 +12,7 @@ T = TypeVar("T")
 
 def truncate(string: str, length: int) -> str:
     if len(string) > length:
-        return string[:length - 1] + "…"
+        return string[: length - 1] + "…"
 
     return string
 
@@ -77,12 +77,11 @@ def print_paged(
             break
 
 
-
 def print_video(video: Video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
 
-    channel = blue(video['creator']['displayName']) if video["creator"] else ""
+    channel = blue(video["creator"]["displayName"]) if video["creator"] else ""
     playing = f"playing {blue(video['game']['name'])}" if video["game"] else ""
 
     # Can't find URL in video object, strange
@@ -120,9 +119,9 @@ def print_clip(clip: Clip):
     click.secho(clip["title"], fg="green")
     click.echo(f"{blue(channel)} {playing}")
     click.echo(
-        f"Published {blue(published_at)}" +
-        f"  Length: {blue(length)}" +
-        f"  Views: {blue(clip['viewCount'])}"
+        f"Published {blue(published_at)}"
+        + f"  Length: {blue(length)}"
+        + f"  Views: {blue(clip['viewCount'])}"
     )
     click.secho(clip["url"], italic=True)
 
@@ -141,6 +140,7 @@ def prompt_continue():
 
 
 # Shorthand functions for coloring output
+
 
 def blue(text: Any) -> str:
     return click.style(text, fg="blue")

@@ -1,9 +1,9 @@
-import click
 import re
 import sys
-
 from os import path
 from typing import Generator
+
+import click
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
@@ -62,12 +62,14 @@ def _target_filename(clip: Clip):
         raise ValueError(f"Failed parsing date from: {clip['createdAt']}")
     date = "".join(match.groups())
 
-    name = "_".join([
-        date,
-        clip["id"],
-        clip["broadcaster"]["login"],
-        utils.slugify(clip["title"]),
-    ])
+    name = "_".join(
+        [
+            date,
+            clip["id"],
+            clip["broadcaster"]["login"],
+            utils.slugify(clip["title"]),
+        ]
+    )
 
     return f"{name}.{ext}"
 
@@ -91,7 +93,7 @@ def _print_all(generator: Generator[Clip, None, None], all: bool):
 
     if not all:
         click.secho(
-            "\nThere may be more clips. " +
-            "Increase the --limit, use --all or --pager to see the rest.",
-            dim=True
+            "\nThere may be more clips. "
+            + "Increase the --limit, use --all or --pager to see the rest.",
+            dim=True,
         )

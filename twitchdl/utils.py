@@ -68,16 +68,16 @@ def read_int(msg: str, min: int, max: int, default: int | None = None) -> int:
 
 
 def slugify(value: str) -> str:
-    value = unicodedata.normalize('NFKC', str(value))
-    value = re.sub(r'[^\w\s_-]', '', value)
-    value = re.sub(r'[\s_-]+', '_', value)
+    value = unicodedata.normalize("NFKC", str(value))
+    value = re.sub(r"[^\w\s_-]", "", value)
+    value = re.sub(r"[\s_-]+", "_", value)
     return value.strip("_").lower()
 
 
 def titlify(value: str) -> str:
-    value = unicodedata.normalize('NFKC', str(value))
-    value = re.sub(r'[^\w\s\[\]().-]', '', value)
-    value = re.sub(r'\s+', ' ', value)
+    value = unicodedata.normalize("NFKC", str(value))
+    value = re.sub(r"[^\w\s\[\]().-]", "", value)
+    value = re.sub(r"\s+", " ", value)
     return value.strip()
 
 

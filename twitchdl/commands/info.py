@@ -1,11 +1,11 @@
 import click
 import m3u8
 
-from twitchdl import utils, twitch
+from twitchdl import twitch, utils
 from twitchdl.commands.download import get_video_placeholders
 from twitchdl.exceptions import ConsoleError
-from twitchdl.output import bold, print_table, print_video, print_clip, print_json, print_log
-from twitchdl.twitch import Clip, Video
+from twitchdl.output import bold, print_clip, print_json, print_log, print_table, print_video
+from twitchdl.twitch import Chapter, Clip, Video
 
 
 def info(id: str, *, json: bool = False):
@@ -48,7 +48,7 @@ def info(id: str, *, json: bool = False):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video: Video, playlists, chapters):
+def video_info(video: Video, playlists, chapters: list[Chapter]):
     click.echo()
     print_video(video)
 
@@ -64,7 +64,7 @@ def video_info(video: Video, playlists, chapters):
             duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
             click.echo(f'{start} {bold(chapter["description"])} ({duration})')
 
-    placeholders = get_video_placeholders(video, format = "mkv")
+    placeholders = get_video_placeholders(video, format="mkv")
     placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
     click.echo("")
     print_table(["Placeholder", "Value"], placeholders)
@@ -79,8 +79,9 @@ def video_json(video, playlists, chapters):
             "resolution": p.stream_info.resolution,
             "codecs": p.stream_info.codecs,
             "video": p.stream_info.video,
-            "uri": p.uri
-        } for p in playlists
+            "uri": p.uri,
+        }
+        for p in playlists
     ]
 
     video["chapters"] = chapters
