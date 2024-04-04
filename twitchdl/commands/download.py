@@ -20,7 +20,7 @@ from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, dim, green, print_log, yellow
-from twitchdl.twitch import Chapter, Clip, Video
+from twitchdl.twitch import Chapter, Clip, ClipAccessToken, Video
 
 
 def download(ids: list[str], args: DownloadOptions):
@@ -211,8 +211,8 @@ def _crete_temp_dir(base_uri: str) -> str:
     return str(temp_dir)
 
 
-def _get_clip_url(clip: Clip, quality: str) -> str:
-    qualities = clip["videoQualities"]
+def _get_clip_url(access_token: ClipAccessToken, quality: str) -> str:
+    qualities = access_token["videoQualities"]
 
     # Quality given as an argument
     if quality:
@@ -250,8 +250,8 @@ def get_clip_authenticated_url(slug: str, quality: str):
 
     query = urlencode(
         {
-            "sig": access_token["signature"],
-            "token": access_token["value"],
+            "sig": access_token["playbackAccessToken"]["signature"],
+            "token": access_token["playbackAccessToken"]["value"],
         }
     )
 

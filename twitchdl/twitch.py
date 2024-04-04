@@ -38,6 +38,12 @@ class VideoQuality(TypedDict):
     sourceURL: str
 
 
+class ClipAccessToken(TypedDict):
+    id: str
+    playbackAccessToken: AccessToken
+    videoQualities: list[VideoQuality]
+
+
 class Clip(TypedDict):
     id: str
     slug: str
@@ -183,7 +189,7 @@ def get_clip(slug: str) -> Clip | None:
     return response["data"]["clip"]
 
 
-def get_clip_access_token(slug: str) -> AccessToken:
+def get_clip_access_token(slug: str) -> ClipAccessToken:
     query = f"""
     {{
         "operationName": "VideoAccessToken_Clip",
@@ -200,7 +206,7 @@ def get_clip_access_token(slug: str) -> AccessToken:
     """
 
     response = gql_post(query.strip())
-    return response["data"]["clip"]["playbackAccessToken"]
+    return response["data"]["clip"]
 
 
 def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None = None):
