@@ -1,14 +1,14 @@
 import re
 import sys
 from os import path
-from typing import Generator
+from typing import Callable, Generator
 
 import click
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
-from twitchdl.output import green, print_clip, print_json, print_paged, yellow
+from twitchdl.output import green, print_clip, print_clip_compact, print_json, print_paged, yellow
 from twitchdl.twitch import Clip
 
 
@@ -16,14 +16,18 @@ def clips(
     channel_name: str,
     *,
     all: bool = False,
+    compact: bool = False,
     download: bool = False,
     json: bool = False,
-    limit: int = 10,
+    limit: int | None = None,
     pager: int | None = None,
     period: twitch.ClipsPeriod = "all_time",
 ):
+    # Set different defaults for limit for compact display
+    default_limit = 40 if compact else 10
+
     # Ignore --limit if --pager or --all are given
-    limit = sys.maxsize if all or pager else limit
+    limit = sys.maxsize if all or pager else (limit or default_limit)
 
     generator = twitch.channel_clips_generator(channel_name, period, limit)
 
@@ -33,23 +37,12 @@ def clips(
     if download:
         return _download_clips(generator)
 
+    print_fn = print_clip_compact if compact else print_clip
+
     if pager:
-        return print_paged("Clips", generator, print_clip, pager)
+        return print_paged("Clips", generator, print_fn, pager)
 
-    return _print_all(generator, all)
-
-
-def _continue():
-    enter = click.style("Enter", bold=True, fg="green")
-    ctrl_c = click.style("Ctrl+C", bold=True, fg="yellow")
-    click.echo(f"Press {enter} to continue, {ctrl_c} to break.")
-
-    try:
-        input()
-    except KeyboardInterrupt:
-        return False
-
-    return True
+    return _print_all(generator, print_fn, all)
 
 
 def _target_filename(clip: Clip):
@@ -86,10 +79,13 @@ def _download_clips(generator: Generator[Clip, None, None]):
             download_file(url, target)
 
 
-def _print_all(generator: Generator[Clip, None, None], all: bool):
+def _print_all(
+    generator: Generator[Clip, None, None],
+    print_fn: Callable[[Clip], None],
+    all: bool,
+):
     for clip in generator:
-        click.echo()
-        print_clip(clip)
+        print_fn(clip)
 
     if not all:
         click.secho(

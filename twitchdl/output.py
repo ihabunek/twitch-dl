@@ -1,10 +1,10 @@
-import click
 import json
-
 from itertools import islice
-from twitchdl import utils
 from typing import Any, Callable, Generator, TypeVar
 
+import click
+
+from twitchdl import utils
 from twitchdl.twitch import Clip, Video
 
 T = TypeVar("T")
@@ -124,6 +124,17 @@ def print_clip(clip: Clip):
         + f"  Views: {blue(clip['viewCount'])}"
     )
     click.secho(clip["url"], italic=True)
+    click.echo()
+
+
+def print_clip_compact(clip: Clip):
+    slug = clip["slug"]
+    date = clip["createdAt"][:10]
+    title = truncate(clip["title"], 50).ljust(50)
+    game = clip["game"]["name"] if clip["game"] else ""
+    game = truncate(game, 30).ljust(30)
+
+    click.echo(f"{date} {green(title)} {blue(game)} {bold(slug)}")
 
 
 def prompt_continue():

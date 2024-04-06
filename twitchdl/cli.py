@@ -102,6 +102,12 @@ def cli(ctx: click.Context, color: bool, debug: bool):
     is_flag=True,
 )
 @click.option(
+    "-c",
+    "--compact",
+    help="Show clips in compact mode, one line per video",
+    is_flag=True,
+)
+@click.option(
     "-d",
     "--download",
     help="Download clips in given period (in source quality)",
@@ -110,9 +116,8 @@ def cli(ctx: click.Context, color: bool, debug: bool):
 @click.option(
     "-l",
     "--limit",
-    help="Number of clips to fetch [max: 100]",
+    help="Number of clips to fetch. Defaults to 40 in compact mode, 10 otherwise.",
     type=int,
-    default=10,
     callback=validate_positive,
 )
 @click.option(
@@ -135,9 +140,10 @@ def cli(ctx: click.Context, color: bool, debug: bool):
 def clips(
     channel_name: str,
     all: bool,
+    compact: bool,
     download: bool,
     json: bool,
-    limit: int,
+    limit: int | None,
     pager: int | None,
     period: ClipsPeriod,
 ):
@@ -147,6 +153,7 @@ def clips(
     clips(
         channel_name,
         all=all,
+        compact=compact,
         download=download,
         json=json,
         limit=limit,

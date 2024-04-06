@@ -7,6 +7,7 @@
     - "Add setting defaults via environment variables, see: https://twitch-dl.bezdomni.net/environment_variables.html"
     - "Add `download --concat` option to avoid using ffmeg for joinig vods and concat them instead. This will produce a `.ts` file by default."
     - "Add video description to metadata (#129)"
+    - "Add `clips --compact` option for listing clips in one-per-line mode"
 
 2.1.4:
   date: 2024-01-06
