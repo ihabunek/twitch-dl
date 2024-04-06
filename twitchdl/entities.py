@@ -15,7 +15,7 @@ class DownloadOptions:
     overwrite: bool
     output: str
     quality: str | None
-    rate_limit: str | None
+    rate_limit: int | None
     start: int | None
     max_workers: int
 

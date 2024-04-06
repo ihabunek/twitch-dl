@@ -403,7 +403,7 @@ def get_access_token(video_id: str, auth_token: str | None = None) -> AccessToke
         raise
 
 
-def get_playlists(video_id: str, access_token: AccessToken):
+def get_playlists(video_id: str, access_token: AccessToken) -> str:
     """
     For a given video return a playlist which contains possible video qualities.
     """

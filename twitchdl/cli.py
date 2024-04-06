@@ -1,8 +1,9 @@
-import click
 import logging
 import platform
 import re
 import sys
+
+import click
 
 from twitchdl import __version__
 from twitchdl.entities import DownloadOptions
@@ -258,7 +259,7 @@ def download(
     overwrite: bool,
     output: str,
     quality: str | None,
-    rate_limit: str | None,
+    rate_limit: int | None,
     start: int | None,
     max_workers: int,
 ):
