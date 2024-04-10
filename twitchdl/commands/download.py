@@ -251,7 +251,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     click.echo(f"Output: {blue(target)}")
 
     if not args.overwrite and path.exists(target):
-        response = click.prompt("File exists. Overwrite? [Y/n]: ", default="Y", show_default=False)
+        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
         if response.lower().strip() != "y":
             raise click.Abort()
         args.overwrite = True
