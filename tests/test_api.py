@@ -3,9 +3,10 @@ These tests depend on the channel having some videos and clips published.
 """
 
 import httpx
-import m3u8
+
 from twitchdl import twitch
-from twitchdl.commands.download import _parse_playlists, get_clip_authenticated_url
+from twitchdl.commands.download import get_clip_authenticated_url
+from twitchdl.playlists import enumerate_vods, load_m3u8, parse_playlists
 
 TEST_CHANNEL = "bananasaurus_rex"
 
@@ -17,22 +18,25 @@ def test_get_videos():
 
     video_id = videos["edges"][0]["node"]["id"]
     video = twitch.get_video(video_id)
+    assert video is not None
     assert video["id"] == video_id
 
     access_token = twitch.get_access_token(video_id)
     assert "signature" in access_token
     assert "value" in access_token
 
-    playlists = twitch.get_playlists(video_id, access_token)
-    assert playlists.startswith("#EXTM3U")
+    playlists_txt = twitch.get_playlists(video_id, access_token)
+    assert playlists_txt.startswith("#EXTM3U")
 
-    name, res, url = next(_parse_playlists(playlists))
-    playlist = httpx.get(url).text
-    assert playlist.startswith("#EXTM3U")
+    playlists = parse_playlists(playlists_txt)
+    playlist_url = playlists[0].url
 
-    playlist = m3u8.loads(playlist)
-    vod_path = playlist.segments[0].uri
-    assert vod_path == "0.ts"
+    playlist_txt = httpx.get(playlist_url).text
+    assert playlist_txt.startswith("#EXTM3U")
+
+    playlist_m3u8 = load_m3u8(playlist_txt)
+    vods = enumerate_vods(playlist_m3u8)
+    assert vods[0].path == "0.ts"
 
 
 def test_get_clips():
@@ -45,6 +49,7 @@ def test_get_clips():
 
     slug = clips["edges"][0]["node"]["slug"]
     clip = twitch.get_clip(slug)
+    assert clip is not None
     assert clip["slug"] == slug
 
     assert get_clip_authenticated_url(slug, "source")

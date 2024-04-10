@@ -51,7 +51,11 @@ def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
     return m3u8.loads(playlist_m3u8)
 
 
-def enumerate_vods(document: m3u8.M3U8, start: int | None, end: int | None) -> list[Vod]:
+def enumerate_vods(
+    document: m3u8.M3U8,
+    start: int | None = None,
+    end: int | None = None,
+) -> list[Vod]:
     """Extract VODs for download from document."""
     vods = []
     vod_start = 0
