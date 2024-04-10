@@ -28,7 +28,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">--concat</td>
-    <td>Do not use ffmpeg to join files, concat them instead</td>
+    <td>Do not use ffmpeg to join files, concat them instead. This will produce a .ts file by default.</td>
 </tr>
 
 <tr>

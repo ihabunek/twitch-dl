@@ -19,13 +19,18 @@ twitch-dl clips [OPTIONS] CHANNEL_NAME
 </tr>
 
 <tr>
+    <td class="code">-c, --compact</td>
+    <td>Show clips in compact mode, one line per video</td>
+</tr>
+
+<tr>
     <td class="code">-d, --download</td>
     <td>Download clips in given period (in source quality)</td>
 </tr>
 
 <tr>
     <td class="code">-l, --limit INTEGER</td>
-    <td>Number of clips to fetch [max: 100] [default: <code>10</code>]</td>
+    <td>Number of clips to fetch. Defaults to 40 in compact mode, 10 otherwise.</td>
 </tr>
 
 <tr>

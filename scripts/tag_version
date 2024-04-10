@@ -11,12 +11,10 @@ Usage: tag_version [version]
 import subprocess
 import sys
 import textwrap
-import yaml
-import twitchdl
-
 from datetime import date
 from os import path
-from pkg_resources import get_distribution
+
+import yaml
 
 path = path.join(path.dirname(path.dirname(path.abspath(__file__))), "changelog.yaml")
 with open(path, "r") as f:
@@ -31,15 +29,6 @@ version = sys.argv[1]
 changelog_item = changelog.get(version)
 if not changelog_item:
     print(f"Version `{version}` not found in changelog.", file=sys.stderr)
-    sys.exit(1)
-
-if twitchdl.__version__ != version:
-    print(f"twitchdl.__version__ is `{twitchdl.__version__}`, expected {version}.", file=sys.stderr)
-    sys.exit(1)
-
-dist_version = get_distribution('twitch-dl').version
-if dist_version != version:
-    print(f"Version in setup.py is `{dist_version}`, expected {version}.", file=sys.stderr)
     sys.exit(1)
 
 release_date = changelog_item["date"]

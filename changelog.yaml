@@ -1,11 +1,12 @@
 2.2.0:
-  date: TBA
+  date: 2024-04-10
   changes:
-    - "**Requires python 3.8 or later**"
+    - "**Requires Python 3.8+**"
     - "Migrated to Click library for generating the commandline interface"
-    - "Add shell auto completion, see: https://twitch-dl.bezdomni.net/shell_completion.html"
-    - "Add setting defaults via environment variables, see: https://twitch-dl.bezdomni.net/environment_variables.html"
+    - "Add shell auto completion, see 'Shell completion' in docs."
+    - "Add setting defaults via environment variables, see 'Environment variables' in docs"
     - "Add `download --concat` option to avoid using ffmeg for joinig vods and concat them instead. This will produce a `.ts` file by default."
+    - "Add `download --dry-run` option to skip actual download (thanks @metacoma)"
     - "Add video description to metadata (#129)"
     - "Add `clips --compact` option for listing clips in one-per-line mode"
 
