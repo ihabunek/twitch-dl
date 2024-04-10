@@ -85,7 +85,7 @@ def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> i
 def cli(ctx: click.Context, color: bool, debug: bool):
     """twitch-dl - twitch.tv downloader
 
-    https://toot.bezdomni.net/
+    https://twitch-dl.bezdomni.net/
     """
     ctx.color = color
 
