@@ -127,7 +127,7 @@ class Progress:
         size = last_sample.downloaded - first_sample.downloaded
         duration = last_sample.timestamp - first_sample.timestamp
 
-        return size / duration
+        return size / duration if duration > 0 else None
 
     def print(self):
         now = time.time()
