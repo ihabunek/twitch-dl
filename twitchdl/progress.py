@@ -136,17 +136,20 @@ class Progress:
         if now - self.last_printed < 0.1:
             return
 
-        progress = " ".join(
-            [
-                f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs",
-                f"{blue(self.progress_perc)}%",
-                f"of ~{blue(format_size(self.estimated_total))}" if self.estimated_total else "",
-                f"at {blue(format_size(self.speed))}/s" if self.speed else "",
-                f"ETA {blue(format_time(self.remaining_time))}"
-                if self.remaining_time is not None
-                else "",
-            ]
-        )
+        click.echo(f"\rDownloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
+        click.secho(f" {self.progress_perc}%", fg="blue", nl=False)
 
-        click.echo(f"\r{progress}     ", nl=False)
+        if self.estimated_total is not None:
+            total = f"~{format_size(self.estimated_total)}"
+            click.echo(f" of {blue(total)}", nl=False)
+
+        if self.speed is not None:
+            speed = f"{format_size(self.speed)}/s"
+            click.echo(f" at {blue(speed)}", nl=False)
+
+        if self.remaining_time is not None:
+            click.echo(f" ETA {blue(format_time(self.remaining_time))}", nl=False)
+
+        click.echo("    ", nl=False)
+
         self.last_printed = now
