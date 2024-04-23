@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict
+from typing import Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict, Union
 
 import click
 import httpx
@@ -87,7 +87,15 @@ class GQLError(click.ClickException):
         super().__init__(message)
 
 
-def authenticated_post(url, content=None, json=None, headers={}):
+RequestContent = Union[str, bytes]
+
+
+def authenticated_post(
+    url: str,
+    content: Optional[RequestContent] = None,
+    json=None,
+    headers={},
+):
     headers["Client-ID"] = CLIENT_ID
 
     response = httpx.post(url, content=content, json=json, headers=headers)
