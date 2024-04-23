@@ -3,7 +3,7 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
-from typing import Generator, OrderedDict
+from typing import Generator, Optional, OrderedDict
 
 import click
 import m3u8
@@ -15,7 +15,7 @@ from twitchdl.output import bold, dim
 @dataclass
 class Playlist:
     name: str
-    resolution: str | None
+    resolution: Optional[str]
     url: str
 
 
@@ -53,8 +53,8 @@ def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
 
 def enumerate_vods(
     document: m3u8.M3U8,
-    start: int | None = None,
-    end: int | None = None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
 ) -> list[Vod]:
     """Extract VODs for download from document."""
     vods = []
@@ -97,7 +97,7 @@ def make_join_playlist(
     return playlist
 
 
-def select_playlist(playlists: list[Playlist], quality: str | None) -> Playlist:
+def select_playlist(playlists: list[Playlist], quality: Optional[str]) -> Playlist:
     return (
         select_playlist_by_name(playlists, quality)
         if quality is not None

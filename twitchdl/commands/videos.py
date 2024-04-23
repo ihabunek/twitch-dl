@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 
 import click
 
@@ -14,8 +15,8 @@ def videos(
     compact: bool,
     games: list[str],
     json: bool,
-    limit: int | None,
-    pager: int | None,
+    limit: Optional[int],
+    pager: Optional[int],
     sort: twitch.VideosSort,
     type: twitch.VideosType,
 ):

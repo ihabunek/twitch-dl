@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, Literal, TypedDict
+from typing import Dict, Generator, Literal, TypedDict, Optional
 
 import click
 import httpx
@@ -163,7 +163,7 @@ CLIP_FIELDS = """
 """
 
 
-def get_video(video_id: str) -> Video | None:
+def get_video(video_id: str) -> Optional[Video]:
     query = f"""
     {{
         video(id: "{video_id}") {{
@@ -176,7 +176,7 @@ def get_video(video_id: str) -> Video | None:
     return response["data"]["video"]
 
 
-def get_clip(slug: str) -> Clip | None:
+def get_clip(slug: str) -> Optional[Clip]:
     query = f"""
     {{
         clip(slug: "{slug}") {{
@@ -209,7 +209,7 @@ def get_clip_access_token(slug: str) -> ClipAccessToken:
     return response["data"]["clip"]
 
 
-def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: str | None = None):
+def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: Optional[str] = None):
     """
     List channel clips.
 
@@ -294,8 +294,8 @@ def get_channel_videos(
     limit: int,
     sort: str,
     type: str = "archive",
-    game_ids: list[str] | None = None,
-    after: str | None = None,
+    game_ids: Optional[list[str]] = None,
+    after: Optional[str] = None,
 ):
     game_ids = game_ids or []
 
@@ -339,7 +339,7 @@ def channel_videos_generator(
     max_videos: int,
     sort: VideosSort,
     type: VideosType,
-    game_ids: list[str] | None = None,
+    game_ids: Optional[list[str]] = None,
 ) -> tuple[int, Generator[Video, None, None]]:
     game_ids = game_ids or []
 
@@ -364,7 +364,7 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id: str, auth_token: str | None = None) -> AccessToken:
+def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessToken:
     query = f"""
     {{
         videoPlaybackAccessToken(

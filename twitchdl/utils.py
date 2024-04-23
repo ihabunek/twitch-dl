@@ -1,4 +1,5 @@
 import re
+from typing import Optional, Union
 import unicodedata
 
 import click
@@ -11,7 +12,7 @@ def _format_size(value: float, digits: int, unit: str):
         return f"{int(value)}{unit}"
 
 
-def format_size(bytes_: int | float, digits: int = 1):
+def format_size(bytes_: Union[int, float], digits: int = 1):
     if bytes_ < 1024:
         return _format_size(bytes_, digits, "B")
 
@@ -26,7 +27,7 @@ def format_size(bytes_: int | float, digits: int = 1):
     return _format_size(mega / 1024, digits, "GB")
 
 
-def format_duration(total_seconds: int | float) -> str:
+def format_duration(total_seconds: Union[int, float]) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -42,7 +43,7 @@ def format_duration(total_seconds: int | float) -> str:
     return f"{seconds} sec"
 
 
-def format_time(total_seconds: int | float, force_hours: bool = False) -> str:
+def format_time(total_seconds: Union[int, float], force_hours: bool = False) -> str:
     total_seconds = int(total_seconds)
     hours = total_seconds // 3600
     remainder = total_seconds % 3600
@@ -55,7 +56,7 @@ def format_time(total_seconds: int | float, force_hours: bool = False) -> str:
     return f"{minutes:02}:{seconds:02}"
 
 
-def read_int(msg: str, min: int, max: int, default: int | None = None) -> int:
+def read_int(msg: str, min: int, max: int, default: Optional[int] = None) -> int:
     while True:
         try:
             val = click.prompt(msg, default=default, type=int)
@@ -93,7 +94,7 @@ CLIP_PATTERNS = [
 ]
 
 
-def parse_video_identifier(identifier: str) -> str | None:
+def parse_video_identifier(identifier: str) -> Optional[str]:
     """Given a video ID or URL returns the video ID, or null if not matched"""
     for pattern in VIDEO_PATTERNS:
         match = re.match(pattern, identifier)
@@ -101,7 +102,7 @@ def parse_video_identifier(identifier: str) -> str | None:
             return match.group("id")
 
 
-def parse_clip_identifier(identifier: str) -> str | None:
+def parse_clip_identifier(identifier: str) -> Optional[str]:
     """Given a clip slug or URL returns the clip slug, or null if not matched"""
     for pattern in CLIP_PATTERNS:
         match = re.match(pattern, identifier)

@@ -1,7 +1,7 @@
 import re
 import sys
 from os import path
-from typing import Callable, Generator
+from typing import Callable, Generator, Optional
 
 import click
 
@@ -9,7 +9,7 @@ from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.download import download_file
 from twitchdl.output import green, print_clip, print_clip_compact, print_json, print_paged, yellow
-from twitchdl.twitch import Clip
+from twitchdl.twitch import Clip, ClipsPeriod
 
 
 def clips(
@@ -19,9 +19,9 @@ def clips(
     compact: bool = False,
     download: bool = False,
     json: bool = False,
-    limit: int | None = None,
-    pager: int | None = None,
-    period: twitch.ClipsPeriod = "all_time",
+    limit: Optional[int] = None,
+    pager: Optional[int] = None,
+    period: ClipsPeriod = "all_time",
 ):
     # Set different defaults for limit for compact display
     default_limit = 40 if compact else 10

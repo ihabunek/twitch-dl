@@ -2,6 +2,7 @@ import logging
 import platform
 import re
 import sys
+from typing import Optional
 
 import click
 
@@ -30,13 +31,13 @@ json_option = click.option(
 )
 
 
-def validate_positive(_ctx: click.Context, _param: click.Parameter, value: int | None):
+def validate_positive(_ctx: click.Context, _param: click.Parameter, value: Optional[int]):
     if value is not None and value <= 0:
         raise click.BadParameter("must be greater than 0")
     return value
 
 
-def validate_time(_ctx: click.Context, _param: click.Parameter, value: str) -> int | None:
+def validate_time(_ctx: click.Context, _param: click.Parameter, value: str) -> Optional[int]:
     """Parse a time string (hh:mm or hh:mm:ss) to number of seconds."""
     if not value:
         return None
@@ -56,7 +57,7 @@ def validate_time(_ctx: click.Context, _param: click.Parameter, value: str) -> i
     return hours * 3600 + minutes * 60 + seconds
 
 
-def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> int | None:
+def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> Optional[int]:
     if not value:
         return None
 
@@ -143,8 +144,8 @@ def clips(
     compact: bool,
     download: bool,
     json: bool,
-    limit: int | None,
-    pager: int | None,
+    limit: Optional[int],
+    pager: Optional[int],
     period: ClipsPeriod,
 ):
     """List or download clips for given CHANNEL_NAME."""
@@ -255,19 +256,19 @@ def clips(
 )
 def download(
     ids: tuple[str, ...],
-    auth_token: str | None,
-    chapter: int | None,
+    auth_token: Optional[str],
+    chapter: Optional[int],
     concat: bool,
     dry_run: bool,
-    end: int | None,
+    end: Optional[int],
     format: str,
     keep: bool,
     no_join: bool,
     overwrite: bool,
     output: str,
-    quality: str | None,
-    rate_limit: int | None,
-    start: int | None,
+    quality: Optional[str],
+    rate_limit: Optional[int],
+    start: Optional[int],
     max_workers: int,
 ):
     """Download videos or clips.
@@ -375,8 +376,8 @@ def videos(
     compact: bool,
     games_tuple: tuple[str, ...],
     json: bool,
-    limit: int | None,
-    pager: int | None,
+    limit: Optional[int],
+    pager: Optional[int],
     sort: VideosSort,
     type: VideosType,
 ):

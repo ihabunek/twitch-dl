@@ -1,22 +1,22 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
 class DownloadOptions:
-    auth_token: str | None
-    chapter: int | None
+    auth_token: Optional[str]
+    chapter: Optional[int]
     concat: bool
     dry_run: bool
-    end: int | None
+    end: Optional[int]
     format: str
     keep: bool
     no_join: bool
     overwrite: bool
     output: str
-    quality: str | None
-    rate_limit: int | None
-    start: int | None
+    quality: Optional[str]
+    rate_limit: Optional[int]
+    start: Optional[int]
     max_workers: int
 
 

@@ -1,6 +1,6 @@
 import json
 from itertools import islice
-from typing import Any, Callable, Generator, TypeVar
+from typing import Any, Callable, Generator, Optional, TypeVar
 
 import click
 
@@ -49,7 +49,7 @@ def print_paged(
     generator: Generator[T, Any, Any],
     print_fn: Callable[[T], None],
     page_size: int,
-    total_count: int | None = None,
+    total_count: Optional[int] = None,
 ):
     iterator = iter(generator)
     page = list(islice(iterator, page_size))
