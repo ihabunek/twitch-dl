@@ -1,7 +1,12 @@
+2.2.2:
+  date: 2024-04-23
+  changes:
+    - "Fix more compat issues Python < 3.10 (#152)"
+
 2.2.1:
   date: 2024-04-23
   changes:
-    - "Fix compat with < Python 3.10 (#152)"
+    - "Fix compat with Python < 3.10 (#152)"
     - "Fix division by zero in progress calculation when video duration is reported as 0"
 
 2.2.0:
