@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, TypedDict, Union
 
 import click
 import httpx
@@ -87,16 +87,20 @@ class GQLError(click.ClickException):
         super().__init__(message)
 
 
-RequestContent = Union[str, bytes]
+Content = Union[str, bytes]
+Headers = Dict[str, str]
 
 
 def authenticated_post(
     url: str,
-    content: Optional[RequestContent] = None,
-    json=None,
-    headers={},
+    *,
+    json: Any = None,
+    content: Optional[Content] = None,
+    auth_token: Optional[str] = None,
 ):
-    headers["Client-ID"] = CLIENT_ID
+    headers = {"Client-ID": CLIENT_ID}
+    if auth_token is not None:
+        headers["authorization"] = f"OAuth {auth_token}"
 
     response = httpx.post(url, content=content, json=json, headers=headers)
     if response.status_code == 400:
@@ -115,9 +119,9 @@ def gql_post(query: str):
     return response.json()
 
 
-def gql_query(query: str, headers: Dict[str, str] = {}):
+def gql_query(query: str, auth_token: Optional[str] = None):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, json={"query": query}, headers=headers)
+    response = authenticated_post(url, json={"query": query}, auth_token=auth_token)
     gql_raise_on_error(response)
     return response.json()
 
@@ -394,12 +398,8 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
     }}
     """
 
-    headers: Mapping[str, str] = {}
-    if auth_token is not None:
-        headers["authorization"] = f"OAuth {auth_token}"
-
     try:
-        response = gql_query(query, headers=headers)
+        response = gql_query(query, auth_token=auth_token)
         return response["data"]["videoPlaybackAccessToken"]
     except httpx.HTTPStatusError as error:
         # Provide a more useful error message when server returns HTTP 401
