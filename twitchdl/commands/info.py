@@ -1,3 +1,5 @@
+from typing import List
+
 import click
 import m3u8
 
@@ -48,7 +50,7 @@ def info(id: str, *, json: bool = False):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video: Video, playlists, chapters: list[Chapter]):
+def video_info(video: Video, playlists, chapters: List[Chapter]):
     click.echo()
     print_video(video)
 

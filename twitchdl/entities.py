@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 
 @dataclass
@@ -22,4 +22,4 @@ class DownloadOptions:
 
 # Type for annotating decoded JSON
 # TODO: make data classes for common structs
-Data = dict[str, Any]
+Data = Mapping[str, Any]

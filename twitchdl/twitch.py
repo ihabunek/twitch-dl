@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, Literal, Optional, TypedDict
+from typing import Dict, Generator, List, Literal, Mapping, Optional, TypedDict
 
 import click
 import httpx
@@ -41,7 +41,7 @@ class VideoQuality(TypedDict):
 class ClipAccessToken(TypedDict):
     id: str
     playbackAccessToken: AccessToken
-    videoQualities: list[VideoQuality]
+    videoQualities: List[VideoQuality]
 
 
 class Clip(TypedDict):
@@ -52,7 +52,7 @@ class Clip(TypedDict):
     viewCount: int
     durationSeconds: int
     url: str
-    videoQualities: list[VideoQuality]
+    videoQualities: List[VideoQuality]
     game: Game
     broadcaster: User
 
@@ -80,7 +80,7 @@ class Chapter(TypedDict):
 
 
 class GQLError(click.ClickException):
-    def __init__(self, errors: list[str]):
+    def __init__(self, errors: List[str]):
         message = "GraphQL query failed."
         for error in errors:
             message += f"\n* {error}"
@@ -299,7 +299,7 @@ def get_channel_videos(
     limit: int,
     sort: str,
     type: str = "archive",
-    game_ids: Optional[list[str]] = None,
+    game_ids: Optional[List[str]] = None,
     after: Optional[str] = None,
 ):
     game_ids = game_ids or []
@@ -344,7 +344,7 @@ def channel_videos_generator(
     max_videos: int,
     sort: VideosSort,
     type: VideosType,
-    game_ids: Optional[list[str]] = None,
+    game_ids: Optional[List[str]] = None,
 ) -> tuple[int, Generator[Video, None, None]]:
     game_ids = game_ids or []
 
@@ -386,7 +386,7 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
     }}
     """
 
-    headers: dict[str, str] = {}
+    headers: Mapping[str, str] = {}
     if auth_token is not None:
         headers["authorization"] = f"OAuth {auth_token}"
 
@@ -443,7 +443,7 @@ def get_game_id(name: str):
         return game["id"]
 
 
-def get_video_chapters(video_id: str) -> list[Chapter]:
+def get_video_chapters(video_id: str) -> List[Chapter]:
     query = {
         "operationName": "VideoPlayer_ChapterSelectButtonVideo",
         "variables": {

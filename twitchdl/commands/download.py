@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 from os import path
 from pathlib import Path
+from typing import Dict, List
 from urllib.parse import urlencode, urlparse
 
 import click
@@ -28,7 +29,7 @@ from twitchdl.playlists import (
 from twitchdl.twitch import Chapter, Clip, ClipAccessToken, Video
 
 
-def download(ids: list[str], args: DownloadOptions):
+def download(ids: List[str], args: DownloadOptions):
     for video_id in ids:
         download_one(video_id, args)
 
@@ -78,7 +79,7 @@ def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
         raise ConsoleError("Joining files failed")
 
 
-def _concat_vods(vod_paths: list[str], target: str):
+def _concat_vods(vod_paths: List[str], target: str):
     tool = "type" if platform.system() == "Windows" else "cat"
     command = [tool] + vod_paths
 
@@ -88,7 +89,7 @@ def _concat_vods(vod_paths: list[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def get_video_placeholders(video: Video, format: str) -> dict[str, str]:
+def get_video_placeholders(video: Video, format: str) -> Dict[str, str]:
     date, time = video["publishedAt"].split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
@@ -350,7 +351,7 @@ def _determine_time_range(video_id: str, args: DownloadOptions):
     return None, None
 
 
-def _choose_chapter_interactive(chapters: list[Chapter]):
+def _choose_chapter_interactive(chapters: List[Chapter]):
     click.echo("\nChapters:")
     for index, chapter in enumerate(chapters):
         duration = utils.format_time(chapter["durationMilliseconds"] // 1000)

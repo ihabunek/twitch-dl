@@ -3,7 +3,7 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
-from typing import Generator, Optional, OrderedDict
+from typing import Generator, List, Optional, OrderedDict
 
 import click
 import m3u8
@@ -55,7 +55,7 @@ def enumerate_vods(
     document: m3u8.M3U8,
     start: Optional[int] = None,
     end: Optional[int] = None,
-) -> list[Vod]:
+) -> List[Vod]:
     """Extract VODs for download from document."""
     vods = []
     vod_start = 0
@@ -78,8 +78,8 @@ def enumerate_vods(
 
 def make_join_playlist(
     playlist: m3u8.M3U8,
-    vods: list[Vod],
-    targets: list[str],
+    vods: List[Vod],
+    targets: List[str],
 ) -> m3u8.Playlist:
     """
     Make a modified playlist which references downloaded VODs
@@ -97,7 +97,7 @@ def make_join_playlist(
     return playlist
 
 
-def select_playlist(playlists: list[Playlist], quality: Optional[str]) -> Playlist:
+def select_playlist(playlists: List[Playlist], quality: Optional[str]) -> Playlist:
     return (
         select_playlist_by_name(playlists, quality)
         if quality is not None
@@ -105,7 +105,7 @@ def select_playlist(playlists: list[Playlist], quality: Optional[str]) -> Playli
     )
 
 
-def select_playlist_by_name(playlists: list[Playlist], quality: str) -> Playlist:
+def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist:
     if quality == "source":
         return playlists[0]
 
@@ -118,7 +118,7 @@ def select_playlist_by_name(playlists: list[Playlist], quality: str) -> Playlist
     raise click.ClickException(msg)
 
 
-def select_playlist_interactive(playlists: list[Playlist]) -> Playlist:
+def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
     click.echo("\nAvailable qualities:")
     for n, playlist in enumerate(playlists):
         if playlist.resolution:

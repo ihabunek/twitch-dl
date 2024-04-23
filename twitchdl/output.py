@@ -1,6 +1,6 @@
 import json
 from itertools import islice
-from typing import Any, Callable, Generator, Optional, TypeVar
+from typing import Any, Callable, Generator, List, Optional, TypeVar
 
 import click
 
@@ -25,12 +25,12 @@ def print_log(message: Any):
     click.secho(message, err=True, dim=True)
 
 
-def print_table(headers: list[str], data: list[list[str]]):
+def print_table(headers: List[str], data: List[List[str]]):
     widths = [[len(cell) for cell in row] for row in data + [headers]]
     widths = [max(width) for width in zip(*widths)]
     underlines = ["-" * width for width in widths]
 
-    def print_row(row: list[str]):
+    def print_row(row: List[str]):
         for idx, cell in enumerate(row):
             width = widths[idx]
             click.echo(cell.ljust(width), nl=False)

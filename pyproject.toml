@@ -53,6 +53,7 @@ twitch-dl = "twitchdl.cli:cli"
 [tool.pyright]
 include = ["twitchdl"]
 typeCheckingMode = "strict"
+pythonVersion = "3.8"
 
 [tool.ruff]
 line-length = 100

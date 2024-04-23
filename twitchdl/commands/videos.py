@@ -1,5 +1,5 @@
 import sys
-from typing import Optional
+from typing import List, Optional
 
 import click
 
@@ -13,7 +13,7 @@ def videos(
     *,
     all: bool,
     compact: bool,
-    games: list[str],
+    games: List[str],
     json: bool,
     limit: Optional[int],
     pager: Optional[int],
@@ -67,7 +67,7 @@ def videos(
         )
 
 
-def _get_game_ids(names: list[str]) -> list[str]:
+def _get_game_ids(names: List[str]) -> List[str]:
     if not names:
         return []
 
