@@ -87,10 +87,10 @@ class GQLError(click.ClickException):
         super().__init__(message)
 
 
-def authenticated_post(url, data=None, json=None, headers={}):
+def authenticated_post(url, content=None, json=None, headers={}):
     headers["Client-ID"] = CLIENT_ID
 
-    response = httpx.post(url, data=data, json=json, headers=headers)
+    response = httpx.post(url, content=content, json=json, headers=headers)
     if response.status_code == 400:
         data = response.json()
         raise ConsoleError(data["message"])
@@ -102,7 +102,7 @@ def authenticated_post(url, data=None, json=None, headers={}):
 
 def gql_post(query: str):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, data=query)
+    response = authenticated_post(url, content=query)
     gql_raise_on_error(response)
     return response.json()
 
