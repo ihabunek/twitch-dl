@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, Literal, TypedDict, Optional
+from typing import Dict, Generator, Literal, Optional, TypedDict
 
 import click
 import httpx
@@ -209,7 +209,12 @@ def get_clip_access_token(slug: str) -> ClipAccessToken:
     return response["data"]["clip"]
 
 
-def get_channel_clips(channel_id: str, period: ClipsPeriod, limit: int, after: Optional[str] = None):
+def get_channel_clips(
+    channel_id: str,
+    period: ClipsPeriod,
+    limit: int,
+    after: Optional[str] = None,
+):
     """
     List channel clips.
 

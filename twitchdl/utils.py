@@ -1,6 +1,6 @@
 import re
-from typing import Optional, Union
 import unicodedata
+from typing import Optional, Union
 
 import click
 
