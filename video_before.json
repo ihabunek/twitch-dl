@@ -1,0 +1,203 @@
+{
+  "id": "2115833882",
+  "title": "Games I Feel Like Speedrun Marathon !newyt !Slender !Merch",
+  "description": null,
+  "publishedAt": "2024-04-10T05:01:12Z",
+  "broadcastType": "ARCHIVE",
+  "lengthSeconds": 30163,
+  "game": {
+    "id": "21063",
+    "name": "Saw"
+  },
+  "creator": {
+    "login": "ecdycis",
+    "displayName": "Ecdycis"
+  },
+  "playlists": [
+    {
+      "bandwidth": 6395968,
+      "resolution": [
+        1920,
+        1080
+      ],
+      "codecs": "avc1.64002A,mp4a.40.2",
+      "video": "chunked",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/chunked/index-muted-GKGIUOE29B.m3u8"
+    },
+    {
+      "bandwidth": 3430341,
+      "resolution": [
+        1280,
+        720
+      ],
+      "codecs": "avc1.4D0020,mp4a.40.2",
+      "video": "720p60",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/720p60/index-muted-GKGIUOE29B.m3u8"
+    },
+    {
+      "bandwidth": 1448243,
+      "resolution": [
+        852,
+        480
+      ],
+      "codecs": "avc1.4D001F,mp4a.40.2",
+      "video": "480p30",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/480p30/index-muted-GKGIUOE29B.m3u8"
+    },
+    {
+      "bandwidth": 215544,
+      "resolution": null,
+      "codecs": "mp4a.40.2",
+      "video": "audio_only",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/audio_only/index-muted-GKGIUOE29B.m3u8"
+    },
+    {
+      "bandwidth": 709051,
+      "resolution": [
+        640,
+        360
+      ],
+      "codecs": "avc1.4D001E,mp4a.40.2",
+      "video": "360p30",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/360p30/index-muted-GKGIUOE29B.m3u8"
+    },
+    {
+      "bandwidth": 288844,
+      "resolution": [
+        284,
+        160
+      ],
+      "codecs": "avc1.4D000C,mp4a.40.2",
+      "video": "160p30",
+      "uri": "https://d2nvs31859zcd8.cloudfront.net/3104d817048588f268fa_ecdycis_43996750059_1712725267/160p30/index-muted-GKGIUOE29B.m3u8"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "6049e803f47a0b9cf64ce95adcf3d96d",
+      "durationMilliseconds": 4891000,
+      "positionMilliseconds": 0,
+      "type": "GAME_CHANGE",
+      "description": "Saw",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "21063",
+        "displayName": "Saw",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/21063_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    },
+    {
+      "id": "c3be4ce5a7bae802d7a6df02baf62a85",
+      "durationMilliseconds": 6235000,
+      "positionMilliseconds": 4891000,
+      "type": "GAME_CHANGE",
+      "description": "Resident Evil 7: Biohazard",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "492934",
+        "displayName": "Resident Evil 7: Biohazard",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/492934_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    },
+    {
+      "id": "bd584f17bc1f91fc11ed14dcec5e4742",
+      "durationMilliseconds": 3401000,
+      "positionMilliseconds": 11126000,
+      "type": "GAME_CHANGE",
+      "description": "Silent Hill: Homecoming",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "18864",
+        "displayName": "Silent Hill: Homecoming",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/18864_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    },
+    {
+      "id": "9f4be8bc7b5bf398213bc602a4b39c4d",
+      "durationMilliseconds": 3490000,
+      "positionMilliseconds": 14527000,
+      "type": "GAME_CHANGE",
+      "description": "Silent Hill 2",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "9891",
+        "displayName": "Silent Hill 2",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/9891_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    },
+    {
+      "id": "7a42d537681decc10660c33f9071a37f",
+      "durationMilliseconds": 7241000,
+      "positionMilliseconds": 18017000,
+      "type": "GAME_CHANGE",
+      "description": "The Darkness",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "8448",
+        "displayName": "The Darkness",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/8448_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    },
+    {
+      "id": "64418186f436d80b1359d2e6686222ef",
+      "durationMilliseconds": 4905000,
+      "positionMilliseconds": 25258000,
+      "type": "GAME_CHANGE",
+      "description": "Silent Hill 4: The Room",
+      "subDescription": "",
+      "thumbnailURL": "",
+      "video": {
+        "id": "2115833882",
+        "lengthSeconds": 30163,
+        "__typename": "Video"
+      },
+      "__typename": "VideoMoment",
+      "game": {
+        "id": "5804",
+        "displayName": "Silent Hill 4: The Room",
+        "boxArtURL": "https://static-cdn.jtvnw.net/ttv-boxart/5804_IGDB-40x53.jpg",
+        "__typename": "Game"
+      }
+    }
+  ]
+}

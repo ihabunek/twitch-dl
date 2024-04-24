@@ -2,7 +2,7 @@ import logging
 import platform
 import re
 import sys
-from typing import Optional
+from typing import Optional, Tuple
 
 import click
 
@@ -255,7 +255,7 @@ def clips(
     default=5,
 )
 def download(
-    ids: tuple[str, ...],
+    ids: Tuple[str, ...],
     auth_token: Optional[str],
     chapter: Optional[int],
     concat: bool,
@@ -374,7 +374,7 @@ def videos(
     channel_name: str,
     all: bool,
     compact: bool,
-    games_tuple: tuple[str, ...],
+    games_tuple: Tuple[str, ...],
     json: bool,
     limit: Optional[int],
     pager: Optional[int],

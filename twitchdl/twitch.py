@@ -3,7 +3,7 @@ Twitch API access.
 """
 
 import json
-from typing import Dict, Generator, List, Literal, Mapping, Optional, TypedDict
+from typing import Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict
 
 import click
 import httpx
@@ -345,7 +345,7 @@ def channel_videos_generator(
     sort: VideosSort,
     type: VideosType,
     game_ids: Optional[List[str]] = None,
-) -> tuple[int, Generator[Video, None, None]]:
+) -> Tuple[int, Generator[Video, None, None]]:
     game_ids = game_ids or []
 
     def _generator(videos: Data, max_videos: int) -> Generator[Video, None, None]:

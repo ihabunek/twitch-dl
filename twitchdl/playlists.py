@@ -29,11 +29,15 @@ class Vod:
     """Segment duration in seconds"""
 
 
-def parse_playlists(playlists_m3u8: str):
+def parse_playlists(playlists_m3u8: str) -> List[Playlist]:
     def _parse(source: str) -> Generator[Playlist, None, None]:
         document = load_m3u8(source)
 
         for p in document.playlists:
+            from pprint import pp
+
+            pp(p.__dict__)
+            pp(p.stream_info.__dict__)
             if p.stream_info.resolution:
                 name = p.media[0].name
                 resolution = "x".join(str(r) for r in p.stream_info.resolution)

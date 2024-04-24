@@ -43,6 +43,11 @@ dev = [
     "vermin",
 ]
 
+test = [
+    "pytest",
+    "vermin",
+]
+
 [project.urls]
 "Homepage" = "https://twitch-dl.bezdomni.net/"
 "Source" = "https://github.com/ihabunek/twitch-dl"
