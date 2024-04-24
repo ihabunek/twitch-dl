@@ -135,3 +135,22 @@ def test_videos_channel_not_found(runner: CliRunner):
     result = runner.invoke(cli.videos, ["doesnotexisthopefully"])
     assert result.exit_code == 1
     assert result.stderr.strip() == "Error: Channel doesnotexisthopefully not found"
+
+
+def test_clips(runner: CliRunner):
+    result = runner.invoke(cli.clips, ["gamesdonequick", "--json"])
+    assert_ok(result)
+    clips = json.loads(result.stdout)
+    clip = clips[0]
+
+    result = runner.invoke(cli.clips, "gamesdonequick")
+    assert_ok(result)
+
+    assert f"Clip {clip['slug']}" in result.stdout
+    assert clip["title"] in result.stdout
+
+    result = runner.invoke(cli.clips, ["gamesdonequick", "--compact"])
+    assert_ok(result)
+
+    assert clip["slug"] in result.stdout
+    assert clip["title"][:60] in result.stdout
