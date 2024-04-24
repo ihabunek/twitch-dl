@@ -107,3 +107,31 @@ def test_download_video(runner: CliRunner):
         "Output: 2024-03-14_2090131595_frozenflygone_frost_fatales_2024_day_1.mkv" in result.stdout
     )
     assert "Dry run, video not downloaded." in result.stdout
+
+
+def test_videos(runner: CliRunner):
+    result = runner.invoke(cli.videos, ["gamesdonequick", "--json"])
+    assert_ok(result)
+    videos = json.loads(result.stdout)
+
+    assert videos["count"] == 10
+    assert videos["totalCount"] > 0
+    video = videos["videos"][0]
+
+    result = runner.invoke(cli.videos, "gamesdonequick")
+    assert_ok(result)
+
+    assert f"Video {video['id']}" in result.stdout
+    assert video["title"] in result.stdout
+
+    result = runner.invoke(cli.videos, ["gamesdonequick", "--compact"])
+    assert_ok(result)
+
+    assert video["id"] in result.stdout
+    assert video["title"] in result.stdout
+
+
+def test_videos_channel_not_found(runner: CliRunner):
+    result = runner.invoke(cli.videos, ["doesnotexisthopefully"])
+    assert result.exit_code == 1
+    assert result.stderr.strip() == "Error: Channel doesnotexisthopefully not found"
