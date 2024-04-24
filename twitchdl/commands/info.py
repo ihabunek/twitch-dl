@@ -72,7 +72,7 @@ def video_info(video: Video, playlists, chapters: List[Chapter]):
     print_table(["Placeholder", "Value"], placeholders)
 
 
-def video_json(video, playlists, chapters):
+def video_json(video: Video, playlists: str, chapters: List[Chapter]):
     playlists = m3u8.loads(playlists).playlists
 
     video["playlists"] = [
