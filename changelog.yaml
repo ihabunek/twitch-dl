@@ -1,4 +1,10 @@
 2.2.2:
+  date: 2024-04-24
+  changes:
+    - "Respect --dry-run option when downloading videos"
+    - "Add automated tests on github actions"
+
+2.2.2:
   date: 2024-04-23
   changes:
     - "Fix more compat issues Python < 3.10 (#152)"
