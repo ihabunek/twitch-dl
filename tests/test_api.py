@@ -3,9 +3,12 @@ These tests depend on the channel having some videos and clips published.
 """
 
 import httpx
+import pytest
 
 from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
+from twitchdl.commands.videos import get_game_ids
+from twitchdl.exceptions import ConsoleError
 from twitchdl.playlists import enumerate_vods, load_m3u8, parse_playlists
 
 TEST_CHANNEL = "bananasaurus_rex"
@@ -53,3 +56,15 @@ def test_get_clips():
     assert clip["slug"] == slug
 
     assert get_clip_authenticated_url(slug, "source")
+
+
+def test_get_games():
+    assert get_game_ids([]) == []
+    assert get_game_ids(["Bioshock"]) == ["15866"]
+    assert get_game_ids(["Bioshock", "Portal"]) == ["15866", "6187"]
+
+
+def test_get_games_not_found():
+    with pytest.raises(ConsoleError) as ex:
+        get_game_ids(["the game which does not exist"])
+    assert str(ex.value) == "Game 'the game which does not exist' not found"

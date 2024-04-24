@@ -20,7 +20,7 @@ def videos(
     sort: twitch.VideosSort,
     type: twitch.VideosType,
 ):
-    game_ids = _get_game_ids(games)
+    game_ids = get_game_ids(games)
 
     # Set different defaults for limit for compact display
     limit = limit or (40 if compact else 10)
@@ -67,16 +67,13 @@ def videos(
         )
 
 
-def _get_game_ids(names: List[str]) -> List[str]:
-    if not names:
-        return []
+def get_game_ids(names: List[str]) -> List[str]:
+    return [get_game_id(name) for name in names]
 
-    game_ids = []
-    for name in names:
-        print_log(f"Looking up game '{name}'...")
-        game_id = twitch.get_game_id(name)
-        if not game_id:
-            raise ConsoleError(f"Game '{name}' not found")
-        game_ids.append(int(game_id))
 
-    return game_ids
+def get_game_id(name: str) -> str:
+    print_log(f"Looking up game '{name}'...")
+    game_id = twitch.get_game_id(name)
+    if not game_id:
+        raise ConsoleError(f"Game '{name}' not found")
+    return game_id

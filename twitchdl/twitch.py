@@ -351,6 +351,7 @@ def get_channel_videos(
     after: Optional[str] = None,
 ):
     game_ids = game_ids or []
+    game_ids_str = f"[{','.join(game_ids)}]"
 
     query = f"""
     {{
@@ -361,7 +362,7 @@ def get_channel_videos(
                 sort: {sort.upper()},
                 after: "{after or ''}",
                 options: {{
-                    gameIDs: {game_ids}
+                    gameIDs: {game_ids_str}
                 }}
             ) {{
                 totalCount
