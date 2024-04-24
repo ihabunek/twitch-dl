@@ -137,14 +137,15 @@ logger = logging.getLogger(__name__)
 def log_request(request: httpx.Request):
     logger.debug(f"--> {request.method} {request.url}")
     if request.content:
-        for line in request.content.splitlines():
-            logger.debug(line)
+        logger.debug(f"--> {request.content}")
 
 
 def log_response(response: httpx.Response, duration: float):
     request = response.request
     duration_ms = int(1000 * duration)
     logger.debug(f"<-- {request.method} {request.url} HTTP {response.status_code} {duration_ms}ms")
+    if response.content:
+        logger.debug(f"<-- {response.content}")
 
 
 def gql_post(query: str):
