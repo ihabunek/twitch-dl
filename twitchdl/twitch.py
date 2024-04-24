@@ -3,7 +3,9 @@ Twitch API access.
 """
 
 import json
-from typing import Any, Dict, Generator, List, Literal, Optional, Tuple, TypedDict, Union
+import logging
+import time
+from typing import Any, Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict, Union
 
 import click
 import httpx
@@ -102,7 +104,7 @@ def authenticated_post(
     if auth_token is not None:
         headers["authorization"] = f"OAuth {auth_token}"
 
-    response = httpx.post(url, content=content, json=json, headers=headers)
+    response = request("POST", url, content=content, json=json, headers=headers)
     if response.status_code == 400:
         data = response.json()
         raise ConsoleError(data["message"])
@@ -110,6 +112,39 @@ def authenticated_post(
     response.raise_for_status()
 
     return response
+
+
+def request(
+    method: str,
+    url: str,
+    json: Any = None,
+    content: Optional[Content] = None,
+    headers: Optional[Mapping[str, str]] = None,
+):
+    with httpx.Client() as client:
+        request = client.build_request(method, url, json=json, content=content, headers=headers)
+        log_request(request)
+        start = time.time()
+        response = client.send(request)
+        duration = time.time() - start
+        log_response(response, duration)
+        return response
+
+
+logger = logging.getLogger(__name__)
+
+
+def log_request(request: httpx.Request):
+    logger.debug(f"--> {request.method} {request.url}")
+    if request.content:
+        for line in request.content.splitlines():
+            logger.debug(line)
+
+
+def log_response(response: httpx.Response, duration: float):
+    request = response.request
+    duration_ms = int(1000 * duration)
+    logger.debug(f"<-- {request.method} {request.url} HTTP {response.status_code} {duration_ms}ms")
 
 
 def gql_post(query: str):

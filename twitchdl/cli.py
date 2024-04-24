@@ -91,7 +91,9 @@ def cli(ctx: click.Context, color: bool, debug: bool):
     ctx.color = color
 
     if debug:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger("httpx").setLevel(logging.WARN)
+        logging.getLogger("httpcore").setLevel(logging.WARN)
 
 
 @cli.command()
