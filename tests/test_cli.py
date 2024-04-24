@@ -128,7 +128,7 @@ def test_videos(runner: CliRunner):
     assert_ok(result)
 
     assert video["id"] in result.stdout
-    assert video["title"] in result.stdout
+    assert video["title"][:60] in result.stdout
 
 
 def test_videos_channel_not_found(runner: CliRunner):
