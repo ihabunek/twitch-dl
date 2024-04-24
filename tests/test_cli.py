@@ -67,3 +67,43 @@ def test_info_not_found(runner: CliRunner):
     result = runner.invoke(cli.info, [""])
     assert result.exit_code == 1
     assert "Invalid input" in result.stderr
+
+
+def test_download_clip(runner: CliRunner):
+    result = runner.invoke(
+        cli.download,
+        [
+            "PoisedTalentedPuddingChefFrank",
+            "-q",
+            "source",
+            "--dry-run",
+        ],
+    )
+    assert_ok(result)
+    assert (
+        "Found: AGDQ Crashes during Bioshock run by GamesDoneQuick, playing BioShock (30 sec)"
+        in result.stdout
+    )
+    assert (
+        "Target: 2020-01-10_3099545841_gamesdonequick_agdq_crashes_during_bioshock_run.mp4"
+        in result.stdout
+    )
+    assert "Dry run, clip not downloaded." in result.stdout
+
+
+def test_download_video(runner: CliRunner):
+    result = runner.invoke(
+        cli.download,
+        [
+            "2090131595",
+            "-q",
+            "source",
+            "--dry-run",
+        ],
+    )
+    assert_ok(result)
+    assert "Found: Frost Fatales 2024 Day 1 by frozenflygone" in result.stdout
+    assert (
+        "Output: 2024-03-14_2090131595_frozenflygone_frost_fatales_2024_day_1.mkv" in result.stdout
+    )
+    assert "Dry run, video not downloaded." in result.stdout

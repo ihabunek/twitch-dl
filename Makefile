@@ -24,7 +24,7 @@ publish :
 	twine upload dist/*.tar.gz dist/*.whl
 
 coverage:
-	py.test --cov=toot --cov-report html tests/
+	pytest --cov=twitchdl --cov-report html tests/
 
 man:
 	scdoc < twitch-dl.1.scd > twitch-dl.1.man
