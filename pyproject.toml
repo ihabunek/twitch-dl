@@ -56,7 +56,6 @@ test = [
 twitch-dl = "twitchdl.cli:cli"
 
 [tool.pyright]
-include = ["twitchdl"]
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
 
