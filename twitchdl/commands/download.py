@@ -273,6 +273,10 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     vods_m3u8 = load_m3u8(vods_text)
     vods = enumerate_vods(vods_m3u8, start, end)
 
+    if args.dry_run:
+        click.echo("Dry run, video not downloaded.")
+        return
+
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
     target_dir = _crete_temp_dir(base_uri)
 
