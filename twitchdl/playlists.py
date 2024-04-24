@@ -29,7 +29,7 @@ class Vod:
     """Segment duration in seconds"""
 
 
-def parse_playlists(playlists_m3u8: str):
+def parse_playlists(playlists_m3u8: str) -> List[Playlist]:
     def _parse(source: str) -> Generator[Playlist, None, None]:
         document = load_m3u8(source)
 

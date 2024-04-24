@@ -7,6 +7,7 @@ from twitchdl import twitch, utils
 from twitchdl.commands.download import get_video_placeholders
 from twitchdl.exceptions import ConsoleError
 from twitchdl.output import bold, print_clip, print_json, print_log, print_table, print_video
+from twitchdl.playlists import parse_playlists
 from twitchdl.twitch import Chapter, Clip, Video
 
 
@@ -50,13 +51,13 @@ def info(id: str, *, json: bool = False):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video: Video, playlists, chapters: List[Chapter]):
+def video_info(video: Video, playlists: str, chapters: List[Chapter]):
     click.echo()
     print_video(video)
 
     click.echo("Playlists:")
-    for p in m3u8.loads(playlists).playlists:
-        click.echo(f"{bold(p.stream_info.video)} {p.uri}")
+    for p in parse_playlists(playlists):
+        click.echo(f"{bold(p.name)} {p.url}")
 
     if chapters:
         click.echo()
