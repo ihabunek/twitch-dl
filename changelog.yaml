@@ -1,7 +1,7 @@
 2.2.4:
-  date: 2024-04-24
+  date: 2024-04-25
   changes:
-    - "Add m dot url support to video and clip regexes"
+    - "Add m dot url support to video and clip regexes (thanks @localnerve)"
 
 2.2.3:
   date: 2024-04-24
