@@ -124,6 +124,7 @@ def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist
 
 
 def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
+    playlists = sorted(playlists, key=_playlist_key)
     headers = ["#", "Name", "Group ID", "Resolution"]
 
     rows = [
@@ -147,3 +148,23 @@ def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
     no = utils.read_int("\nChoose quality", min=1, max=len(playlists) + 1, default=default)
     playlist = playlists[no - 1]
     return playlist
+
+
+MAX = 1_000_000
+
+
+def _playlist_key(playlist: Playlist) -> int:
+    """Attempt to sort playlists so that source quality is on top, audio only
+    is on bottom and others are sorted descending by resolution."""
+    if playlist.is_source:
+        return 0
+
+    if playlist.group_id == "audio_only":
+        return MAX
+
+    try:
+        return MAX - int(playlist.name.split("p")[0])
+    except Exception:
+        pass
+
+    return MAX
