@@ -25,15 +25,24 @@ def print_log(message: Any):
     click.secho(message, err=True, dim=True)
 
 
+def visual_len(text: str):
+    return len(click.unstyle(text))
+
+
+def ljust(text: str, width: int):
+    diff = width - visual_len(text)
+    return text + (" " * diff) if diff > 0 else text
+
+
 def print_table(headers: List[str], data: List[List[str]]):
-    widths = [[len(cell) for cell in row] for row in data + [headers]]
+    widths = [[visual_len(cell) for cell in row] for row in data + [headers]]
     widths = [max(width) for width in zip(*widths)]
     underlines = ["-" * width for width in widths]
 
     def print_row(row: List[str]):
         for idx, cell in enumerate(row):
             width = widths[idx]
-            click.echo(cell.ljust(width), nl=False)
+            click.echo(ljust(cell, width), nl=False)
             click.echo("  ", nl=False)
         click.echo()
 
