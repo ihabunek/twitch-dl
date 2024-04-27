@@ -9,7 +9,7 @@ import click
 import m3u8
 
 from twitchdl import utils
-from twitchdl.output import bold, dim
+from twitchdl.output import bold, dim, print_table
 
 
 @dataclass
@@ -124,13 +124,26 @@ def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist
 
 
 def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
-    click.echo("\nAvailable qualities:")
-    for n, playlist in enumerate(playlists):
-        if playlist.resolution:
-            click.echo(f"{n + 1}) {bold(playlist.name)} {dim(f'({playlist.resolution})')}")
-        else:
-            click.echo(f"{n + 1}) {bold(playlist.name)}")
+    headers = ["#", "Name", "Group ID", "Resolution"]
 
-    no = utils.read_int("Choose quality", min=1, max=len(playlists) + 1, default=1)
+    rows = [
+        [
+            f"{n + 1})",
+            bold(playlist.name),
+            dim(playlist.group_id),
+            dim(playlist.resolution or ""),
+        ]
+        for n, playlist in enumerate(playlists)
+    ]
+
+    click.echo()
+    print_table(headers, rows)
+
+    default = 1
+    for index, playlist in enumerate(playlists):
+        if playlist.is_source:
+            default = index + 1
+
+    no = utils.read_int("\nChoose quality", min=1, max=len(playlists) + 1, default=default)
     playlist = playlists[no - 1]
     return playlist
