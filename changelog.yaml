@@ -1,3 +1,9 @@
+2.3.0:
+  date: 2024-04-27
+  changes:
+    - "Show more playlist data when choosing quality"
+    - "Improve detection of 'source' quality for Twitch Enhanced Broadcast Streams (#154)"
+
 2.2.4:
   date: 2024-04-25
   changes:
