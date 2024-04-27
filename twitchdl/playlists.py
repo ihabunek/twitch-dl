@@ -15,8 +15,10 @@ from twitchdl.output import bold, dim
 @dataclass
 class Playlist:
     name: str
+    group_id: str
     resolution: Optional[str]
     url: str
+    is_source: bool
 
 
 @dataclass
@@ -34,17 +36,17 @@ def parse_playlists(playlists_m3u8: str) -> List[Playlist]:
         document = load_m3u8(source)
 
         for p in document.playlists:
-            if p.stream_info.resolution:
-                name = p.media[0].name
-                resolution = "x".join(str(r) for r in p.stream_info.resolution)
-            else:
-                name = p.media[0].group_id
-                resolution = None
+            resolution = (
+                "x".join(str(r) for r in p.stream_info.resolution)
+                if p.stream_info.resolution
+                else None
+            )
 
-            yield Playlist(name, resolution, p.uri)
+            media = p.media[0]
+            is_source = media.group_id == "chunked"
+            yield Playlist(media.name, media.group_id, resolution, p.uri, is_source)
 
-    # Move audio to bottom, it has no resolution
-    return sorted(_parse(playlists_m3u8), key=lambda p: p.resolution is None)
+    return list(_parse(playlists_m3u8))
 
 
 def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
@@ -107,10 +109,13 @@ def select_playlist(playlists: List[Playlist], quality: Optional[str]) -> Playli
 
 def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist:
     if quality == "source":
-        return playlists[0]
+        for playlist in playlists:
+            if playlist.is_source:
+                return playlist
+        raise click.ClickException("Source quality not found, please report an issue on github.")
 
     for playlist in playlists:
-        if playlist.name == quality:
+        if playlist.name == quality or playlist.group_id == quality:
             return playlist
 
     available = ", ".join([p.name for p in playlists])
