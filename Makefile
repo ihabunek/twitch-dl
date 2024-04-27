@@ -7,7 +7,7 @@ dist:
 
 clean :
 	find . -name "*pyc" | xargs rm -rf $1
-	rm -rf build dist bundle MANIFEST htmlcov deb_dist twitch-dl.*.pyz twitch-dl.1.man twitch_dl.egg-info
+	rm -rf build dist book bundle MANIFEST htmlcov deb_dist twitch-dl.*.pyz twitch-dl.1.man twitch_dl.egg-info
 
 bundle:
 	mkdir bundle
