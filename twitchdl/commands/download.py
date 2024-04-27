@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from os import path
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 from urllib.parse import urlencode, urlparse
 
 import click
@@ -160,7 +160,7 @@ def _crete_temp_dir(base_uri: str) -> str:
     return str(temp_dir)
 
 
-def _get_clip_url(access_token: ClipAccessToken, quality: str) -> str:
+def _get_clip_url(access_token: ClipAccessToken, quality: Optional[str]) -> str:
     qualities = access_token["videoQualities"]
 
     # Quality given as an argument
@@ -188,7 +188,7 @@ def _get_clip_url(access_token: ClipAccessToken, quality: str) -> str:
     return selected_quality["sourceURL"]
 
 
-def get_clip_authenticated_url(slug: str, quality: str):
+def get_clip_authenticated_url(slug: str, quality: Optional[str]):
     print_log("Fetching access token...")
     access_token = twitch.get_clip_access_token(slug)
 
