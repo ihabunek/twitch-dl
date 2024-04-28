@@ -30,6 +30,10 @@ from twitchdl.twitch import Chapter, Clip, ClipAccessToken, Video
 
 
 def download(ids: List[str], args: DownloadOptions):
+    if not ids:
+        print_log("No IDs to downlad given")
+        return
+
     for video_id in ids:
         download_one(video_id, args)
 
