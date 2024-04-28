@@ -1,7 +1,7 @@
 import logging
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from statistics import mean
 from typing import Deque, Dict, NamedTuple, Optional
 
@@ -31,20 +31,20 @@ class Sample(NamedTuple):
     timestamp: float
 
 
-@dataclass
 class Progress:
-    vod_count: int
-    downloaded: int = 0
-    estimated_total: Optional[int] = None
-    last_printed: float = field(default_factory=time.time)
-    progress_bytes: int = 0
-    progress_perc: int = 0
-    remaining_time: Optional[int] = None
-    speed: Optional[float] = None
-    start_time: float = field(default_factory=time.time)
-    tasks: Dict[TaskId, Task] = field(default_factory=dict)
-    vod_downloaded_count: int = 0
-    samples: Deque[Sample] = field(default_factory=lambda: deque(maxlen=100))
+    def __init__(self, vod_count: int):
+        self.downloaded: int = 0
+        self.estimated_total: Optional[int] = None
+        self.last_printed: Optional[float] = None
+        self.progress_bytes: int = 0
+        self.progress_perc: int = 0
+        self.remaining_time: Optional[int] = None
+        self.samples: Deque[Sample] = deque(maxlen=1000)
+        self.speed: Optional[float] = None
+        self.start_time: float = time.time()
+        self.tasks: Dict[TaskId, Task] = {}
+        self.vod_count = vod_count
+        self.vod_downloaded_count: int = 0
 
     def start(self, task_id: int, size: int):
         if task_id in self.tasks:
@@ -133,7 +133,7 @@ class Progress:
         now = time.time()
 
         # Don't print more often than 10 times per second
-        if now - self.last_printed < 0.1:
+        if self.last_printed and now - self.last_printed < 0.1:
             return
 
         click.echo(f"\rDownloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
