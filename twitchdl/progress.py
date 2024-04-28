@@ -41,7 +41,6 @@ class Progress:
         self.remaining_time: Optional[int] = None
         self.samples: Deque[Sample] = deque(maxlen=1000)
         self.speed: Optional[float] = None
-        self.start_time: float = time.time()
         self.tasks: Dict[TaskId, Task] = {}
         self.vod_count = vod_count
         self.vod_downloaded_count: int = 0
@@ -51,8 +50,6 @@ class Progress:
             raise ValueError(f"Task {task_id}: cannot start, already started")
 
         self.tasks[task_id] = Task(task_id, size)
-        self._calculate_total()
-        self._calculate_progress()
         self.print()
 
     def advance(self, task_id: int, size: int):
@@ -63,7 +60,6 @@ class Progress:
         self.progress_bytes += size
         self.tasks[task_id].advance(size)
         self.samples.append(Sample(self.downloaded, time.time()))
-        self._calculate_progress()
         self.print()
 
     def already_downloaded(self, task_id: int, size: int):
@@ -73,8 +69,6 @@ class Progress:
         self.tasks[task_id] = Task(task_id, size)
         self.progress_bytes += size
         self.vod_downloaded_count += 1
-        self._calculate_total()
-        self._calculate_progress()
         self.print()
 
     def abort(self, task_id: int):
@@ -83,9 +77,6 @@ class Progress:
 
         del self.tasks[task_id]
         self.progress_bytes = sum(t.downloaded for t in self.tasks.values())
-
-        self._calculate_total()
-        self._calculate_progress()
         self.print()
 
     def end(self, task_id: int):
@@ -101,12 +92,10 @@ class Progress:
         self.vod_downloaded_count += 1
         self.print()
 
-    def _calculate_total(self):
+    def _recalculate(self):
         self.estimated_total = (
             int(mean(t.size for t in self.tasks.values()) * self.vod_count) if self.tasks else None
         )
-
-    def _calculate_progress(self):
         self.speed = self._calculate_speed()
         self.progress_perc = (
             int(100 * self.progress_bytes / self.estimated_total) if self.estimated_total else 0
@@ -135,6 +124,8 @@ class Progress:
         # Don't print more often than 10 times per second
         if self.last_printed and now - self.last_printed < 0.1:
             return
+
+        self._recalculate()
 
         click.echo(f"\rDownloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
         click.secho(f" {self.progress_perc}%", fg="blue", nl=False)
