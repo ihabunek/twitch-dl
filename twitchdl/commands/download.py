@@ -282,7 +282,8 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         return
 
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
-    target_dir = _crete_temp_dir(base_uri)
+    target_dir = f".twitch_dl_{video_id}_{playlist.group_id}"
+    os.makedirs(target_dir, exist_ok=True)
 
     # Save playlists for debugging purposes
     with open(path.join(target_dir, "playlists.m3u8"), "w") as f:
@@ -296,7 +297,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     targets = [os.path.join(target_dir, f"{vod.index:05d}.ts") for vod in vods]
     asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
 
-    join_playlist = make_join_playlist(vods_m3u8, vods, targets)
+    join_playlist = make_join_playlist(vods, targets)
     join_playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
     join_playlist.dump(join_playlist_path)  # type: ignore
     click.echo()
