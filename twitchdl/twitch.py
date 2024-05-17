@@ -422,7 +422,7 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
     query = f"""
     {{
         videoPlaybackAccessToken(
-            id: {video_id},
+            id: "{video_id}",
             params: {{
                 platform: "web",
                 playerBackend: "mediaplayer",
