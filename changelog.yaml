@@ -1,3 +1,8 @@
+2.3.1:
+  date: 2024-05-19
+  changes:
+    - "Fix fetching access token (#155, thanks @KryptonicDragon)"
+
 2.3.0:
   date: 2024-04-27
   changes:
