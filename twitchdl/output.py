@@ -1,4 +1,5 @@
 import json
+import sys
 from itertools import islice
 from typing import Any, Callable, Generator, List, Optional, TypeVar
 
@@ -8,6 +9,11 @@ from twitchdl import utils
 from twitchdl.twitch import Clip, Video
 
 T = TypeVar("T")
+
+
+def clear_line():
+    sys.stdout.write("\033[1K")
+    sys.stdout.write("\r")
 
 
 def truncate(string: str, length: int) -> str:

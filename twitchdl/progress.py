@@ -7,7 +7,7 @@ from typing import Deque, Dict, NamedTuple, Optional
 
 import click
 
-from twitchdl.output import blue
+from twitchdl.output import blue, clear_line
 from twitchdl.utils import format_size, format_time
 
 logger = logging.getLogger(__name__)
@@ -127,7 +127,8 @@ class Progress:
 
         self._recalculate()
 
-        click.echo(f"\rDownloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
+        clear_line()
+        click.echo(f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
         click.secho(f" {self.progress_perc}%", fg="blue", nl=False)
 
         if self.estimated_total is not None:
@@ -140,7 +141,5 @@ class Progress:
 
         if self.remaining_time is not None:
             click.echo(f" ETA {blue(format_time(self.remaining_time))}", nl=False)
-
-        click.echo("    ", nl=False)
 
         self.last_printed = now
