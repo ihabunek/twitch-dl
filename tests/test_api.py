@@ -9,7 +9,7 @@ from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
 from twitchdl.commands.videos import get_game_ids
 from twitchdl.exceptions import ConsoleError
-from twitchdl.playlists import enumerate_vods, load_m3u8, parse_playlists
+from twitchdl.playlists import parse_playlists
 
 TEST_CHANNEL = "bananasaurus_rex"
 
@@ -36,10 +36,6 @@ def test_get_videos():
 
     playlist_txt = httpx.get(playlist_url).text
     assert playlist_txt.startswith("#EXTM3U")
-
-    playlist_m3u8 = load_m3u8(playlist_txt)
-    vods = enumerate_vods(playlist_m3u8)
-    assert vods[0].path == "0.ts"
 
 
 def test_get_clips():

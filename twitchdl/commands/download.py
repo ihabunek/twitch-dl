@@ -5,9 +5,10 @@ import re
 import shutil
 import subprocess
 import tempfile
+from decimal import Decimal
 from os import path
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlencode, urlparse
 
 import click
@@ -20,10 +21,11 @@ from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
 from twitchdl.output import blue, bold, green, print_log, yellow
 from twitchdl.playlists import (
-    enumerate_vods,
+    Vod,
     load_m3u8,
     make_join_playlist,
     parse_playlists,
+    parse_vods,
     select_playlist,
 )
 from twitchdl.twitch import Chapter, Clip, ClipAccessToken, Video
@@ -286,14 +288,8 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     print_log("Fetching playlist...")
     vods_text = http_get(playlist.url)
     vods_m3u8 = load_m3u8(vods_text)
-    vods, start_offset, end_offset = enumerate_vods(vods_m3u8, start, end)
-    vods_duration = sum(v.duration for v in vods)
-    duration = vods_duration - start_offset - end_offset
-
-    print(f"{vods_duration=}")
-    print(f"{start_offset=}")
-    print(f"{end_offset=}")
-    print(f"{duration=}")
+    all_vods = parse_vods(vods_m3u8)
+    vods, start_offset, duration = filter_vods(all_vods, start, end)
 
     if args.dry_run:
         click.echo("Dry run, video not downloaded.")
@@ -340,6 +336,33 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         shutil.rmtree(target_dir)
 
     click.echo(f"\nDownloaded: {green(target)}")
+
+
+def filter_vods(
+    vods: List[Vod], start: Optional[int], end: Optional[int]
+) -> Tuple[List[Vod], Decimal, Decimal]:
+    vod_start = Decimal(0)
+    start_offset = Decimal(0)
+    end_offset = Decimal(0)
+    filtered_vods: List[Vod] = []
+
+    for vod in vods:
+        vod_end = vod_start + vod.duration
+
+        if (not start or vod_end > start) and (not end or vod_start < end):
+            filtered_vods.append(vod)
+
+        if start and start > vod_start and start < vod_end:
+            start_offset = start - vod_start
+
+        if end and end > vod_start and end < vod_end:
+            end_offset = vod_end - end
+
+        vod_start = vod_end
+
+    filtered_vod_duration = sum(v.duration for v in filtered_vods)
+    duration = filtered_vod_duration - start_offset - end_offset
+    return filtered_vods, start_offset, duration
 
 
 def http_get(url: str) -> str:

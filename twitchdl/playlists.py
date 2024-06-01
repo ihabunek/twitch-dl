@@ -3,7 +3,8 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
-from typing import Generator, List, Optional, OrderedDict, Tuple
+from decimal import Decimal
+from typing import Generator, List, Optional, OrderedDict
 
 import click
 import m3u8
@@ -27,7 +28,7 @@ class Vod:
     """Ordinal number of the VOD in the playlist"""
     path: str
     """Path part of the VOD URL"""
-    duration: int
+    duration: Decimal
     """Segment duration in seconds"""
 
 
@@ -53,37 +54,11 @@ def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
     return m3u8.loads(playlist_m3u8)
 
 
-def enumerate_vods(
-    document: m3u8.M3U8,
-    start: Optional[int] = None,
-    end: Optional[int] = None,
-) -> Tuple[List[Vod], int, int]:
-    """Extract VODs for download from document."""
-    vods = []
-    vod_start = 0
-
-    # How much time needs to be taken off by ffmpeg when joining
-    start_offset = 0
-    end_offset = 0
-
-    for index, segment in enumerate(document.segments):
-        vod_end = vod_start + segment.duration
-
-        start_condition = not start or vod_end > start
-        end_condition = not end or vod_start < end
-
-        if start_condition and end_condition:
-            vods.append(Vod(index, segment.uri, segment.duration))
-
-        if start and start > vod_start and start < vod_end:
-            start_offset = start - vod_start
-
-        if end and end > vod_start and end < vod_end:
-            end_offset = vod_end - end
-
-        vod_start = vod_end
-
-    return vods, int(start_offset), int(end_offset)
+def parse_vods(document: m3u8.M3U8) -> List[Vod]:
+    return [
+        Vod(index, segment.uri, Decimal(segment.duration))
+        for index, segment in enumerate(document.segments)
+    ]
 
 
 def make_join_playlist(
