@@ -121,8 +121,8 @@ class Progress:
     def print(self):
         now = time.time()
 
-        # Don't print more often than 10 times per second
-        if self.last_printed and now - self.last_printed < 0.1:
+        # Don't print more often than 5 times per second
+        if self.last_printed and now - self.last_printed < 0.2:
             return
 
         self._recalculate()

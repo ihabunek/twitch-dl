@@ -3,7 +3,7 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
-from typing import Generator, List, Optional, OrderedDict
+from typing import Generator, List, Optional, OrderedDict, Tuple
 
 import click
 import m3u8
@@ -57,25 +57,33 @@ def enumerate_vods(
     document: m3u8.M3U8,
     start: Optional[int] = None,
     end: Optional[int] = None,
-) -> List[Vod]:
+) -> Tuple[List[Vod], int, int]:
     """Extract VODs for download from document."""
     vods = []
     vod_start = 0
 
+    # How much time needs to be taken off by ffmpeg when joining
+    start_offset = 0
+    end_offset = 0
+
     for index, segment in enumerate(document.segments):
         vod_end = vod_start + segment.duration
 
-        # `vod_end > start` is used here becuase it's better to download a bit
-        # more than a bit less, similar for the end condition
         start_condition = not start or vod_end > start
         end_condition = not end or vod_start < end
 
         if start_condition and end_condition:
             vods.append(Vod(index, segment.uri, segment.duration))
 
+        if start and start > vod_start and start < vod_end:
+            start_offset = start - vod_start
+
+        if end and end > vod_start and end < vod_end:
+            end_offset = vod_end - end
+
         vod_start = vod_end
 
-    return vods
+    return vods, int(start_offset), int(end_offset)
 
 
 def make_join_playlist(

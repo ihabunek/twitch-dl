@@ -50,7 +50,14 @@ def download_one(video: str, args: DownloadOptions):
     raise ConsoleError(f"Invalid input: {video}")
 
 
-def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
+def _join_vods(
+    playlist_path: str,
+    target: str,
+    overwrite: bool,
+    video: Video,
+    start_offset: int,
+    duration: int,
+):
     description = video["description"] or ""
     description = description.strip()
 
@@ -60,6 +67,10 @@ def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
         playlist_path,
         "-c",
         "copy",
+        "-ss",
+        str(start_offset),
+        "-to",
+        str(duration),
         "-metadata",
         f"artist={video['creator']['displayName']}",
         "-metadata",
@@ -73,11 +84,11 @@ def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
         "warning",
         f"file:{target}",
     ]
-
     if overwrite:
         command.append("-y")
 
     click.secho(f"{' '.join(command)}", dim=True)
+
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
@@ -275,7 +286,14 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     print_log("Fetching playlist...")
     vods_text = http_get(playlist.url)
     vods_m3u8 = load_m3u8(vods_text)
-    vods = enumerate_vods(vods_m3u8, start, end)
+    vods, start_offset, end_offset = enumerate_vods(vods_m3u8, start, end)
+    vods_duration = sum(v.duration for v in vods)
+    duration = vods_duration - start_offset - end_offset
+
+    print(f"{vods_duration=}")
+    print(f"{start_offset=}")
+    print(f"{end_offset=}")
+    print(f"{duration=}")
 
     if args.dry_run:
         click.echo("Dry run, video not downloaded.")
@@ -311,7 +329,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         _concat_vods(targets, target)
     else:
         print_log("Joining files...")
-        _join_vods(join_playlist_path, target, args.overwrite, video)
+        _join_vods(join_playlist_path, target, args.overwrite, video, start_offset, duration)
 
     click.echo()
 
