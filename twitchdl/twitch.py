@@ -19,11 +19,12 @@ from twitchdl.entities import (
     ClipsPeriod,
     Data,
     Video,
+    VideoComments,
     VideosSort,
     VideosType,
 )
 from twitchdl.exceptions import ConsoleError
-from twitchdl.utils import format_size
+from twitchdl.utils import format_size, remove_null_values
 
 
 class GQLError(click.ClickException):
@@ -443,3 +444,51 @@ def _chapter_nodes(moments: Data) -> Generator[Chapter, None, None]:
         del node["details"]
         del node["moments"]
         yield node
+
+
+def get_comments(
+    video_id: str,
+    *,
+    cursor: Optional[str] = None,
+    offset_seconds: Optional[int] = None,
+):
+    variables = remove_null_values(
+        {
+            "videoID": video_id,
+            "cursor": cursor,
+            "contentOffsetSeconds": offset_seconds,
+        }
+    )
+
+    query = {
+        "operationName": "VideoCommentsByOffsetOrCursor",
+        "variables": variables,
+        "extensions": {
+            "persistedQuery": {
+                "version": 1,
+                "sha256Hash": "b70a3591ff0f4e0313d126c6a1502d79a1c02baebb288227c582044aa76adf6a",
+            }
+        },
+    }
+
+    response = gql_persisted_query(query)
+    return response["data"]["video"]
+
+
+def get_video_comments(video_id: str) -> VideoComments:
+    query = {
+        "operationName": "VideoComments",
+        "variables": {
+            "videoID": video_id,
+            "hasVideoID": True,
+        },
+        "extensions": {
+            "persistedQuery": {
+                "version": 1,
+                "sha256Hash": "be06407e8d7cda72f2ee086ebb11abb6b062a7deb8985738e648090904d2f0eb",
+            }
+        },
+    }
+
+    response = gql_persisted_query(query)
+    return response["data"]

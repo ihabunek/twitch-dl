@@ -11,8 +11,12 @@ from twitchdl.entities import Clip, Video
 T = TypeVar("T")
 
 
+def cursor_previous_line():
+    sys.stdout.write("\033[1F")
+
+
 def clear_line():
-    sys.stdout.write("\033[1K")
+    sys.stdout.write("\033[2K")
     sys.stdout.write("\r")
 
 
@@ -27,8 +31,22 @@ def print_json(data: Any):
     click.echo(json.dumps(data))
 
 
-def print_log(message: Any):
-    click.secho(message, err=True, dim=True)
+def print_log(message: Any, *, nl: bool = True):
+    click.secho(message, err=True, dim=True, nl=nl)
+
+
+_prev_transient = False
+
+
+def print_status(message: str, transient: bool = False, dim: bool = False):
+    global _prev_transient
+
+    if _prev_transient:
+        cursor_previous_line()
+        clear_line()
+
+    click.secho(message, err=True, dim=dim)
+    _prev_transient = transient
 
 
 def visual_len(text: str):

@@ -90,3 +90,74 @@ class Chapter(TypedDict):
 # Type for annotating decoded JSON
 # TODO: make data classes for common structs
 Data = Mapping[str, Any]
+
+
+class Commenter(TypedDict):
+    id: str
+    login: str
+    displayName: str
+
+
+Emote = TypedDict(
+    "Emote",
+    {
+        "id": str,
+        "emoteID": str,
+        "from": int,
+    },
+)
+
+
+class Message_Fragment(TypedDict):
+    emote: Optional[Emote]
+    text: str
+
+
+class Message_Badge(TypedDict):
+    id: str
+    setID: str
+    version: str
+
+
+class Message(TypedDict):
+    fragments: List[Message_Fragment]
+    userBadges: List[Message_Badge]
+    userColor: str
+
+
+class Comment(TypedDict):
+    id: str
+    commenter: Commenter
+    contentOffsetSeconds: int
+    createdAt: str
+    message: Message
+
+
+class Badge(TypedDict):
+    id: str
+    setID: str
+    version: str
+    title: str
+    image1x: str
+    image2x: str
+    image4x: str
+    clickAction: str
+    clickURL: str
+
+
+class VideoComments_Owner(TypedDict):
+    id: str
+    login: str
+    broadcastBadges: List[Badge]
+
+
+class VideoComments_Video(TypedDict):
+    id: str
+    broadcastType: str
+    lengthSeconds: int
+    owner: VideoComments_Owner
+
+
+class VideoComments(TypedDict):
+    video: VideoComments_Video
+    badges: List[Badge]
