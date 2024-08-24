@@ -325,23 +325,6 @@ def channel_clips_generator(
     return _generator(clips, limit)
 
 
-def channel_clips_generator_old(channel_id: str, period: ClipsPeriod, limit: int):
-    cursor = ""
-    while True:
-        clips = get_channel_clips(channel_id, period, limit, after=cursor)
-
-        if not clips["edges"]:
-            break
-
-        has_next = clips["pageInfo"]["hasNextPage"]
-        cursor = clips["edges"][-1]["cursor"] if has_next else None
-
-        yield clips, has_next
-
-        if not cursor:
-            break
-
-
 def get_channel_videos(
     channel_id: str,
     limit: int,
