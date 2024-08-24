@@ -4,80 +4,24 @@ Twitch API access.
 
 import logging
 import time
-from typing import Any, Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict, Union
+from typing import Any, Dict, Generator, List, Mapping, Optional, Tuple, Union
 
 import click
 import httpx
 
 from twitchdl import CLIENT_ID
-from twitchdl.entities import Data
+from twitchdl.entities import (
+    AccessToken,
+    Chapter,
+    Clip,
+    ClipAccessToken,
+    ClipsPeriod,
+    Data,
+    Video,
+    VideosSort,
+    VideosType,
+)
 from twitchdl.exceptions import ConsoleError
-
-ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]
-VideosSort = Literal["views", "time"]
-VideosType = Literal["archive", "highlight", "upload"]
-
-
-class AccessToken(TypedDict):
-    signature: str
-    value: str
-
-
-class User(TypedDict):
-    login: str
-    displayName: str
-
-
-class Game(TypedDict):
-    id: str
-    name: str
-
-
-class VideoQuality(TypedDict):
-    frameRate: str
-    quality: str
-    sourceURL: str
-
-
-class ClipAccessToken(TypedDict):
-    id: str
-    playbackAccessToken: AccessToken
-    videoQualities: List[VideoQuality]
-
-
-class Clip(TypedDict):
-    id: str
-    slug: str
-    title: str
-    createdAt: str
-    viewCount: int
-    durationSeconds: int
-    url: str
-    videoQualities: List[VideoQuality]
-    game: Game
-    broadcaster: User
-
-
-class Video(TypedDict):
-    id: str
-    title: str
-    description: str
-    publishedAt: str
-    broadcastType: str
-    lengthSeconds: int
-    game: Game
-    creator: User
-
-
-class Chapter(TypedDict):
-    id: str
-    durationMilliseconds: int
-    positionMilliseconds: int
-    type: str
-    description: str
-    subDescription: str
-    thumbnailURL: str
-    game: Game
 
 
 class GQLError(click.ClickException):

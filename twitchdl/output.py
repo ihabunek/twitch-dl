@@ -6,7 +6,7 @@ from typing import Any, Callable, Generator, List, Optional, TypeVar
 import click
 
 from twitchdl import utils
-from twitchdl.twitch import Clip, Video
+from twitchdl.entities import Clip, Video
 
 T = TypeVar("T")
 
