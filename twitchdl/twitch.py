@@ -2,7 +2,6 @@
 Twitch API access.
 """
 
-import json
 import logging
 import time
 from typing import Any, Dict, Generator, List, Literal, Mapping, Optional, Tuple, TypedDict, Union
@@ -148,9 +147,9 @@ def log_response(response: httpx.Response, duration: float):
         logger.debug(f"<-- {response.content}")
 
 
-def gql_post(query: str):
+def gql_persisted_query(query: Data):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, content=query)
+    response = authenticated_post(url, json=query)
     gql_raise_on_error(response)
     return response.json()
 
@@ -238,22 +237,18 @@ def get_clip(slug: str) -> Optional[Clip]:
 
 
 def get_clip_access_token(slug: str) -> ClipAccessToken:
-    query = f"""
-    {{
+    query = {
         "operationName": "VideoAccessToken_Clip",
-        "variables": {{
-            "slug": "{slug}"
-        }},
-        "extensions": {{
-            "persistedQuery": {{
+        "variables": {"slug": slug},
+        "extensions": {
+            "persistedQuery": {
                 "version": 1,
-                "sha256Hash": "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"
-            }}
-        }}
-    }}
-    """
+                "sha256Hash": "36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11",
+            }
+        },
+    }
 
-    response = gql_post(query.strip())
+    response = gql_persisted_query(query)
     return response["data"]["clip"]
 
 
@@ -486,7 +481,7 @@ def get_video_chapters(video_id: str) -> List[Chapter]:
         },
     }
 
-    response = gql_post(json.dumps(query))
+    response = gql_persisted_query(query)
     return list(_chapter_nodes(response["data"]["video"]["moments"]))
 
 
