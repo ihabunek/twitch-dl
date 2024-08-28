@@ -4,8 +4,8 @@ import click
 import m3u8
 
 from twitchdl import twitch, utils
-from twitchdl.commands.download import get_video_placeholders
 from twitchdl.exceptions import ConsoleError
+from twitchdl.naming import video_placeholders
 from twitchdl.output import bold, print_clip, print_json, print_log, print_table, print_video
 from twitchdl.playlists import parse_playlists
 from twitchdl.twitch import Chapter, Clip, Video
@@ -67,7 +67,7 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
             duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
             click.echo(f'{start} {bold(chapter["description"])} ({duration})')
 
-    placeholders = get_video_placeholders(video, format="mkv")
+    placeholders = video_placeholders(video, format="mkv")
     placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
     click.echo("")
     print_table(["Placeholder", "Value"], placeholders)

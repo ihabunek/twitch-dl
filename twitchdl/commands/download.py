@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from os import path
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 from urllib.parse import urlencode, urlparse
 
 import click
@@ -18,6 +18,7 @@ from twitchdl.download import download_file
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all
+from twitchdl.naming import clip_filename, video_filename
 from twitchdl.output import blue, bold, green, print_log, yellow
 from twitchdl.playlists import (
     enumerate_vods,
@@ -26,7 +27,7 @@ from twitchdl.playlists import (
     parse_playlists,
     select_playlist,
 )
-from twitchdl.twitch import Chapter, Clip, ClipAccessToken, Video
+from twitchdl.twitch import Chapter, ClipAccessToken, Video
 
 
 def download(ids: List[str], args: DownloadOptions):
@@ -91,65 +92,6 @@ def _concat_vods(vod_paths: List[str], target: str):
         result = subprocess.run(command, stdout=target_file)
         if result.returncode != 0:
             raise ConsoleError(f"Joining files failed: {result.stderr}")
-
-
-def get_video_placeholders(video: Video, format: str) -> Dict[str, str]:
-    date, time = video["publishedAt"].split("T")
-    game = video["game"]["name"] if video["game"] else "Unknown"
-
-    return {
-        "channel": video["creator"]["displayName"],
-        "channel_login": video["creator"]["login"],
-        "date": date,
-        "datetime": video["publishedAt"],
-        "format": format,
-        "game": game,
-        "game_slug": utils.slugify(game),
-        "id": video["id"],
-        "time": time,
-        "title": utils.titlify(video["title"]),
-        "title_slug": utils.slugify(video["title"]),
-    }
-
-
-def _video_target_filename(video: Video, args: DownloadOptions):
-    subs = get_video_placeholders(video, args.format)
-
-    try:
-        return args.output.format(**subs)
-    except KeyError as e:
-        supported = ", ".join(subs.keys())
-        raise ConsoleError(f"Invalid key {e} used in --output. Supported keys are: {supported}")
-
-
-def _clip_target_filename(clip: Clip, args: DownloadOptions):
-    date, time = clip["createdAt"].split("T")
-    game = clip["game"]["name"] if clip["game"] else "Unknown"
-
-    url = clip["videoQualities"][0]["sourceURL"]
-    _, ext = path.splitext(url)
-    ext = ext.lstrip(".")
-
-    subs = {
-        "channel": clip["broadcaster"]["displayName"],
-        "channel_login": clip["broadcaster"]["login"],
-        "date": date,
-        "datetime": clip["createdAt"],
-        "format": ext,
-        "game": game,
-        "game_slug": utils.slugify(game),
-        "id": clip["id"],
-        "slug": clip["slug"],
-        "time": time,
-        "title": utils.titlify(clip["title"]),
-        "title_slug": utils.slugify(clip["title"]),
-    }
-
-    try:
-        return args.output.format(**subs)
-    except KeyError as e:
-        supported = ", ".join(subs.keys())
-        raise ConsoleError(f"Invalid key {e} used in --output. Supported keys are: {supported}")
 
 
 def _crete_temp_dir(base_uri: str) -> str:
@@ -220,7 +162,7 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
     duration = utils.format_duration(clip["durationSeconds"])
     click.echo(f"Found: {green(title)} by {yellow(user)}, playing {blue(game)} ({duration})")
 
-    target = _clip_target_filename(clip, args)
+    target = clip_filename(clip, args.output)
     click.echo(f"Target: {blue(target)}")
 
     if not args.overwrite and path.exists(target):
@@ -252,7 +194,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
 
     click.echo(f"Found: {blue(video['title'])} by {yellow(video['creator']['displayName'])}")
 
-    target = _video_target_filename(video, args)
+    target = video_filename(video, args.format, args.output)
     click.echo(f"Output: {blue(target)}")
 
     if not args.overwrite and path.exists(target):

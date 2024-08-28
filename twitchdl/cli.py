@@ -8,6 +8,7 @@ import click
 
 from twitchdl import __version__
 from twitchdl.entities import DownloadOptions
+from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 
 # Tweak the Click context
@@ -229,7 +230,7 @@ def clips(
     "-o",
     "--output",
     help="Output file name template. See docs for details.",
-    default="{date}_{id}_{channel_login}_{title_slug}.{format}",
+    default=DEFAULT_OUTPUT_TEMPLATE,
 )
 @click.option(
     "-q",
