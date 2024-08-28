@@ -8,8 +8,8 @@ def test_initial_values():
     assert progress.progress_perc == 0
     assert progress.remaining_time is None
     assert progress.speed is None
-    assert progress.vod_count == 10
-    assert progress.vod_downloaded_count == 0
+    assert progress.file_count == 10
+    assert progress.downloaded_count == 0
 
 
 def test_downloaded():
@@ -96,16 +96,16 @@ def test_vod_downloaded_count():
     progress.start(2, 100)
     progress.start(3, 100)
 
-    assert progress.vod_downloaded_count == 0
+    assert progress.downloaded_count == 0
 
     progress.advance(1, 100)
     progress.end(1)
-    assert progress.vod_downloaded_count == 1
+    assert progress.downloaded_count == 1
 
     progress.advance(2, 100)
     progress.end(2)
-    assert progress.vod_downloaded_count == 2
+    assert progress.downloaded_count == 2
 
     progress.advance(3, 100)
     progress.end(3)
-    assert progress.vod_downloaded_count == 3
+    assert progress.downloaded_count == 3
