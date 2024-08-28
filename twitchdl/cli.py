@@ -2,6 +2,7 @@ import logging
 import platform
 import re
 import sys
+from pathlib import Path
 from typing import Optional, Tuple
 
 import click
@@ -141,6 +142,18 @@ def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool):
     default="all_time",
     type=click.Choice(["last_day", "last_week", "last_month", "all_time"]),
 )
+@click.option(
+    "-t",
+    "--target-dir",
+    help="Target directory when downloading clips",
+    type=click.Path(
+        file_okay=False,
+        readable=False,
+        writable=True,
+        path_type=Path,
+    ),
+    default=Path(),
+)
 @json_option
 def clips(
     channel_name: str,
@@ -151,9 +164,13 @@ def clips(
     limit: Optional[int],
     pager: Optional[int],
     period: ClipsPeriod,
+    target_dir: Path,
 ):
     """List or download clips for given CHANNEL_NAME."""
     from twitchdl.commands.clips import clips
+
+    if not target_dir.exists():
+        target_dir.mkdir(parents=True, exist_ok=True)
 
     clips(
         channel_name,
@@ -164,6 +181,7 @@ def clips(
         limit=limit,
         pager=pager,
         period=period,
+        target_dir=target_dir,
     )
 
 

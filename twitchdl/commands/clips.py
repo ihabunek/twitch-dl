@@ -23,6 +23,7 @@ def clips(
     limit: Optional[int] = None,
     pager: Optional[int] = None,
     period: ClipsPeriod = "all_time",
+    target_dir: Path = Path(),
 ):
     # Set different defaults for limit for compact display
     default_limit = 40 if compact else 10
@@ -36,7 +37,7 @@ def clips(
         return print_json(list(generator))
 
     if download:
-        return _download_clips(generator)
+        return _download_clips(target_dir, generator)
 
     print_fn = print_clip_compact if compact else print_clip
 
@@ -68,9 +69,12 @@ def _target_filename(clip: Clip):
     return f"{name}.{ext}"
 
 
-def _download_clips(generator: Generator[Clip, None, None]):
+def _download_clips(target_dir: Path, generator: Generator[Clip, None, None]):
+    if not target_dir.exists():
+        target_dir.mkdir(parents=True, exist_ok=True)
+
     for clip in generator:
-        target = Path(_target_filename(clip))
+        target = target_dir / _target_filename(clip)
 
         if target.exists():
             click.echo(f"Already downloaded: {green(target)}")

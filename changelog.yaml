@@ -1,3 +1,8 @@
+2.4.0:
+  date: TBA
+  changes:
+    - "Add `clips --target-dir` option. Use in conjunction with `--download` to specify target directory."
+
 2.3.1:
   date: 2024-05-19
   changes:
