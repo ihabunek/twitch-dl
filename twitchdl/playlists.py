@@ -3,6 +3,7 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Generator, List, Optional, OrderedDict
 
 import click
@@ -81,7 +82,7 @@ def enumerate_vods(
 def make_join_playlist(
     playlist: m3u8.M3U8,
     vods: List[Vod],
-    targets: List[str],
+    targets: List[Path],
 ) -> m3u8.Playlist:
     """
     Make a modified playlist which references downloaded VODs
@@ -93,7 +94,7 @@ def make_join_playlist(
     playlist.segments.clear()
     for segment in org_segments:
         if segment.uri in path_map:
-            segment.uri = path_map[segment.uri]
+            segment.uri = str(path_map[segment.uri])
             playlist.segments.append(segment)
 
     return playlist

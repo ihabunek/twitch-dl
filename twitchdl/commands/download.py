@@ -1,11 +1,9 @@
 import asyncio
-import os
 import platform
 import re
 import shutil
 import subprocess
 import tempfile
-from os import path
 from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlencode, urlparse
@@ -51,14 +49,14 @@ def download_one(video: str, args: DownloadOptions):
     raise ConsoleError(f"Invalid input: {video}")
 
 
-def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
+def _join_vods(playlist_path: Path, target: str, overwrite: bool, video: Video):
     description = video["description"] or ""
     description = description.strip()
 
-    command = [
+    command: List[str] = [
         "ffmpeg",
         "-i",
-        playlist_path,
+        str(playlist_path),
         "-c",
         "copy",
         "-metadata",
@@ -84,9 +82,9 @@ def _join_vods(playlist_path: str, target: str, overwrite: bool, video: Video):
         raise ConsoleError("Joining files failed")
 
 
-def _concat_vods(vod_paths: List[str], target: str):
+def _concat_vods(vod_paths: List[Path], target: str):
     tool = "type" if platform.system() == "Windows" else "cat"
-    command = [tool] + vod_paths
+    command = [tool] + [str(p) for p in vod_paths]
 
     with open(target, "wb") as target_file:
         result = subprocess.run(command, stdout=target_file)
@@ -94,12 +92,12 @@ def _concat_vods(vod_paths: List[str], target: str):
             raise ConsoleError(f"Joining files failed: {result.stderr}")
 
 
-def _crete_temp_dir(base_uri: str) -> str:
+def _crete_temp_dir(base_uri: str) -> Path:
     """Create a temp dir to store downloads if it doesn't exist."""
     path = urlparse(base_uri).path.lstrip("/")
     temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
     temp_dir.mkdir(parents=True, exist_ok=True)
-    return str(temp_dir)
+    return temp_dir
 
 
 def _get_clip_url(access_token: ClipAccessToken, quality: Optional[str]) -> str:
@@ -162,10 +160,10 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
     duration = utils.format_duration(clip["durationSeconds"])
     click.echo(f"Found: {green(title)} by {yellow(user)}, playing {blue(game)} ({duration})")
 
-    target = clip_filename(clip, args.output)
+    target = Path(clip_filename(clip, args.output))
     click.echo(f"Target: {blue(target)}")
 
-    if not args.overwrite and path.exists(target):
+    if not args.overwrite and target.exists():
         response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
         if response.lower().strip() != "y":
             raise click.Abort()
@@ -194,10 +192,10 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
 
     click.echo(f"Found: {blue(video['title'])} by {yellow(video['creator']['displayName'])}")
 
-    target = video_filename(video, args.format, args.output)
+    target = Path(video_filename(video, args.format, args.output))
     click.echo(f"Output: {blue(target)}")
 
-    if not args.overwrite and path.exists(target):
+    if not args.overwrite and target.exists():
         response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
         if response.lower().strip() != "y":
             raise click.Abort()
@@ -227,19 +225,19 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     target_dir = _crete_temp_dir(base_uri)
 
     # Save playlists for debugging purposes
-    with open(path.join(target_dir, "playlists.m3u8"), "w") as f:
+    with open(target_dir / "playlists.m3u8", "w") as f:
         f.write(playlists_text)
-    with open(path.join(target_dir, "playlist.m3u8"), "w") as f:
+    with open(target_dir / "playlist.m3u8", "w") as f:
         f.write(vods_text)
 
     click.echo(f"\nDownloading {len(vods)} VODs using {args.max_workers} workers to {target_dir}")
 
     sources = [base_uri + vod.path for vod in vods]
-    targets = [os.path.join(target_dir, f"{vod.index:05d}.ts") for vod in vods]
+    targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]
     asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
 
     join_playlist = make_join_playlist(vods_m3u8, vods, targets)
-    join_playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
+    join_playlist_path = target_dir / "playlist_downloaded.m3u8"
     join_playlist.dump(join_playlist_path)  # type: ignore
     click.echo()
 

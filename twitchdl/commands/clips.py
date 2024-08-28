@@ -1,6 +1,7 @@
 import re
 import sys
 from os import path
+from pathlib import Path
 from typing import Callable, Generator, Optional
 
 import click
@@ -69,9 +70,9 @@ def _target_filename(clip: Clip):
 
 def _download_clips(generator: Generator[Clip, None, None]):
     for clip in generator:
-        target = _target_filename(clip)
+        target = Path(_target_filename(clip))
 
-        if path.exists(target):
+        if target.exists():
             click.echo(f"Already downloaded: {green(target)}")
         else:
             url = get_clip_authenticated_url(clip["slug"], "source")

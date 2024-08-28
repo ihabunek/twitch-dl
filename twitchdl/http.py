@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List, Optional
 
 import httpx
@@ -71,7 +72,7 @@ async def download(
     client: httpx.AsyncClient,
     task_id: int,
     source: str,
-    target: str,
+    target: Path,
     progress: Progress,
     token_bucket: TokenBucket,
 ):
@@ -96,12 +97,12 @@ async def download_with_retries(
     semaphore: asyncio.Semaphore,
     task_id: int,
     source: str,
-    target: str,
+    target: Path,
     progress: Progress,
     token_bucket: TokenBucket,
 ):
     async with semaphore:
-        if os.path.exists(target):
+        if target.exists():
             size = os.path.getsize(target)
             progress.already_downloaded(task_id, size)
             return
@@ -120,7 +121,7 @@ async def download_with_retries(
 
 async def download_all(
     sources: List[str],
-    targets: List[str],
+    targets: List[Path],
     workers: int,
     *,
     rate_limit: Optional[int] = None,

@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+from typing import Tuple
 
 import httpx
 
@@ -9,8 +11,8 @@ CONNECT_TIMEOUT = 5
 RETRY_COUNT = 5
 
 
-def _download(url: str, path: str):
-    tmp_path = path + ".tmp"
+def _download(url: str, path: Path):
+    tmp_path = Path(str(path) + ".tmp")
     size = 0
     with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT, follow_redirects=True) as response:
         response.raise_for_status()
@@ -23,8 +25,8 @@ def _download(url: str, path: str):
     return size
 
 
-def download_file(url: str, path: str, retries: int = RETRY_COUNT):
-    if os.path.exists(path):
+def download_file(url: str, path: Path, retries: int = RETRY_COUNT) -> Tuple[int, bool]:
+    if path.exists():
         from_disk = True
         return os.path.getsize(path), from_disk
 
