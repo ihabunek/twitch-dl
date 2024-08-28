@@ -4,7 +4,7 @@ import os
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import httpx
 
@@ -146,16 +146,12 @@ async def download_all(
         await asyncio.gather(*tasks)
 
 
-def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> Tuple[int, bool]:
-    if target.exists():
-        from_disk = True
-        return os.path.getsize(target), from_disk
-
-    from_disk = False
+def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> None:
+    """Download URL to given target path with retries"""
     error_message = ""
     for _ in range(retries):
         try:
-            return _do_download_file(url, target), from_disk
+            return _do_download_file(url, target)
         except httpx.HTTPStatusError as ex:
             error_message = f"Server responded with HTTP {ex.response.status_code}"
         except httpx.RequestError as ex:
@@ -164,15 +160,13 @@ def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> Tuple[i
     raise ConsoleError(f"Failed downloading after {retries} attempts: {error_message}")
 
 
-def _do_download_file(url: str, target: Path):
+def _do_download_file(url: str, target: Path) -> None:
     tmp_path = Path(str(target) + ".tmp")
-    size = 0
+
     with httpx.stream("GET", url, timeout=TIMEOUT, follow_redirects=True) as response:
         response.raise_for_status()
         with open(tmp_path, "wb") as f:
             for chunk in response.iter_bytes(chunk_size=CHUNK_SIZE):
                 f.write(chunk)
-                size += len(chunk)
 
     os.rename(tmp_path, target)
-    return size
