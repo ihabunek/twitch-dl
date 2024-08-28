@@ -26,12 +26,12 @@ def _download(url: str, path: str):
 def download_file(url: str, path: str, retries: int = RETRY_COUNT):
     if os.path.exists(path):
         from_disk = True
-        return (os.path.getsize(path), from_disk)
+        return os.path.getsize(path), from_disk
 
     from_disk = False
     for _ in range(retries):
         try:
-            return (_download(url, path), from_disk)
+            return _download(url, path), from_disk
         except httpx.RequestError:
             pass
 
