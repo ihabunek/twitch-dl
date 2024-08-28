@@ -12,10 +12,9 @@ import click
 import httpx
 
 from twitchdl import twitch, utils
-from twitchdl.download import download_file
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
-from twitchdl.http import download_all
+from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename
 from twitchdl.output import blue, bold, green, print_log, yellow
 from twitchdl.playlists import (

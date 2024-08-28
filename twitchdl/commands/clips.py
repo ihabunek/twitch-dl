@@ -8,7 +8,7 @@ import click
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
-from twitchdl.download import download_file
+from twitchdl.http import download_file
 from twitchdl.output import green, print_clip, print_clip_compact, print_json, print_paged, yellow
 from twitchdl.twitch import Clip, ClipsPeriod
 
