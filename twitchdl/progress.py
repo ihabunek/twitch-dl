@@ -32,7 +32,7 @@ class Sample(NamedTuple):
 
 
 class Progress:
-    def __init__(self, vod_count: int):
+    def __init__(self, file_count: Optional[int] = None):
         self.downloaded: int = 0
         self.estimated_total: Optional[int] = None
         self.last_printed: Optional[float] = None
@@ -42,8 +42,8 @@ class Progress:
         self.samples: Deque[Sample] = deque(maxlen=1000)
         self.speed: Optional[float] = None
         self.tasks: Dict[TaskId, Task] = {}
-        self.vod_count = vod_count
-        self.vod_downloaded_count: int = 0
+        self.file_count = file_count
+        self.downloaded_count: int = 0
 
     def start(self, task_id: int, size: int):
         if task_id in self.tasks:
@@ -68,7 +68,7 @@ class Progress:
 
         self.tasks[task_id] = Task(task_id, size)
         self.progress_bytes += size
-        self.vod_downloaded_count += 1
+        self.downloaded_count += 1
         self.print()
 
     def abort(self, task_id: int):
@@ -89,13 +89,15 @@ class Progress:
                 f"Taks {task_id} ended with {task.downloaded}b downloaded, expected {task.size}b."
             )
 
-        self.vod_downloaded_count += 1
+        self.downloaded_count += 1
         self.print()
 
     def _recalculate(self):
-        self.estimated_total = (
-            int(mean(t.size for t in self.tasks.values()) * self.vod_count) if self.tasks else None
-        )
+        if self.tasks and self.file_count:
+            self.estimated_total = int(mean(t.size for t in self.tasks.values()) * self.file_count)
+        else:
+            self.estimated_total = None
+
         self.speed = self._calculate_speed()
         self.progress_perc = (
             int(100 * self.progress_bytes / self.estimated_total) if self.estimated_total else 0
@@ -128,7 +130,8 @@ class Progress:
         self._recalculate()
 
         clear_line()
-        click.echo(f"Downloaded {self.vod_downloaded_count}/{self.vod_count} VODs", nl=False)
+        total_label = f"/{self.file_count}" if self.file_count else ""
+        click.echo(f"Downloaded {self.downloaded_count}{total_label}", nl=False)
         click.secho(f" {self.progress_perc}%", fg="blue", nl=False)
 
         if self.estimated_total is not None:
