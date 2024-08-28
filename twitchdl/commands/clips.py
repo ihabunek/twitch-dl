@@ -75,9 +75,12 @@ def _download_clips(generator: Generator[Clip, None, None]):
         if target.exists():
             click.echo(f"Already downloaded: {green(target)}")
         else:
-            url = get_clip_authenticated_url(clip["slug"], "source")
-            click.echo(f"Downloading: {yellow(target)}")
-            download_file(url, target)
+            try:
+                url = get_clip_authenticated_url(clip["slug"], "source")
+                click.echo(f"Downloading: {yellow(target)}")
+                download_file(url, target)
+            except Exception as ex:
+                click.secho(ex, err=True, fg="red")
 
 
 def _print_all(

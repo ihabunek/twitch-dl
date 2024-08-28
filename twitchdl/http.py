@@ -152,13 +152,16 @@ def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> Tuple[i
         return os.path.getsize(target), from_disk
 
     from_disk = False
+    error_message = ""
     for _ in range(retries):
         try:
             return _do_download_file(url, target), from_disk
-        except httpx.RequestError:
-            pass
+        except httpx.HTTPStatusError as ex:
+            error_message = f"Server responded with HTTP {ex.response.status_code}"
+        except httpx.RequestError as ex:
+            error_message = str(ex)
 
-    raise ConsoleError(f"Failed downloading after {retries} attempts: {url}")
+    raise ConsoleError(f"Failed downloading after {retries} attempts: {error_message}")
 
 
 def _do_download_file(url: str, target: Path):
