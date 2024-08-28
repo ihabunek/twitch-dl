@@ -12,7 +12,8 @@ RETRY_COUNT = 5
 def _download(url: str, path: str):
     tmp_path = path + ".tmp"
     size = 0
-    with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT) as response:
+    with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT, follow_redirects=True) as response:
+        response.raise_for_status()
         with open(tmp_path, "wb") as target:
             for chunk in response.iter_bytes(chunk_size=CHUNK_SIZE):
                 target.write(chunk)
