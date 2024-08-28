@@ -149,12 +149,16 @@ async def download_all(
 def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> None:
     """Download URL to given target path with retries"""
     error_message = ""
-    for _ in range(retries):
+    for r in range(retries):
         try:
+            retry_info = f" (retry {r})" if r > 0 else ""
+            logger.info(f"Downloading {url} to {target}{retry_info}")
             return _do_download_file(url, target)
         except httpx.HTTPStatusError as ex:
+            logger.error(ex)
             error_message = f"Server responded with HTTP {ex.response.status_code}"
         except httpx.RequestError as ex:
+            logger.error(ex)
             error_message = str(ex)
 
     raise ConsoleError(f"Failed downloading after {retries} attempts: {error_message}")

@@ -22,6 +22,7 @@ from twitchdl.entities import (
     VideosType,
 )
 from twitchdl.exceptions import ConsoleError
+from twitchdl.utils import format_size
 
 
 class GQLError(click.ClickException):
@@ -78,15 +79,16 @@ logger = logging.getLogger(__name__)
 
 
 def log_request(request: httpx.Request):
-    logger.debug(f"--> {request.method} {request.url}")
+    logger.info(f"--> {request.method} {request.url}")
     if request.content:
         logger.debug(f"--> {request.content}")
 
 
-def log_response(response: httpx.Response, duration: float):
+def log_response(response: httpx.Response, duration_seconds: float):
     request = response.request
-    duration_ms = int(1000 * duration)
-    logger.debug(f"<-- {request.method} {request.url} HTTP {response.status_code} {duration_ms}ms")
+    duration = f"{int(1000 * duration_seconds)}ms"
+    size = format_size(len(response.content))
+    logger.info(f"<-- {request.method} {request.url} HTTP {response.status_code} {duration} {size}")
     if response.content:
         logger.debug(f"<-- {response.content}")
 

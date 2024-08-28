@@ -80,11 +80,12 @@ def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> O
 
 
 @click.group(context_settings=CONTEXT)
-@click.option("--debug/--no-debug", default=False, help="Log debug info to stderr")
+@click.option("--debug/--no-debug", default=False, help="Enable debug logging to stderr")
+@click.option("--verbose/--no-verbose", default=False, help="More verbose debug logging")
 @click.option("--color/--no-color", default=sys.stdout.isatty(), help="Use ANSI color in output")
 @click.version_option(package_name="twitch-dl")
 @click.pass_context
-def cli(ctx: click.Context, color: bool, debug: bool):
+def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool):
     """twitch-dl - twitch.tv downloader
 
     https://twitch-dl.bezdomni.net/
@@ -92,7 +93,7 @@ def cli(ctx: click.Context, color: bool, debug: bool):
     ctx.color = color
 
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
         logging.getLogger("httpx").setLevel(logging.WARN)
         logging.getLogger("httpcore").setLevel(logging.WARN)
 
