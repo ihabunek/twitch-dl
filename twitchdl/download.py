@@ -11,29 +11,29 @@ CONNECT_TIMEOUT = 5
 RETRY_COUNT = 5
 
 
-def _download(url: str, path: Path):
-    tmp_path = Path(str(path) + ".tmp")
+def _download(url: str, target: Path):
+    tmp_path = Path(str(target) + ".tmp")
     size = 0
     with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT, follow_redirects=True) as response:
         response.raise_for_status()
-        with open(tmp_path, "wb") as target:
+        with open(tmp_path, "wb") as f:
             for chunk in response.iter_bytes(chunk_size=CHUNK_SIZE):
-                target.write(chunk)
+                f.write(chunk)
                 size += len(chunk)
 
-    os.rename(tmp_path, path)
+    os.rename(tmp_path, target)
     return size
 
 
-def download_file(url: str, path: Path, retries: int = RETRY_COUNT) -> Tuple[int, bool]:
-    if path.exists():
+def download_file(url: str, target: Path, retries: int = RETRY_COUNT) -> Tuple[int, bool]:
+    if target.exists():
         from_disk = True
-        return os.path.getsize(path), from_disk
+        return os.path.getsize(target), from_disk
 
     from_disk = False
     for _ in range(retries):
         try:
-            return _download(url, path), from_disk
+            return _download(url, target), from_disk
         except httpx.RequestError:
             pass
 
