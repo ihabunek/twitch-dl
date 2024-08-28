@@ -2,6 +2,7 @@
   date: TBA
   changes:
     - "Add `clips --target-dir` option. Use in conjunction with `--download` to specify target directory."
+    - "Fix a crash when downloading clips (#160)"
 
 2.3.1:
   date: 2024-05-19

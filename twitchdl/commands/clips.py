@@ -2,12 +2,13 @@ import re
 import sys
 from os import path
 from pathlib import Path
-from typing import Callable, Generator, Optional
+from typing import Callable, Generator, List, Optional
 
 import click
 
 from twitchdl import twitch, utils
 from twitchdl.commands.download import get_clip_authenticated_url
+from twitchdl.entities import VideoQuality
 from twitchdl.http import download_file
 from twitchdl.output import green, print_clip, print_clip_compact, print_json, print_paged, yellow
 from twitchdl.twitch import Clip, ClipsPeriod
@@ -47,8 +48,8 @@ def clips(
     return _print_all(generator, print_fn, all)
 
 
-def _target_filename(clip: Clip):
-    url = clip["videoQualities"][0]["sourceURL"]
+def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
+    url = video_qualities[0]["sourceURL"]
     _, ext = path.splitext(url)
     ext = ext.lstrip(".")
 
@@ -74,7 +75,12 @@ def _download_clips(target_dir: Path, generator: Generator[Clip, None, None]):
         target_dir.mkdir(parents=True, exist_ok=True)
 
     for clip in generator:
-        target = target_dir / _target_filename(clip)
+        # videoQualities can be null in some circumstances, see:
+        # https://github.com/ihabunek/twitch-dl/issues/160
+        if not clip["videoQualities"]:
+            continue
+
+        target = target_dir / _target_filename(clip, clip["videoQualities"])
 
         if target.exists():
             click.echo(f"Already downloaded: {green(target)}")

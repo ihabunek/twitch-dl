@@ -60,7 +60,7 @@ class Clip(TypedDict):
     viewCount: int
     durationSeconds: int
     url: str
-    videoQualities: List[VideoQuality]
+    videoQualities: Optional[List[VideoQuality]]
     game: Game
     broadcaster: User
 
