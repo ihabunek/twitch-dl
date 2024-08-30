@@ -1,8 +1,10 @@
 2.4.0:
-  date: TBA
+  date: 2024-08-30
   changes:
     - "Add `clips --target-dir` option. Use in conjunction with `--download` to specify target directory."
     - "Fix a crash when downloading clips (#160)"
+    - "Handle video URLs which contain the channel name (#162)"
+    - "Don't stop downloading clips if one download fails"
 
 2.3.1:
   date: 2024-05-19

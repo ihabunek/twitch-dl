@@ -44,6 +44,11 @@ twitch-dl clips [OPTIONS] CHANNEL_NAME
 </tr>
 
 <tr>
+    <td class="code">-t, --target-dir</td>
+    <td>Target directory when downloading clips [default: <code>.</code>]</td>
+</tr>
+
+<tr>
     <td class="code">--json</td>
     <td>Print data as JSON rather than human readable text</td>
 </tr>
