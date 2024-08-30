@@ -6,7 +6,7 @@ import m3u8
 from twitchdl import twitch, utils
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import video_placeholders
-from twitchdl.output import bold, print_clip, print_json, print_log, print_table, print_video
+from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
 from twitchdl.playlists import parse_playlists
 from twitchdl.twitch import Chapter, Clip, Video
 
@@ -55,9 +55,19 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
     click.echo()
     print_video(video)
 
-    click.echo("Playlists:")
-    for p in parse_playlists(playlists):
-        click.echo(f"{bold(p.name)} {p.url}")
+    click.echo("Playlists:\n")
+
+    playlist_headers = ["Name", "Group", "Resolution", "URL"]
+    playlist_data = [
+        [
+            f"{p.name} {dim('source')}" if p.is_source else p.name,
+            p.group_id,
+            f"{p.resolution}",
+            p.url,
+        ]
+        for p in parse_playlists(playlists)
+    ]
+    print_table(playlist_headers, playlist_data)
 
     if chapters:
         click.echo()
