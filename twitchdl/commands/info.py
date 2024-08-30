@@ -98,5 +98,8 @@ def clip_info(clip: Clip):
     click.echo()
     click.echo("Download links:")
 
-    for q in clip["videoQualities"]:
-        click.echo(f"{bold(q['quality'])} [{q['frameRate']} fps] {q['sourceURL']}")
+    if clip["videoQualities"]:
+        for q in clip["videoQualities"]:
+            click.echo(f"{bold(q['quality'])} [{q['frameRate']} fps] {q['sourceURL']}")
+    else:
+        click.echo("No download URLs found")
