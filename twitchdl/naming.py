@@ -41,9 +41,12 @@ def clip_placeholders(clip: Clip) -> Dict[str, str]:
     date, time = clip["createdAt"].split("T")
     game = clip["game"]["name"] if clip["game"] else "Unknown"
 
-    url = clip["videoQualities"][0]["sourceURL"]
-    _, ext = os.path.splitext(url)
-    ext = ext.lstrip(".")
+    if clip["videoQualities"]:
+        url = clip["videoQualities"][0]["sourceURL"]
+        _, ext = os.path.splitext(url)
+        ext = ext.lstrip(".")
+    else:
+        ext = "mp4"
 
     return {
         "channel": clip["broadcaster"]["displayName"],

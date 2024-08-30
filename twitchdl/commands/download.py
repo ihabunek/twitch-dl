@@ -48,7 +48,7 @@ def download_one(video: str, args: DownloadOptions):
     raise ConsoleError(f"Invalid input: {video}")
 
 
-def _join_vods(playlist_path: Path, target: str, overwrite: bool, video: Video):
+def _join_vods(playlist_path: Path, target: Path, overwrite: bool, video: Video):
     description = video["description"] or ""
     description = description.strip()
 
@@ -81,7 +81,7 @@ def _join_vods(playlist_path: Path, target: str, overwrite: bool, video: Video):
         raise ConsoleError("Joining files failed")
 
 
-def _concat_vods(vod_paths: List[Path], target: str):
+def _concat_vods(vod_paths: List[Path], target: Path):
     tool = "type" if platform.system() == "Windows" else "cat"
     command = [tool] + [str(p) for p in vod_paths]
 
