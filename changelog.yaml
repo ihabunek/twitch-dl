@@ -1,3 +1,8 @@
+2.5.0:
+  date: 2024-08-30
+  changes:
+    - "Add support for HD video qualities (#163)"
+
 2.4.0:
   date: 2024-08-30
   changes:
