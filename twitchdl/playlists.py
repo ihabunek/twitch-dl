@@ -94,7 +94,7 @@ def make_join_playlist(
     playlist.segments.clear()
     for segment in org_segments:
         if segment.uri in path_map:
-            segment.uri = str(path_map[segment.uri])
+            segment.uri = str(path_map[segment.uri].name)
             playlist.segments.append(segment)
 
     return playlist
