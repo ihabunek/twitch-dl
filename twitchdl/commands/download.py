@@ -19,6 +19,7 @@ from twitchdl.naming import clip_filename, video_filename
 from twitchdl.output import blue, bold, green, print_log, yellow
 from twitchdl.playlists import (
     enumerate_vods,
+    get_init_sections,
     load_m3u8,
     make_join_playlist,
     parse_playlists,
@@ -230,6 +231,11 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         f.write(vods_text)
 
     click.echo(f"\nDownloading {len(vods)} VODs using {args.max_workers} workers to {target_dir}")
+
+    init_sections = get_init_sections(vods_m3u8)
+    for uri in init_sections:
+        print_log(f"Downloading init section {uri}...")
+        download_file(f"{base_uri}{uri}", target_dir / uri)
 
     sources = [base_uri + vod.path for vod in vods]
     targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]

@@ -4,7 +4,7 @@ Parse and manipulate m3u8 playlists.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, OrderedDict
+from typing import Generator, List, Optional, OrderedDict, Set
 
 import click
 import m3u8
@@ -169,3 +169,12 @@ def _playlist_key(playlist: Playlist) -> int:
         pass
 
     return MAX
+
+
+def get_init_sections(playlist: m3u8.M3U8) -> Set[str]:
+    # TODO: we're ignoring initi_section.base_uri and bytes
+    return set(
+        segment.init_section.uri
+        for segment in playlist.segments
+        if segment.init_section is not None
+    )
