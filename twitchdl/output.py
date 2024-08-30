@@ -108,11 +108,12 @@ def print_video(video: Video):
     if channel or playing:
         click.echo(" ".join([channel, playing]))
 
-    if video["description"]:
-        click.echo(f"Description: {video['description']}")
-
     click.echo(f"Published {blue(published_at)}  Length: {blue(length)} ")
     click.secho(url, italic=True)
+
+    if video["description"]:
+        click.echo(f"\nDescription:\n{video['description']}")
+
     click.echo()
 
 
