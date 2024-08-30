@@ -85,6 +85,7 @@ def titlify(value: str) -> str:
 VIDEO_PATTERNS = [
     r"^(?P<id>\d+)?$",
     r"^https://(www\.|m\.)?twitch\.tv/videos/(?P<id>\d+)(\?.+)?$",
+    r"^https://(www\.|m\.)?twitch\.tv/\w+/video/(?P<id>\d+)(\?.+)?$",
 ]
 
 CLIP_PATTERNS = [

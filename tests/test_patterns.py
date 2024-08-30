@@ -7,6 +7,7 @@ TEST_VIDEO_PATTERNS = [
     ("702689313", "https://twitch.tv/videos/702689313"),
     ("702689313", "https://www.twitch.tv/videos/702689313"),
     ("702689313", "https://m.twitch.tv/videos/702689313"),
+    ("2223719525", "https://www.twitch.tv/r0dn3y/video/2223719525"),
 ]
 
 TEST_CLIP_PATTERNS = {
