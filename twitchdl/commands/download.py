@@ -1,6 +1,7 @@
 import asyncio
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -76,7 +77,7 @@ def _join_vods(playlist_path: Path, target: Path, overwrite: bool, video: Video)
     if overwrite:
         command.append("-y")
 
-    click.secho(f"{' '.join(command)}", dim=True)
+    click.secho(f"{shlex.join(command)}", dim=True)
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
@@ -230,12 +231,12 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     with open(target_dir / "playlist.m3u8", "w") as f:
         f.write(vods_text)
 
-    click.echo(f"\nDownloading {len(vods)} VODs using {args.max_workers} workers to {target_dir}")
-
     init_sections = get_init_sections(vods_m3u8)
     for uri in init_sections:
         print_log(f"Downloading init section {uri}...")
         download_file(f"{base_uri}{uri}", target_dir / uri)
+
+    print_log(f"Downloading {len(vods)} VODs using {args.max_workers} workers to {target_dir}")
 
     sources = [base_uri + vod.path for vod in vods]
     targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]
@@ -269,12 +270,12 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     click.echo()
 
     if args.keep:
-        click.echo(f"Temporary files not deleted: {target_dir}")
+        click.echo(f"Temporary files not deleted: {yellow(target_dir)}")
     else:
         print_log("Deleting temporary files...")
         shutil.rmtree(target_dir)
 
-    click.echo(f"\nDownloaded: {green(target)}")
+    click.echo(f"Downloaded: {green(target)}")
 
 
 def http_get(url: str) -> str:
