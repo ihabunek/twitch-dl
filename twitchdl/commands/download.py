@@ -233,7 +233,15 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
 
     sources = [base_uri + vod.path for vod in vods]
     targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]
-    asyncio.run(download_all(sources, targets, args.max_workers, rate_limit=args.rate_limit))
+
+    asyncio.run(
+        download_all(
+            zip(sources, targets),
+            args.max_workers,
+            rate_limit=args.rate_limit,
+            count=len(vods),
+        )
+    )
 
     join_playlist = make_join_playlist(vods_m3u8, vods, targets)
     join_playlist_path = target_dir / "playlist_downloaded.m3u8"

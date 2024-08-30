@@ -4,7 +4,7 @@ import os
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional
+from typing import Iterable, Optional, Tuple
 
 import httpx
 
@@ -121,13 +121,13 @@ async def download_with_retries(
 
 
 async def download_all(
-    sources: List[str],
-    targets: List[Path],
+    source_targets: Iterable[Tuple[str, Path]],
     workers: int,
     *,
+    count: Optional[int] = None,
     rate_limit: Optional[int] = None,
 ):
-    progress = Progress(len(sources))
+    progress = Progress(count)
     token_bucket = LimitingTokenBucket(rate_limit) if rate_limit else EndlessTokenBucket()
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         semaphore = asyncio.Semaphore(workers)
@@ -141,7 +141,7 @@ async def download_all(
                 progress,
                 token_bucket,
             )
-            for task_id, (source, target) in enumerate(zip(sources, targets))
+            for task_id, (source, target) in enumerate(source_targets)
         ]
         await asyncio.gather(*tasks)
 
