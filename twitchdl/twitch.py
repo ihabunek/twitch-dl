@@ -3,6 +3,7 @@ Twitch API access.
 """
 
 import logging
+import random
 import time
 from typing import Any, Dict, Generator, List, Mapping, Optional, Tuple, Union
 
@@ -391,8 +392,12 @@ def get_playlists(video_id: str, access_token: AccessToken) -> str:
             "allow_audio_only": "true",
             "allow_source": "true",
             "player": "twitchweb",
+            "platform": "web",
+            "supported_codecs": "av1,h265,h264",
+            "p": random.randint(1000000, 10000000),
         },
     )
+
     response.raise_for_status()
     return response.content.decode("utf-8")
 
