@@ -131,7 +131,7 @@ class Progress:
 
         clear_line()
         total_label = f"/{self.file_count}" if self.file_count else ""
-        click.echo(f"Downloaded {self.downloaded_count}{total_label}", nl=False)
+        click.echo(f"Downloaded {self.downloaded_count}{total_label} VODs", nl=False)
         click.secho(f" {self.progress_perc}%", fg="blue", nl=False)
 
         if self.estimated_total is not None:
