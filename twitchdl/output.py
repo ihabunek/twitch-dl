@@ -46,11 +46,8 @@ def print_table(headers: List[str], data: List[List[str]]):
     underlines = ["-" * width for width in widths]
 
     def print_row(row: List[str]):
-        for idx, cell in enumerate(row):
-            width = widths[idx]
-            click.echo(ljust(cell, width), nl=False)
-            click.echo("  ", nl=False)
-        click.echo()
+        parts = (ljust(cell, widths[idx]) for idx, cell in enumerate(row))
+        click.echo("  ".join(parts).strip())
 
     print_row(headers)
     print_row(underlines)
