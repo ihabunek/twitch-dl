@@ -217,7 +217,15 @@ def get_channel_clips(
     query = f"""
     {{
       user(login: "{channel_id}") {{
-        clips(first: {limit}, after: "{after or ''}", criteria: {{ period: {period.upper()}, sort: VIEWS_DESC }}) {{
+        clips(
+          first: {limit},
+          after: "{after or ''}",
+          criteria: {{
+            period: {period.upper()},
+            sort: VIEWS_DESC
+          }}
+        )
+        {{
           pageInfo {{
             hasNextPage
             hasPreviousPage
