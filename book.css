@@ -12,6 +12,11 @@ td.code {
     white-space: nowrap;
 }
 
+.callout {
+    border: 1px solid gray;
+    padding: 0.5rem 1rem;
+}
+
 /* Override max width */
 .searchbar-outer,
 .searchresults-outer,
