@@ -60,6 +60,12 @@ Install twitch-dl:
 pipx install twitch-dl
 ```
 
+Install with the optional dependencies for rendering chat:
+
+```
+pipx install "twitch-dl[chat]"
+```
+
 Check installation worked:
 
 ```

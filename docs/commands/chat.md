@@ -49,6 +49,18 @@ twitch-dl chat [OPTIONS] ID
 
 <!-- ------------------- generated docs end ------------------- -->
 
+<h2>Experimental command</h2>
+
+Chat command is still experimental and things may change.
+
+This command requires twitch-dl to be installed with optional "chat" dependencies:
+
+```sh
+pipx install "twitch-dl[chat]"
+```
+
+It is not available if twitch-dl is used from the `pyz` archive.
+
 <h2>Rendering video with chat</h2>
 
 Here's an example how you can join a twitch stream with its chat in a single video.
