@@ -17,12 +17,10 @@ logger = logging.getLogger(__name__)
 def download_cached(
     url: str,
     *,
+    subdir: Optional[str] = None,
     filename: Optional[str] = None,
-    subfolder: Optional[str] = None,
 ) -> Path:
-    cache_dir = get_cache_dir()
-    target_dir = cache_dir / subfolder if subfolder else cache_dir
-    target_dir.mkdir(parents=True, exist_ok=True)
+    target_dir = get_cache_dir(subdir)
 
     if not filename:
         filename = hashlib.sha256(url.encode()).hexdigest()
@@ -35,8 +33,10 @@ def download_cached(
     return target
 
 
-def get_cache_dir() -> Path:
+def get_cache_dir(subdir: Optional[str] = None) -> Path:
     path = _cache_dir_path()
+    if subdir:
+        path = path / subdir
     path.mkdir(parents=True, exist_ok=True)
     return path
 

@@ -63,7 +63,7 @@ def get_codepoints_cached(path: Path) -> Set[int]:
     # Cache codepoints, since it's slow to extract them
     hash = hashlib.md5(str(path).encode()).hexdigest()
     filename = f"{path.name}.{hash}.json"
-    codepoints_path = get_cache_dir() / "fonts" / filename
+    codepoints_path = get_cache_dir("fonts") / filename
 
     if codepoints_path.exists():
         try:

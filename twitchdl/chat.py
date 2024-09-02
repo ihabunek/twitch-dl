@@ -74,8 +74,7 @@ def render_chat(
     screen = Screen(width, height, fonts, foreground, background, padding)
     frames: List[Tuple[Path, int]] = []
 
-    cache_dir = cache.get_cache_dir() / "chat" / video_id
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir = cache.get_cache_dir(f"chat/{video_id}")
 
     first = True
     start = time.monotonic()
@@ -119,7 +118,7 @@ def load_fonts(font_size: int):
 
     for url in TEXT_FONTS:
         filename = Path(urlparse(url).path).name
-        path = cache.download_cached(url, filename=filename, subfolder="fonts")
+        path = cache.download_cached(url, filename=filename, subdir="fonts")
         print_log(f"Loading text font: {path}")
         font = load_font(path, False, font_size)
         print_font_info(font)
@@ -127,7 +126,7 @@ def load_fonts(font_size: int):
 
     for url, font_size in BITMAP_FONTS:
         filename = Path(urlparse(url).path).name
-        path = cache.download_cached(url, filename=filename, subfolder="fonts")
+        path = cache.download_cached(url, filename=filename, subdir="fonts")
         print_log(f"Loading bitmap font: {path}")
         font = load_font(path, True, font_size)
         print_font_info(font)
@@ -370,7 +369,7 @@ def pad(image: Image.Image, px: int, py: int, background: str):
 def download_badge(badge: Badge) -> Optional[Path]:
     # TODO: make badge size configurable?
     url = badge["image1x"]
-    return cache.download_cached(url, subfolder="badges")
+    return cache.download_cached(url, subdir="badges")
 
 
 def download_emote(emote: Emote, dark: bool) -> Optional[Path]:
@@ -378,7 +377,7 @@ def download_emote(emote: Emote, dark: bool) -> Optional[Path]:
     emote_id = emote["emoteID"]
     variant = "dark" if dark else "light"
     url = f"https://static-cdn.jtvnw.net/emoticons/v2/{emote_id}/default/{variant}/1.0"
-    return cache.download_cached(url, subfolder="emotes")
+    return cache.download_cached(url, subdir="emotes")
 
 
 def group_comments(video_id: str, total_duration: int):
