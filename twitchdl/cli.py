@@ -470,7 +470,35 @@ def videos(
     callback=validate_positive,
     default=5,
 )
-def chat(id: str, width: int, height: int, font_size: int, dark: bool, pad_x: int, pad_y: int):
+@click.option(
+    "-o",
+    "--output",
+    help="Output file name template. See docs for details.",
+    default="chat_{id}.{format}",
+)
+@click.option(
+    "-f",
+    "--format",
+    help="Video format to convert into, passed to ffmpeg as the target file extension.",
+    default="mp4",
+)
+@click.option(
+    "--overwrite",
+    help="Overwrite the target file if it already exists without prompting.",
+    is_flag=True,
+)
+def chat(
+    id: str,
+    width: int,
+    height: int,
+    font_size: int,
+    dark: bool,
+    pad_x: int,
+    pad_y: int,
+    output: str,
+    format: str,
+    overwrite: bool,
+):
     """
     Render chat for a given video.
 
@@ -481,7 +509,17 @@ def chat(id: str, width: int, height: int, font_size: int, dark: bool, pad_x: in
     try:
         from twitchdl.chat import render_chat
 
-        render_chat(id, width, height, font_size, dark, (pad_x, pad_y))
+        render_chat(
+            id,
+            width,
+            height,
+            font_size,
+            dark,
+            (pad_x, pad_y),
+            output,
+            format,
+            overwrite,
+        )
     except ModuleNotFoundError as ex:
         raise ConsoleError(
             dedent(f"""

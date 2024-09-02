@@ -9,12 +9,14 @@ from pathlib import Path
 from typing import Dict, Generator, List, Optional, Tuple
 from urllib.parse import urlparse
 
+import click
 from PIL import Image, ImageDraw
 
 from twitchdl import cache
 from twitchdl.entities import Badge, Comment, Emote
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, group_by_font, load_font
+from twitchdl.naming import video_filename
 from twitchdl.output import green, print_log, print_status
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
@@ -36,6 +38,9 @@ def render_chat(
     font_size: int,
     dark: bool,
     padding: Tuple[int, int],
+    output: str,
+    format: str,
+    overwrite: bool,
 ):
     video_id = parse_video_identifier(id)
     if not video_id:
@@ -46,6 +51,13 @@ def render_chat(
     if not video:
         raise ConsoleError(f"Video {video_id} not found")
     total_duration = video["lengthSeconds"]
+
+    target_path = Path(video_filename(video, format, output))
+    if not overwrite and target_path.exists():
+        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
+        if response.lower().strip() != "y":
+            raise click.Abort()
+        overwrite = True
 
     print_log("Loading comments meta...")
     video_comments = get_video_comments(video_id)
@@ -85,10 +97,8 @@ def render_chat(
             f.write(f"file '{path.resolve()}'\n")
             f.write(f"duration {duration}\n")
 
-    # TODO
-    output_path = Path(f"chat_{video_id}.mp4")
     print_status("Generating chat video...", dim=True)
-    generate_video(spec_path, output_path)
+    generate_video(spec_path, target_path, overwrite)
 
     print_status("Deleting cache...", dim=True)
     shutil.rmtree(cache_dir)
@@ -305,7 +315,7 @@ class Screen:
         return padded_image
 
 
-def generate_video(spec_path: Path, output: Path):
+def generate_video(spec_path: Path, target: Path, overwrite: bool):
     print_status("Generating chat video...")
 
     command = [
@@ -323,15 +333,18 @@ def generate_video(spec_path: Path, output: Path):
         "-stats",
         "-loglevel",
         "warning",
-        output,
+        target,
         "-y",
     ]
+
+    if overwrite:
+        command.append("-y")
 
     result = subprocess.run(command)
     if result.returncode != 0:
         raise ConsoleError("Joining files failed")
 
-    print_status(f"Saved: {green(output)}")
+    print_status(f"Saved: {green(target)}")
 
 
 def shift(image: Image.Image, dy: int, background: str):
