@@ -34,6 +34,13 @@ packages = [
 [tool.setuptools_scm]
 
 [project.optional-dependencies]
+# This is made optional because it is not pure python, and when used prevents
+# distribution of twitch-dl as a pyz archive while keeping it cross-platform.
+chat = [
+    "pillow>=9",
+    "fonttools>=4,<5",
+]
+
 dev = [
     "build",
     "pytest",

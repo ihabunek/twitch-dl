@@ -3,13 +3,16 @@ import platform
 import re
 import sys
 from pathlib import Path
+from textwrap import dedent
 from typing import Optional, Tuple
 
 import click
 
 from twitchdl import __version__
 from twitchdl.entities import DownloadOptions
+from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
+from twitchdl.output import print_log
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 
 # Tweak the Click context
@@ -97,6 +100,7 @@ def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool):
         logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
         logging.getLogger("httpx").setLevel(logging.WARN)
         logging.getLogger("httpcore").setLevel(logging.WARN)
+        logging.getLogger("PIL").setLevel(logging.WARN)
 
 
 @cli.command()
@@ -420,3 +424,111 @@ def videos(
         sort=sort,
         type=type,
     )
+
+
+@cli.command()
+@click.argument("id")
+@click.option(
+    "-w",
+    "--width",
+    help="Chat width in pixels",
+    type=int,
+    default=400,
+    callback=validate_positive,
+)
+@click.option(
+    "-h",
+    "--height",
+    help="Chat height in pixels",
+    type=int,
+    default=1024,
+    callback=validate_positive,
+)
+@click.option(
+    "--font-size",
+    help="Font size",
+    type=int,
+    default=20,
+    callback=validate_positive,
+)
+@click.option(
+    "--dark",
+    help="Dark mode",
+    is_flag=True,
+)
+@click.option(
+    "--pad-x",
+    help="Horizontal padding",
+    type=int,
+    callback=validate_positive,
+    default=5,
+)
+@click.option(
+    "--pad-y",
+    help="Vertical padding",
+    type=int,
+    callback=validate_positive,
+    default=5,
+)
+@click.option(
+    "-o",
+    "--output",
+    help="Output file name template. See docs for details.",
+    default="chat_{id}.{format}",
+)
+@click.option(
+    "-f",
+    "--format",
+    help="Video format to convert into, passed to ffmpeg as the target file extension.",
+    default="mp4",
+)
+@click.option(
+    "--overwrite",
+    help="Overwrite the target file if it already exists without prompting.",
+    is_flag=True,
+)
+def chat(
+    id: str,
+    width: int,
+    height: int,
+    font_size: int,
+    dark: bool,
+    pad_x: int,
+    pad_y: int,
+    output: str,
+    format: str,
+    overwrite: bool,
+):
+    """
+    Render chat for a given video.
+
+    This command is experimental and may change in the future!
+    """
+    print_log("Chat command is still experimental, try it out and report any bugs.")
+
+    try:
+        from twitchdl.chat import render_chat
+
+        render_chat(
+            id,
+            width,
+            height,
+            font_size,
+            dark,
+            (pad_x, pad_y),
+            output,
+            format,
+            overwrite,
+        )
+    except ModuleNotFoundError as ex:
+        raise ConsoleError(
+            dedent(f"""
+                {ex}
+
+                This command requires twitch-dl to be installed with optional "chat" dependencies:
+                pipx install "twitch-dl[chat]"
+
+                See documentation for more info:
+                https://twitch-dl.bezdomni.net/commands/chat.html
+            """)
+        )

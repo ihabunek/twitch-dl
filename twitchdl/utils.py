@@ -1,8 +1,15 @@
 import re
+import time
 import unicodedata
-from typing import Optional, Union
+from contextlib import contextmanager
+from itertools import chain, islice, tee
+from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
 
 import click
+
+T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
 
 
 def _format_size(value: float, digits: int, unit: str):
@@ -109,3 +116,25 @@ def parse_clip_identifier(identifier: str) -> Optional[str]:
         match = re.match(pattern, identifier)
         if match:
             return match.group("slug")
+
+
+def remove_null_values(adict: Dict[K, V]) -> Dict[K, V]:
+    return {k: v for k, v in adict.items() if v is not None}
+
+
+def iterate_with_next(iterable: Iterable[T]) -> Iterable[Tuple[T, Optional[T]]]:
+    """
+    Creates an iterator which provides the current and next item.
+    """
+    items, nexts = tee(iterable, 2)
+    nexts = chain(islice(nexts, 1, None), [None])
+    return zip(items, nexts)
+
+
+@contextmanager
+def timed(message: str = "Time taken"):
+    """Print how long it took to execute a block of code"""
+    start = time.monotonic()
+    yield
+    duration = time.monotonic() - start
+    print(f"{message}: {int(1000 * duration):.1f}ms")
