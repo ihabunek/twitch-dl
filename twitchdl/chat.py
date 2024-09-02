@@ -21,11 +21,16 @@ from twitchdl.output import green, print_log, print_status
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
+# Use NotoSans for latin, greek, cyrillic
+# Use NotoSansCJK for Chinese, Japanese, and Korean
+# This should cover most text used in twitch chat
+# TODO: Make fonts configurable so users can choose their own
 TEXT_FONTS = [
     "https://github.com/notofonts/notofonts.github.io/raw/main/fonts/NotoSans/full/variable-ttf/NotoSans[wdth,wght].ttf",
     "https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/OTC/NotoSansCJK-VF.ttf.ttc",
 ]
 
+# Use NotoColorEmoji for rendering Emoji
 BITMAP_FONTS = [
     ("https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf", 109),
 ]

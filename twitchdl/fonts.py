@@ -1,3 +1,5 @@
+import hashlib
+import json
 import math
 import unicodedata
 from dataclasses import dataclass
@@ -7,6 +9,9 @@ from typing import Generator, Iterable, List, Optional, Set, Tuple
 from fontTools.ttLib import TTFont, TTLibFileIsCollectionError  # type: ignore
 from fontTools.ttLib.ttCollection import TTCollection  # type: ignore
 from PIL import ImageFont
+
+from twitchdl.cache import get_cache_dir
+from twitchdl.output import print_log
 
 
 @dataclass
@@ -43,7 +48,7 @@ class Font:
             return []
 
 
-def extract_codepoints(path: Path) -> Set[int]:
+def get_codepoints(path: Path) -> Set[int]:
     def gen() -> Generator[Iterable[int], None, None]:
         for font in tt_fonts(path):
             for subtable in font["cmap"].tables:  # type: ignore
@@ -52,6 +57,29 @@ def extract_codepoints(path: Path) -> Set[int]:
 
     empty_set: Set[int] = set()
     return empty_set.union(*gen())
+
+
+def get_codepoints_cached(path: Path) -> Set[int]:
+    # Cache codepoints, since it's slow to extract them
+    hash = hashlib.md5(str(path).encode()).hexdigest()
+    filename = f"{path.name}.{hash}.json"
+    codepoints_path = get_cache_dir() / "fonts" / filename
+
+    if codepoints_path.exists():
+        try:
+            with open(codepoints_path, "r") as f:
+                return set(json.load(f))
+        except Exception:
+            pass
+
+    print_log("Extracting supported codepoints...")
+    codepoints = get_codepoints(path)
+
+    print_log(f"Saving codepoints cache to: {codepoints_path}")
+    with open(codepoints_path, "w") as f:
+        json.dump(list(codepoints), f)
+
+    return get_codepoints(path)
 
 
 def tt_fonts(path: Path) -> Generator[TTFont, None, None]:
@@ -65,12 +93,10 @@ def tt_fonts(path: Path) -> Generator[TTFont, None, None]:
 
 
 def load_font(path: Path, is_bitmap: bool, size: int):
-    image_font = ImageFont.truetype(path, size)
-
     return Font(
         path=path,
-        image_font=image_font,
-        codepoints=extract_codepoints(path),
+        image_font=ImageFont.truetype(path, size),
+        codepoints=get_codepoints_cached(path),
         is_bitmap=is_bitmap,
         size=size,
     )
@@ -84,7 +110,7 @@ def char_name(char: str):
 
 
 def dump_codepoints(path: Path):
-    for codepoint in sorted(extract_codepoints(path)):
+    for codepoint in sorted(get_codepoints(path)):
         try:
             name = unicodedata.name(chr(codepoint))
         except ValueError:
