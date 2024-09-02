@@ -1,3 +1,9 @@
+2.6.0:
+  date: 2024-08-30
+  changes:
+    - Add `chat` command for rendering twitch chat as a video which can then be
+      embedded into a downloaded stream using ffmpeg.
+
 2.5.0:
   date: 2024-08-30
   changes:

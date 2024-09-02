@@ -44,6 +44,21 @@ twitch-dl chat [OPTIONS] ID
     <td class="code">--pad-y INTEGER</td>
     <td>Vertical padding [default: <code>5</code>]</td>
 </tr>
+
+<tr>
+    <td class="code">-o, --output TEXT</td>
+    <td>Output file name template. See docs for details. [default: <code>chat_{id}.{format}</code>]</td>
+</tr>
+
+<tr>
+    <td class="code">-f, --format TEXT</td>
+    <td>Video format to convert into, passed to ffmpeg as the target file extension. [default: <code>mp4</code>]</td>
+</tr>
+
+<tr>
+    <td class="code">--overwrite</td>
+    <td>Overwrite the target file if it already exists without prompting.</td>
+</tr>
 </tbody>
 </table>
 

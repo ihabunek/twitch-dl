@@ -18,7 +18,7 @@ print()
 
 for version in data.keys():
     date = data[version]["date"]
-    changes = data[version]["changes"]
+    changes = data[version].get("changes", [])
     print(f"### [{version} ({date})](https://github.com/ihabunek/twitch-dl/releases/tag/{version})")
     print()
 
