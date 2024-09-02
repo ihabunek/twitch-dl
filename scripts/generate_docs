@@ -56,7 +56,7 @@ def render_command(command: Command, ctx: click.Context):
     content += f"\n# twitch-dl {command.name}\n\n"
 
     if command.help:
-        content += command.help + "\n\n"
+        content += textwrap.dedent(command.help).strip() + "\n\n"
 
     content += render_usage(ctx, command)
     content += render_options(ctx, command)
