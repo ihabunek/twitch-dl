@@ -471,7 +471,11 @@ def videos(
     default=5,
 )
 def chat(id: str, width: int, height: int, font_size: int, dark: bool, pad_x: int, pad_y: int):
-    """Render chat for a given video (experimental)"""
+    """
+    Render chat for a given video.
+
+    This command is experimental and may change in the future!
+    """
     print_log("Chat command is still experimental, try it out and report any bugs.")
 
     try:

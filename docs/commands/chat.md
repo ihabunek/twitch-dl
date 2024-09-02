@@ -1,7 +1,9 @@
 <!-- ------------------- generated docs start ------------------- -->
 # twitch-dl chat
 
-Render chat for a given video (experimental)
+Render chat for a given video.
+
+This command is experimental and may change in the future!
 
 ### USAGE
 
@@ -46,10 +48,6 @@ twitch-dl chat [OPTIONS] ID
 </table>
 
 <!-- ------------------- generated docs end ------------------- -->
-
-<h2>Experimental</h2>
-
-This command is experimetnal and may change in the future!
 
 <h2>Rendering video with chat</h2>
 

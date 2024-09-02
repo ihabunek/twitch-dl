@@ -4,7 +4,6 @@
 Download videos or clips.
 
     Pass one or more video ID, clip slug or Twitch URL to download.
-    
 
 ### USAGE
 
