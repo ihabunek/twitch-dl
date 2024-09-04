@@ -42,6 +42,12 @@ def validate_positive(_ctx: click.Context, _param: click.Parameter, value: Optio
     return value
 
 
+def validate_non_negative(_ctx: click.Context, _param: click.Parameter, value: Optional[int]):
+    if value is not None and value < 0:
+        raise click.BadParameter("must be greater or equal than 0")
+    return value
+
+
 def validate_time(_ctx: click.Context, _param: click.Parameter, value: str) -> Optional[int]:
     """Parse a time string (hh:mm or hh:mm:ss) to number of seconds."""
     if not value:
@@ -460,14 +466,14 @@ def videos(
     "--pad-x",
     help="Horizontal padding",
     type=int,
-    callback=validate_positive,
+    callback=validate_non_negative,
     default=5,
 )
 @click.option(
     "--pad-y",
     help="Vertical padding",
     type=int,
-    callback=validate_positive,
+    callback=validate_non_negative,
     default=5,
 )
 @click.option(
