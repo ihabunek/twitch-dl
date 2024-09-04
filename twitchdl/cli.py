@@ -441,7 +441,7 @@ def videos(
     "--height",
     help="Chat height in pixels",
     type=int,
-    default=1024,
+    default=1080,
     callback=validate_positive,
 )
 @click.option(
