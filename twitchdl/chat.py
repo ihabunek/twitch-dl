@@ -76,15 +76,13 @@ def render_chat(
 
     cache_dir = cache.get_cache_dir(f"chat/{video_id}")
 
-    first = True
     start = time.monotonic()
-    for index, offset, duration, comments in group_comments(video_id, total_duration):
-        if first:
+    for group_index, offset, duration, comments in group_comments(video_id, total_duration):
+        if group_index == 0:
             # Save the initial empty frame
             frame_path = cache_dir / f"chat_{0:05d}.bmp"
             screen.padded_image().save(frame_path)
             frames.append((frame_path, offset))
-            first = False
 
         for comment in comments:
             draw_comment(screen, comment, dark, badges_by_id)
@@ -93,7 +91,7 @@ def render_chat(
         frame_path = cache_dir / f"chat_{offset:05d}.bmp"
         screen.padded_image().save(frame_path)
         frames.append((frame_path, duration))
-        _print_progress(index, offset, start, total_duration)
+        _print_progress(group_index, offset, start, total_duration)
 
     spec_path = cache_dir / "concat.txt"
     with open(spec_path, "w") as f:
