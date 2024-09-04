@@ -76,6 +76,7 @@ def render_chat(
 
     cache_dir = cache.get_cache_dir(f"chat/{video_id}")
 
+    first = True
     start = time.monotonic()
     for group_index, offset, duration, comments in group_comments(video_id, total_duration):
         if group_index == 0:
@@ -85,8 +86,10 @@ def render_chat(
             frames.append((frame_path, offset))
 
         for comment in comments:
+            if not first:
+                screen.next_line()
             draw_comment(screen, comment, dark, badges_by_id)
-            screen.next_line()
+            first = False
 
         frame_path = cache_dir / f"chat_{offset:05d}.bmp"
         screen.padded_image().save(frame_path)
