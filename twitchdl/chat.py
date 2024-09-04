@@ -349,21 +349,6 @@ def generate_video(spec_path: Path, target: Path, overwrite: bool):
     print_status(f"Saved: {green(target)}")
 
 
-def shift(image: Image.Image, dy: int, background: str):
-    cropped_image = image.crop((0, dy, image.width, image.height))
-    shifted_image = Image.new(image.mode, image.size, color=background)
-    shifted_image.paste(cropped_image, (0, 0))
-    return shifted_image
-
-
-def pad(image: Image.Image, px: int, py: int, background: str):
-    width = image.width + 2 * px
-    height = image.height + 2 * py
-    padded_image = Image.new(image.mode, (width, height), color=background)
-    padded_image.paste(image, (px, py))
-    return padded_image
-
-
 def download_badge(badge: Badge) -> Optional[Path]:
     # TODO: make badge size configurable?
     url = badge["image1x"]
