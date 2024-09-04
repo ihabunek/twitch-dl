@@ -1,11 +1,15 @@
 import re
 import time
 import unicodedata
+from collections import defaultdict, deque
 from contextlib import contextmanager
 from itertools import chain, islice, tee
-from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
+from statistics import fmean
+from typing import Deque, Dict, Iterable, Optional, Tuple, TypeVar, Union
 
 import click
+
+from twitchdl.output import print_status
 
 T = TypeVar("T")
 K = TypeVar("K")
@@ -138,3 +142,15 @@ def timed(message: str = "Time taken"):
     yield
     duration = time.monotonic() - start
     print(f"{message}: {int(1000 * duration):.1f}ms")
+
+
+perfs: Dict[str, Deque[float]] = defaultdict(lambda: deque(maxlen=50))
+
+
+@contextmanager
+def monitor_performance(group: str):
+    global perfs
+    start = time.monotonic()
+    yield
+    perfs[group].append(time.monotonic() - start)
+    print_status(f"{group}: {1000 * fmean(perfs[group]):.1f}ms")
