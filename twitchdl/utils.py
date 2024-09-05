@@ -91,16 +91,20 @@ def titlify(value: str) -> str:
     return value.strip()
 
 
+VIDEO_ID_PATTERN = r"(?P<id>\d+)"
+
 VIDEO_PATTERNS = [
-    r"^(?P<id>\d+)$",
-    r"^https://(www\.|m\.)?twitch\.tv/videos/(?P<id>\d+)(\?.+)?$",
-    r"^https://(www\.|m\.)?twitch\.tv/\w+/video/(?P<id>\d+)(\?.+)?$",
+    rf"^{VIDEO_ID_PATTERN}$",
+    rf"^https://(www\.|m\.)?twitch\.tv/videos/{VIDEO_ID_PATTERN}(\?.+)?$",
+    rf"^https://(www\.|m\.)?twitch\.tv/\w+/video/{VIDEO_ID_PATTERN}(\?.+)?$",
 ]
 
+CLIP_SLUG_PATTERN = r"(?P<slug>[A-Za-z0-9-_]+)"
+
 CLIP_PATTERNS = [
-    r"^(?P<slug>[A-Za-z0-9-_]+)$",
-    r"^https://(www\.|m\.)?twitch\.tv/\w+/clip/(?P<slug>[A-Za-z0-9-_]+)(\?.+)?$",
-    r"^https://clips\.twitch\.tv/(?P<slug>[A-Za-z0-9-_]+)(\?.+)?$",
+    fr"^{CLIP_SLUG_PATTERN}$",
+    fr"^https://(www\.|m\.)?twitch\.tv/\w+/clip/{CLIP_SLUG_PATTERN}(\?.+)?$",
+    fr"^https://clips\.twitch\.tv/{CLIP_SLUG_PATTERN}(\?.+)?$",
 ]
 
 
