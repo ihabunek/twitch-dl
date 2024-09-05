@@ -6,10 +6,12 @@ twitch-dl changelog
 ### [2.7.0 (2024-09-05)](https://github.com/ihabunek/twitch-dl/releases/tag/2.7.0)
 
 * Add new options when prompting if a file should be overwritten: overwrite,
-  overwrite all, skip, skip all, abort
+  overwrite all, skip, skip all, abort (thanks @NuVanDibe)
 * Embed chapter metadata in video, allows skipping to chapter if video player
   supports it
 * Increase default worker count to 10, seems to improve speeds
+* Fix a bug where some clip slugs would not be recognized
+* Add `--skip-existing` option to `download` command
 * Add `--json` option to `chat` command
 * Improvements to chat renderer
 
