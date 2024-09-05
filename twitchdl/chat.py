@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw
 from twitchdl import cache
 from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
-from twitchdl.fonts import Font, group_by_font, load_font
+from twitchdl.fonts import Font, char_name, group_by_font, load_font, make_group_by_font
 from twitchdl.naming import video_filename
 from twitchdl.output import green, print_json, print_log, print_status
 from twitchdl.twitch import get_comments, get_video, get_video_comments
@@ -231,8 +231,9 @@ class Screen:
         self.x: int = 0
         self.y: int = 0
 
-        self.line_height = max(f.height for f in fonts if not f.is_bitmap)
+        self.group_by_font = make_group_by_font(fonts, self.on_char_not_found)
 
+        self.line_height = max(f.height for f in fonts if not f.is_bitmap)
         left, _, right, _ = fonts[0].image_font.getbbox(" ")
         self.space_size = int(right - left)
 
@@ -240,6 +241,10 @@ class Screen:
         image_size = (width - 2 * px, height - 2 * py)
         self._image = Image.new("RGBA", image_size, self.background)
         self._draw = ImageDraw.Draw(self._image)
+
+    def on_char_not_found(self, char: str):
+        """Invoked when a char cannot be rendered in any of the fonts."""
+        print_status(f"Cannot render char '{char}' Name: {char_name(char)} Codepoint: {ord(char)}")
 
     @property
     def image(self):
@@ -257,6 +262,7 @@ class Screen:
     def draw_text(self, text: str, color: Optional[str] = None):
         # Split into words while keeping the whitespace
         for word in re.split(r"(?=\s)", text):
+            # for fragment, font in self.group_by_font(word):
             for fragment, font in group_by_font(word, self.fonts):
                 if font.is_bitmap:
                     for emoji in fragment:

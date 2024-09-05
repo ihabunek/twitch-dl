@@ -9,8 +9,6 @@ from typing import Deque, Dict, Iterable, Optional, Tuple, TypeVar, Union
 
 import click
 
-from twitchdl.output import print_status
-
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
@@ -149,6 +147,8 @@ perfs: Dict[str, Deque[float]] = defaultdict(lambda: deque(maxlen=50))
 
 @contextmanager
 def monitor_performance(group: str):
+    from twitchdl.output import print_status
+
     global perfs
     start = time.monotonic()
     yield

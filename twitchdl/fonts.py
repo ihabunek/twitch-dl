@@ -1,17 +1,18 @@
+from functools import lru_cache
 import hashlib
 import json
 import math
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, List, Optional, Set, Tuple
+from typing import Callable, Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from fontTools.ttLib import TTFont, TTLibFileIsCollectionError  # type: ignore
 from fontTools.ttLib.ttCollection import TTCollection  # type: ignore
 from PIL import ImageFont
 
 from twitchdl.cache import get_cache_dir
-from twitchdl.output import print_log
+from twitchdl.output import print_log, print_status
 
 
 @dataclass
@@ -119,36 +120,42 @@ def dump_codepoints(path: Path):
         print(f"{codepoint}\t{chr(codepoint)}\t{name}")
 
 
-def get_font_for_char(fonts: List[Font], char: str) -> Optional[Font]:
-    for font in fonts:
-        if ord(char) in font.codepoints:
-            return font
-    return None
+def make_group_by_font(
+    fonts: List[Font],
+    on_char_not_found: Callable[[str], None],
+) -> Callable[[str], Generator[Tuple[str, Font], None, None]]:
 
+    @lru_cache
+    def get_font(char: str) -> Optional[Font]:
+        for font in fonts:
+            if ord(char) in font.codepoints:
+                return font
 
-def group_by_font(text: str, fonts: List[Font]) -> Generator[Tuple[str, Font], None, None]:
-    """Split given text into chunks which can be rendered by the same font."""
-    if not text:
-        return
+    def group_by_font(text: str):
+        """Split given text into chunks which can be rendered by the same font."""
+        if not text:
+            return
 
-    buffer = ""
-    font = None
+        buffer = ""
+        font = None
 
-    for char in text:
-        char_font = get_font_for_char(fonts, char)
-        if not char_font:
-            print(f"Cannot render char: {char} {char_name(char)} {ord(char)}")
-            continue
+        for char in text:
+            char_font = get_font(char)
+            if not char_font:
+                on_char_not_found(char)
+                continue
 
-        if not font:
-            font = char_font
+            if not font:
+                font = char_font
 
-        if font == char_font:
-            buffer += char
-        else:
+            if font == char_font:
+                buffer += char
+            else:
+                yield buffer, font
+                font = char_font
+                buffer = char
+
+        if buffer and font:
             yield buffer, font
-            font = char_font
-            buffer = char
 
-    if buffer and font:
-        yield buffer, font
+    return group_by_font
