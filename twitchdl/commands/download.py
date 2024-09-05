@@ -13,11 +13,11 @@ import click
 import httpx
 
 from twitchdl import twitch, utils
-from twitchdl.entities import DownloadOptions
+from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename
-from twitchdl.output import blue, bold, green, print_log, yellow
+from twitchdl.output import blue, bold, green, print_error, print_log, yellow
 from twitchdl.playlists import (
     enumerate_vods,
     get_init_sections,
@@ -38,16 +38,29 @@ def download(ids: List[str], args: DownloadOptions):
         download_one(video_id, args)
 
 
-def download_one(video: str, args: DownloadOptions):
-    video_id = utils.parse_video_identifier(video)
+def download_one(id_or_slug: str, args: DownloadOptions):
+    video_id = utils.parse_video_identifier(id_or_slug)
     if video_id:
-        return _download_video(video_id, args)
+        print_log("Looking up video...")
+        video = twitch.get_video(video_id)
+        if video:
+            _download_video(video, args)
+        else:
+            print_error(f"Video '{video_id}' not found")
+        return
 
-    clip_slug = utils.parse_clip_identifier(video)
-    if clip_slug:
-        return _download_clip(clip_slug, args)
+    slug = utils.parse_clip_identifier(id_or_slug)
+    if slug:
+        print_log("Looking up clip...")
+        clip = twitch.get_clip(slug)
 
-    raise ConsoleError(f"Invalid input: {video}")
+        if clip:
+            _download_clip(clip, args)
+        else:
+            print_error(f"Clip '{slug}' not found")
+        return
+
+    raise ConsoleError(f"Invalid input: {id_or_slug}")
 
 
 def _join_vods(playlist_path: Path, metadata_path: Path, target: Path, overwrite: bool):
@@ -141,13 +154,7 @@ def get_clip_authenticated_url(slug: str, quality: Optional[str]):
     return f"{url}?{query}"
 
 
-def _download_clip(slug: str, args: DownloadOptions) -> None:
-    print_log("Looking up clip...")
-    clip = twitch.get_clip(slug)
-
-    if not clip:
-        raise ConsoleError(f"Clip '{slug}' not found")
-
+def _download_clip(clip: Clip, args: DownloadOptions) -> None:
     title = clip["title"]
     user = clip["broadcaster"]["displayName"]
     game = clip["game"]["name"] if clip["game"] else "Unknown"
@@ -166,7 +173,7 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
             print_log(f"Skipping clip: {green(target)}")
             return
 
-    url = get_clip_authenticated_url(slug, args.quality)
+    url = get_clip_authenticated_url(clip["slug"], args.quality)
     print_log(f"Selected URL: {url}")
 
     if args.dry_run:
@@ -177,16 +184,10 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
         click.echo(f"Downloaded: {blue(target)}")
 
 
-def _download_video(video_id: str, args: DownloadOptions) -> None:
-    print_log("Looking up video...")
-    video = twitch.get_video(video_id)
-
-    if not video:
-        raise ConsoleError(f"Video {video_id} not found")
+def _download_video(video: Video, args: DownloadOptions) -> None:
+    target = Path(video_filename(video, args.format, args.output))
 
     click.echo(f"Found: {blue(video['title'])} by {yellow(video['creator']['displayName'])}")
-
-    target = Path(video_filename(video, args.format, args.output))
     click.echo(f"Output: {blue(target)}")
 
     overwrite = args.overwrite
@@ -203,14 +204,14 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
                 return
 
     print_log("Fetching chapters...")
-    chapters = twitch.get_video_chapters(video_id)
+    chapters = twitch.get_video_chapters(video["id"])
     start, end = _determine_time_range(chapters, args)
 
     print_log("Fetching access token...")
-    access_token = twitch.get_access_token(video_id, auth_token=args.auth_token)
+    access_token = twitch.get_access_token(video["id"], auth_token=args.auth_token)
 
     print_log("Fetching playlists...")
-    playlists_text = twitch.get_playlists(video_id, access_token)
+    playlists_text = twitch.get_playlists(video["id"], access_token)
     playlists = parse_playlists(playlists_text)
     playlist = select_playlist(playlists, args.quality)
 
