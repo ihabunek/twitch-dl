@@ -60,7 +60,7 @@ def download_one(id_or_slug: str, args: DownloadOptions):
             print_error(f"Clip '{slug}' not found")
         return
 
-    raise ConsoleError(f"Invalid input: {id_or_slug}")
+    print_error(f"Not a valid video ID or clip slug: {id_or_slug}")
 
 
 def _join_vods(playlist_path: Path, metadata_path: Path, target: Path, overwrite: bool):
@@ -155,52 +155,57 @@ def get_clip_authenticated_url(slug: str, quality: Optional[str]):
 
 
 def _download_clip(clip: Clip, args: DownloadOptions) -> None:
-    title = clip["title"]
-    user = clip["broadcaster"]["displayName"]
-    game = clip["game"]["name"] if clip["game"] else "Unknown"
-    duration = utils.format_duration(clip["durationSeconds"])
-    click.echo(f"Found: {green(title)} by {yellow(user)}, playing {blue(game)} ({duration})")
-
     target = Path(clip_filename(clip, args.output))
-    click.echo(f"Target: {blue(target)}")
+    _print_found_clip(clip)
+    print_log(f"Target: {target}")
 
     if target.exists():
         if args.skip_existing:
-            print_log(f"Skipping downloaded clip: {green(target)}")
+            click.echo(f"Clip already downloaded: {green(target)}")
             return
 
         if not args.overwrite and not _prompt_overwrite():
-            print_log(f"Skipping clip: {green(target)}")
+            click.echo(f"Skipping clip: {green(target)}")
             return
 
     url = get_clip_authenticated_url(clip["slug"], args.quality)
-    print_log(f"Selected URL: {url}")
+    print_log(f"Downloading from: {url}")
 
     if args.dry_run:
         click.echo("Dry run, clip not downloaded.")
     else:
-        print_log("Downloading clip...")
         download_file(url, target)
-        click.echo(f"Downloaded: {blue(target)}")
+        click.echo(f"Downloaded clip: {green(target)}")
+
+
+def _print_found_clip(clip: Clip):
+    print_log(
+        "Found clip:",
+        green(clip["title"]),
+        "by",
+        yellow(clip["broadcaster"]["displayName"]),
+        "playing",
+        blue(clip["game"]["name"] if clip["game"] else "Unknown"),
+        f"({utils.format_time(clip['durationSeconds'])})",
+    )
 
 
 def _download_video(video: Video, args: DownloadOptions) -> None:
     target = Path(video_filename(video, args.format, args.output))
-
-    click.echo(f"Found: {blue(video['title'])} by {yellow(video['creator']['displayName'])}")
-    click.echo(f"Output: {blue(target)}")
+    _print_found_video(video)
+    print_log(f"Target: {blue(target)}")
 
     overwrite = args.overwrite
     if target.exists():
         if args.skip_existing:
-            print_log(f"Skipping downloaded video: {green(target)}")
+            click.echo(f"Video already downloaded: {green(target)}")
             return
 
         if not overwrite:
             if _prompt_overwrite():
                 overwrite = True
             else:
-                print_log(f"Skipping video: {green(target)}")
+                click.echo(f"Skipping video: {green(target)}")
                 return
 
     print_log("Fetching chapters...")
@@ -282,6 +287,18 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         shutil.rmtree(target_dir)
 
     click.echo(f"Downloaded: {green(target)}")
+
+
+def _print_found_video(video: Video):
+    print_log(
+        "Found video:",
+        green(video["title"]),
+        "by",
+        yellow(video["creator"]["displayName"]),
+        "playing",
+        blue(video["game"]["name"] if video["game"] else "Unknown"),
+        f"({utils.format_time(video['lengthSeconds'])})",
+    )
 
 
 def http_get(url: str) -> str:

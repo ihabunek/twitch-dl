@@ -31,8 +31,9 @@ def print_json(data: Any):
     click.echo(json.dumps(data))
 
 
-def print_log(message: Any, *, nl: bool = True):
-    click.secho(message, err=True, dim=True, nl=nl)
+def print_log(*args: Any):
+    message = " ".join(click.style(a, dim=True) for a in args)
+    click.secho(message, err=True)
 
 
 def print_error(message: Any):
