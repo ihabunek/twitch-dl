@@ -26,6 +26,10 @@ TEST_CLIP_PATTERNS = {
     ("GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ", "https://twitch.tv/dracul1nx/clip/GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ?filter=clips&range=7d&sort=time"),
     ("GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ", "https://www.twitch.tv/dracul1nx/clip/GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ?filter=clips&range=7d&sort=time"),
     ("GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ", "https://m.twitch.tv/dracul1nx/clip/GloriousColdbloodedTortoiseRuleFive-E017utJ4DZmHVpfQ?filter=clips&range=7d&sort=time"),
+
+    # Can contain underscores
+    ("TemperedGlamorousSpiderMikeHogu-u0r0y1y_lKQ_BDAP", "TemperedGlamorousSpiderMikeHogu-u0r0y1y_lKQ_BDAP"),
+    ("TemperedGlamorousSpiderMikeHogu-u0r0y1y_lKQ_BDAP", "https://www.twitch.tv/tsoding/clip/TemperedGlamorousSpiderMikeHogu-u0r0y1y_lKQ_BDAP?filter=clips&range=all&sort=time"),
 }
 
 
