@@ -284,7 +284,7 @@ def clips(
     "--max-workers",
     help="Number of workers for downloading vods concurrently",
     type=int,
-    default=5,
+    default=10,
 )
 def download(
     ids: Tuple[str, ...],
