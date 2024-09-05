@@ -211,3 +211,7 @@ def bold(text: Any) -> str:
 
 def dim(text: Any) -> str:
     return click.style(text, dim=True)
+
+
+def underlined(text: Any) -> str:
+    return click.style(text, underline=True)

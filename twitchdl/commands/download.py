@@ -5,6 +5,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+from enum import Enum, auto
 from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlencode, urlparse
@@ -17,7 +18,7 @@ from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename
-from twitchdl.output import blue, bold, green, print_error, print_log, yellow
+from twitchdl.output import blue, bold, green, print_error, print_log, underlined, yellow
 from twitchdl.playlists import (
     enumerate_vods,
     get_init_sections,
@@ -164,9 +165,19 @@ def _download_clip(clip: Clip, args: DownloadOptions) -> None:
             click.echo(f"Clip already downloaded: {green(target)}")
             return
 
-        if not args.overwrite and not _prompt_overwrite():
-            click.echo(f"Skipping clip: {green(target)}")
-            return
+        if not args.overwrite:
+            response = _prompt_overwrite()
+            if response == Overwrite.OVERWRITE_ALL:
+                args.overwrite = True
+            elif response == Overwrite.SKIP:
+                click.echo(f"Skipping clip: {green(target)}")
+                return
+            elif response == Overwrite.SKIP_ALL:
+                args.skip_existing = True
+                click.echo(f"Skipping clip: {green(target)}")
+                return
+            elif response == Overwrite.ABORT:
+                raise click.Abort()
 
     url = get_clip_authenticated_url(clip["slug"], args.quality)
     print_log(f"Downloading from: {url}")
@@ -202,11 +213,21 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
             return
 
         if not overwrite:
-            if _prompt_overwrite():
+            response = _prompt_overwrite()
+            if response == Overwrite.OVERWRITE:
                 overwrite = True
-            else:
-                click.echo(f"Skipping video: {green(target)}")
+            elif response == Overwrite.OVERWRITE_ALL:
+                overwrite = True
+                args.overwrite = True
+            elif response == Overwrite.SKIP:
+                click.echo(f"Skipping clip: {green(target)}")
                 return
+            elif response == Overwrite.SKIP_ALL:
+                args.skip_existing = True
+                click.echo(f"Skipping clip: {green(target)}")
+                return
+            elif response == Overwrite.ABORT:
+                raise click.Abort()
 
     print_log("Fetching chapters...")
     chapters = twitch.get_video_chapters(video["id"])
@@ -396,6 +417,36 @@ def _escape_metadata(text: Optional[str]):
     return re.sub(r"([=;#\\\n])", r"\\\1", text.strip())
 
 
-def _prompt_overwrite() -> bool:
-    response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
-    return response.lower().strip() == "y"
+class Overwrite(Enum):
+    OVERWRITE = auto()
+    OVERWRITE_ALL = auto()
+    SKIP = auto()
+    SKIP_ALL = auto()
+    ABORT = auto()
+
+
+def _prompt_overwrite() -> Overwrite:
+    prompt = (
+        "File exists. Do you want to: "
+        + f"{underlined('O')}verwrite, "
+        + f"Overwrite {underlined('A')}ll, "
+        + f"{underlined('S')}kip, "
+        + f"S{underlined('k')}ip all, "
+        + f"A{underlined('b')}ort"
+    )
+
+    while True:
+        response = click.prompt(prompt, default="O").lower().strip()
+
+        if response == "o":
+            return Overwrite.OVERWRITE
+        elif response == "a":
+            return Overwrite.OVERWRITE_ALL
+        elif response == "s":
+            return Overwrite.SKIP
+        elif response == "k":
+            return Overwrite.SKIP_ALL
+        elif response == "b":
+            return Overwrite.ABORT
+
+        print_error(f"Invalid response: {response}")
