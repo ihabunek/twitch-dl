@@ -57,7 +57,12 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">--overwrite</td>
-    <td>Overwrite the target file if it already exists without prompting.</td>
+    <td>Overwrite target file if it already exists</td>
+</tr>
+
+<tr>
+    <td class="code">--skip-existing</td>
+    <td>Skip target file if it already exists</td>
 </tr>
 
 <tr>
@@ -82,7 +87,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">-w, --max-workers INTEGER</td>
-    <td>Number of workers for downloading vods concurrently [default: <code>5</code>]</td>
+    <td>Number of workers for downloading vods concurrently [default: <code>10</code>]</td>
 </tr>
 </tbody>
 </table>

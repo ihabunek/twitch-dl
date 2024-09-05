@@ -22,7 +22,7 @@ twitch-dl chat [OPTIONS] ID
 
 <tr>
     <td class="code">-h, --height INTEGER</td>
-    <td>Chat height in pixels [default: <code>1024</code>]</td>
+    <td>Chat height in pixels [default: <code>1080</code>]</td>
 </tr>
 
 <tr>
@@ -58,6 +58,11 @@ twitch-dl chat [OPTIONS] ID
 <tr>
     <td class="code">--overwrite</td>
     <td>Overwrite the target file if it already exists without prompting.</td>
+</tr>
+
+<tr>
+    <td class="code">--json</td>
+    <td>Print data as JSON rather than human readable text</td>
 </tr>
 </tbody>
 </table>
