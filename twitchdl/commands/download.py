@@ -17,7 +17,7 @@ from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename
-from twitchdl.output import blue, bold, green, print_log, yellow
+from twitchdl.output import blue, bold, green, print_error, print_log, yellow
 from twitchdl.playlists import (
     enumerate_vods,
     get_init_sections,
@@ -38,16 +38,29 @@ def download(ids: List[str], args: DownloadOptions):
         download_one(video_id, args)
 
 
-def download_one(video: str, args: DownloadOptions):
-    video_id = utils.parse_video_identifier(video)
+def download_one(id_or_slug: str, args: DownloadOptions):
+    video_id = utils.parse_video_identifier(id_or_slug)
     if video_id:
-        return _download_video(video_id, args)
+        print_log("Looking up video...")
+        video = twitch.get_video(video_id)
+        if video:
+            _download_video(video, args)
+        else:
+            print_error(f"Video '{video_id}' not found")
+        return
 
-    clip_slug = utils.parse_clip_identifier(video)
-    if clip_slug:
-        return _download_clip(clip_slug, args)
+    slug = utils.parse_clip_identifier(id_or_slug)
+    if slug:
+        print_log("Looking up clip...")
+        clip = twitch.get_clip(slug)
 
-    raise ConsoleError(f"Invalid input: {video}")
+        if clip:
+            _download_clip(slug, args)
+        else:
+            print_error(f"Clip '{slug}' not found")
+        return
+
+    raise ConsoleError(f"Invalid input: {id_or_slug}")
 
 
 def _join_vods(playlist_path: Path, metadata_path: Path, target: Path, overwrite: bool):
@@ -177,16 +190,11 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
         click.echo(f"Downloaded: {blue(target)}")
 
 
-def _download_video(video_id: str, args: DownloadOptions) -> None:
-    print_log("Looking up video...")
-    video = twitch.get_video(video_id)
-
-    if not video:
-        raise ConsoleError(f"Video {video_id} not found")
+def _download_video(video: Video, args: DownloadOptions) -> None:
+    video_id = video["id"]
+    target = Path(video_filename(video, args.format, args.output))
 
     click.echo(f"Found: {blue(video['title'])} by {yellow(video['creator']['displayName'])}")
-
-    target = Path(video_filename(video, args.format, args.output))
     click.echo(f"Output: {blue(target)}")
 
     overwrite = args.overwrite

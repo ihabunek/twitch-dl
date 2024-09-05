@@ -1,8 +1,15 @@
+2.7.0:
+  date: 2024-09-05
+  changes:
+    - "Embed chapter metadata in video, allows skipping to chapter if video player supports it"
+    - "Increase default worker count to 10, seems to improve speeds"
+    - "Add `--json` option to `chat` command"
+    - "Improvements to chat renderer"
+
 2.6.0:
   date: 2024-08-30
   changes:
-    - Add `chat` command for rendering twitch chat as a video which can then be
-      embedded into a downloaded stream using ffmpeg.
+    - "Add `chat` command for rendering twitch chat as a video which can then be embedded into a downloaded stream using ffmpeg."
 
 2.5.0:
   date: 2024-08-30

@@ -35,6 +35,10 @@ def print_log(message: Any, *, nl: bool = True):
     click.secho(message, err=True, dim=True, nl=nl)
 
 
+def print_error(message: Any):
+    click.secho(message, err=True, fg="red")
+
+
 _prev_transient = False
 
 
