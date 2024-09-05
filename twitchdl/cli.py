@@ -318,6 +318,9 @@ def download(
     if not format:
         format = "ts" if concat else "mkv"
 
+    if start is not None and end is not None and end <= start:
+        raise ConsoleError("End time must be greater than start time")
+
     options = DownloadOptions(
         auth_token=auth_token,
         chapter=chapter,

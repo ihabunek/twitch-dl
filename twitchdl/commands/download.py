@@ -178,9 +178,6 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
 
 
 def _download_video(video_id: str, args: DownloadOptions) -> None:
-    if args.start and args.end and args.end <= args.start:
-        raise ConsoleError("End time must be greater than start time")
-
     print_log("Looking up video...")
     video = twitch.get_video(video_id)
 
