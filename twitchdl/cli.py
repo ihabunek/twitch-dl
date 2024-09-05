@@ -252,7 +252,12 @@ def clips(
 )
 @click.option(
     "--overwrite",
-    help="Overwrite the target file if it already exists without prompting.",
+    help="Overwrite target file if it already exists",
+    is_flag=True,
+)
+@click.option(
+    "--skip-existing",
+    help="Skip target file if it already exists",
     is_flag=True,
 )
 @click.option(
@@ -297,6 +302,7 @@ def download(
     keep: bool,
     no_join: bool,
     overwrite: bool,
+    skip_existing: bool,
     output: str,
     quality: Optional[str],
     rate_limit: Optional[int],
@@ -322,6 +328,7 @@ def download(
         keep=keep,
         no_join=no_join,
         overwrite=overwrite,
+        skip_existing=skip_existing,
         output=output,
         quality=quality,
         rate_limit=rate_limit,

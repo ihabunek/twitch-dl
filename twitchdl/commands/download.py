@@ -157,11 +157,14 @@ def _download_clip(slug: str, args: DownloadOptions) -> None:
     target = Path(clip_filename(clip, args.output))
     click.echo(f"Target: {blue(target)}")
 
-    if not args.overwrite and target.exists():
-        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
-        if response.lower().strip() != "y":
-            raise click.Abort()
-        args.overwrite = True
+    if target.exists():
+        if args.skip_existing:
+            print_log(f"Skipping downloaded clip: {green(target)}")
+            return
+
+        if not args.overwrite and not _prompt_overwrite():
+            print_log(f"Skipping clip: {green(target)}")
+            return
 
     url = get_clip_authenticated_url(slug, args.quality)
     print_log(f"Selected URL: {url}")
@@ -189,11 +192,18 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
     target = Path(video_filename(video, args.format, args.output))
     click.echo(f"Output: {blue(target)}")
 
-    if not args.overwrite and target.exists():
-        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
-        if response.lower().strip() != "y":
-            raise click.Abort()
-        args.overwrite = True
+    overwrite = args.overwrite
+    if target.exists():
+        if args.skip_existing:
+            print_log(f"Skipping downloaded video: {green(target)}")
+            return
+
+        if not overwrite:
+            if _prompt_overwrite():
+                overwrite = True
+            else:
+                print_log(f"Skipping video: {green(target)}")
+                return
 
     print_log("Fetching chapters...")
     chapters = twitch.get_video_chapters(video_id)
@@ -263,7 +273,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         _concat_vods(targets, target)
     else:
         print_log("Joining files...")
-        _join_vods(join_playlist_path, metadata_path, target, args.overwrite)
+        _join_vods(join_playlist_path, metadata_path, target, overwrite)
 
     click.echo()
 
@@ -369,3 +379,8 @@ def _escape_metadata(text: Optional[str]):
     # (‘=’, ‘;’, ‘#’, ‘\’ and a newline) must be escaped with a backslash ‘\’.
     text = text.strip() if text else ""
     return re.sub(r"([=;#\\\n])", r"\\\1", text.strip())
+
+
+def _prompt_overwrite() -> bool:
+    response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
+    return response.lower().strip() == "y"

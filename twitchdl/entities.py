@@ -13,6 +13,7 @@ class DownloadOptions:
     keep: bool
     no_join: bool
     overwrite: bool
+    skip_existing: bool
     output: str
     quality: Optional[str]
     rate_limit: Optional[int]
