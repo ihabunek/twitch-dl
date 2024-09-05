@@ -81,12 +81,12 @@ def test_download_clip(runner: CliRunner):
     )
     assert_ok(result)
     assert (
-        "Found: AGDQ Crashes during Bioshock run by GamesDoneQuick, playing BioShock (30 sec)"
-        in result.stdout
+        "Found clip: AGDQ Crashes during Bioshock run by GamesDoneQuick playing BioShock (00:30)"
+        in result.stderr
     )
     assert (
         "Target: 2020-01-10_3099545841_gamesdonequick_agdq_crashes_during_bioshock_run.mp4"
-        in result.stdout
+        in result.stderr
     )
     assert "Dry run, clip not downloaded." in result.stdout
 
@@ -102,9 +102,9 @@ def test_download_video(runner: CliRunner):
         ],
     )
     assert_ok(result)
-    assert "Found: Frost Fatales 2024 Day 1 by frozenflygone" in result.stdout
+    assert "Found video: Frost Fatales 2024 Day 1 by frozenflygone playing Tomb Raider (11:44:38)" in result.stderr
     assert (
-        "Output: 2024-03-14_2090131595_frozenflygone_frost_fatales_2024_day_1.mkv" in result.stdout
+        "Target: 2024-03-14_2090131595_frozenflygone_frost_fatales_2024_day_1.mkv" in result.stderr
     )
     assert "Dry run, video not downloaded." in result.stdout
 
