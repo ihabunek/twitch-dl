@@ -50,24 +50,17 @@ def download_one(video: str, args: DownloadOptions):
     raise ConsoleError(f"Invalid input: {video}")
 
 
-def _join_vods(playlist_path: Path, target: Path, overwrite: bool, video: Video):
-    description = video["description"] or ""
-    description = description.strip()
-
+def _join_vods(playlist_path: Path, metadata_path: Path, target: Path, overwrite: bool):
     command: List[str] = [
         "ffmpeg",
         "-i",
         str(playlist_path),
+        "-i",
+        str(metadata_path),
+        "-map_metadata",
+        "1",
         "-c",
         "copy",
-        "-metadata",
-        f"artist={video['creator']['displayName']}",
-        "-metadata",
-        f"title={video['title']}",
-        "-metadata",
-        f"description={description}",
-        "-metadata",
-        "encoded_by=twitch-dl",
         "-stats",
         "-loglevel",
         "warning",
@@ -202,8 +195,9 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
             raise click.Abort()
         args.overwrite = True
 
-    # Chapter select or manual offset
-    start, end = _determine_time_range(video_id, args)
+    print_log("Fetching chapters...")
+    chapters = twitch.get_video_chapters(video_id)
+    start, end = _determine_time_range(chapters, args)
 
     print_log("Fetching access token...")
     access_token = twitch.get_access_token(video_id, auth_token=args.auth_token)
@@ -224,6 +218,10 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
 
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
     target_dir = _crete_temp_dir(base_uri)
+
+    # Create ffmpeg metadata file
+    metadata_path = target_dir / "metadata.txt"
+    _write_metadata(video, chapters, metadata_path)
 
     # Save playlists for debugging purposes
     with open(target_dir / "playlists.m3u8", "w") as f:
@@ -265,7 +263,7 @@ def _download_video(video_id: str, args: DownloadOptions) -> None:
         _concat_vods(targets, target)
     else:
         print_log("Joining files...")
-        _join_vods(join_playlist_path, target, args.overwrite, video)
+        _join_vods(join_playlist_path, metadata_path, target, args.overwrite)
 
     click.echo()
 
@@ -284,14 +282,11 @@ def http_get(url: str) -> str:
     return response.text
 
 
-def _determine_time_range(video_id: str, args: DownloadOptions):
+def _determine_time_range(chapters: List[Chapter], args: DownloadOptions):
     if args.start or args.end:
         return args.start, args.end
 
     if args.chapter is not None:
-        print_log("Fetching chapters...")
-        chapters = twitch.get_video_chapters(video_id)
-
         if not chapters:
             raise ConsoleError("This video has no chapters")
 
@@ -321,3 +316,35 @@ def _choose_chapter_interactive(chapters: List[Chapter]):
     index = utils.read_int("Select a chapter", 1, len(chapters))
     chapter = chapters[index - 1]
     return chapter
+
+
+# See: https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+def _write_metadata(video: Video, chapters: List[Chapter], path: Path):
+    with open(path, "w") as f:
+        # Header
+        f.write(";FFMETADATA1\n")
+
+        # Global metadata
+        f.write(f"title={_escape_metadata(video['title'])}\n")
+        f.write(f"artist={_escape_metadata(video['creator']['displayName'])}\n")
+        f.write(f"description={_escape_metadata(video['description'])}\n")
+        f.write("encoded_by=twitch-dl\n")
+
+        # Chapter metadata
+        for chapter in chapters:
+            title = chapter["description"]
+            start = chapter["positionMilliseconds"]
+            end = chapter["positionMilliseconds"] + chapter["durationMilliseconds"]
+
+            f.write("\n[CHAPTER]\n")
+            f.write("TIMEBASE=1/1000\n")
+            f.write(f"START={start}\n")
+            f.write(f"END={end}\n")
+            f.write(f"title={title}\n")
+
+
+def _escape_metadata(text: Optional[str]):
+    #  Metadata keys or values containing special characters
+    # (‘=’, ‘;’, ‘#’, ‘\’ and a newline) must be escaped with a backslash ‘\’.
+    text = text.strip() if text else ""
+    return re.sub(r"([=;#\\\n])", r"\\\1", text.strip())
