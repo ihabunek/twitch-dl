@@ -493,6 +493,7 @@ def videos(
     help="Overwrite the target file if it already exists without prompting.",
     is_flag=True,
 )
+@json_option
 def chat(
     id: str,
     width: int,
@@ -504,6 +505,7 @@ def chat(
     output: str,
     format: str,
     overwrite: bool,
+    json: bool,
 ):
     """
     Render chat for a given video.
@@ -525,6 +527,7 @@ def chat(
             output,
             format,
             overwrite,
+            json,
         )
     except ModuleNotFoundError as ex:
         raise ConsoleError(

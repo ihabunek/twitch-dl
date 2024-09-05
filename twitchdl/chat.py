@@ -13,11 +13,11 @@ import click
 from PIL import Image, ImageDraw
 
 from twitchdl import cache
-from twitchdl.entities import Badge, Comment, Emote
+from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, group_by_font, load_font
 from twitchdl.naming import video_filename
-from twitchdl.output import green, print_log, print_status
+from twitchdl.output import green, print_json, print_log, print_status
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
@@ -46,6 +46,7 @@ def render_chat(
     output: str,
     format: str,
     overwrite: bool,
+    json: bool,
 ):
     video_id = parse_video_identifier(id)
     if not video_id:
@@ -57,6 +58,10 @@ def render_chat(
         raise ConsoleError(f"Video {video_id} not found")
     total_duration = video["lengthSeconds"]
 
+    if json:
+        render_chat_json(video)
+        return
+
     target_path = Path(video_filename(video, format, output))
     if not overwrite and target_path.exists():
         response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
@@ -64,7 +69,7 @@ def render_chat(
             raise click.Abort()
         overwrite = True
 
-    print_log("Loading comments meta...")
+    print_log("Loading video comments...")
     video_comments = get_video_comments(video_id)
     badges_by_id = {badge["id"]: badge for badge in video_comments["badges"]}
 
@@ -107,6 +112,22 @@ def render_chat(
 
     print_status("Deleting cache...", dim=True)
     shutil.rmtree(cache_dir)
+
+
+def render_chat_json(video: Video):
+    print_log("Loading VideoComments...")
+    video_comments = get_video_comments(video["id"])
+
+    print_log("Loading Comments...")
+    comments = list(generate_comments(video["id"]))
+
+    print_json(
+        {
+            "video": video,
+            "video_comments": video_comments,
+            "comments": comments,
+        }
+    )
 
 
 def load_fonts(font_size: int):
