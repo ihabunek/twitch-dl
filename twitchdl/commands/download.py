@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 from urllib.parse import urlencode, urlparse
 
 import click
@@ -21,6 +21,7 @@ from twitchdl.naming import clip_filename, video_filename
 from twitchdl.output import blue, bold, green, print_error, print_log, underlined, yellow
 from twitchdl.playlists import (
     enumerate_vods,
+    filter_vods,
     get_init_sections,
     load_m3u8,
     make_join_playlist,
@@ -64,25 +65,38 @@ def download_one(id_or_slug: str, args: DownloadOptions):
     print_error(f"Not a valid video ID or clip slug: {id_or_slug}")
 
 
-def _join_vods(playlist_path: Path, metadata_path: Path, target: Path, overwrite: bool):
-    command: List[str] = [
-        "ffmpeg",
-        "-i",
-        str(playlist_path),
-        "-i",
-        str(metadata_path),
-        "-map_metadata",
-        "1",
-        "-c",
-        "copy",
-        "-stats",
-        "-loglevel",
-        "warning",
-        f"file:{target}",
-    ]
+def _join_vods(
+    playlist_path: Path,
+    metadata_path: Path,
+    target: Path,
+    overwrite: bool,
+    crop_start: Optional[float],
+    crop_duration: Optional[float],
+):
+    command: List[str] = []
+
+    def append(*vars: Any):
+        for var in vars:
+            command.append(str(var))
+
+    append("ffmpeg")
+    append("-i", playlist_path)
+    append("-i", metadata_path)
+    append("-map_metadata", 1)
+
+    if crop_start:
+        append("-ss", utils.format_time(crop_start))
+
+    if crop_duration:
+        append("-t", utils.format_time(crop_duration))
+
+    append("-c", "copy")
+    append("-stats")
+    append("-loglevel", "warning")
+    append(f"file:{target}")
 
     if overwrite:
-        command.append("-y")
+        append("-y")
 
     click.secho(f"{shlex.join(command)}", dim=True)
     result = subprocess.run(command)
@@ -244,7 +258,8 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     print_log("Fetching playlist...")
     vods_text = http_get(playlist.url)
     vods_m3u8 = load_m3u8(vods_text)
-    vods = enumerate_vods(vods_m3u8, start, end)
+    all_vods = enumerate_vods(vods_m3u8)
+    vods, crop_start, crop_duration = filter_vods(all_vods, start, end)
 
     if args.dry_run:
         click.echo("Dry run, video not downloaded.")
@@ -297,7 +312,14 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         _concat_vods(targets, target)
     else:
         print_log("Joining files...")
-        _join_vods(join_playlist_path, metadata_path, target, overwrite)
+        _join_vods(
+            join_playlist_path,
+            metadata_path,
+            target,
+            overwrite,
+            crop_start,
+            crop_duration,
+        )
 
     click.echo()
 

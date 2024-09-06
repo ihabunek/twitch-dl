@@ -4,7 +4,7 @@ Parse and manipulate m3u8 playlists.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, OrderedDict, Set
+from typing import Generator, Iterable, List, Optional, OrderedDict, Set, Tuple
 
 import click
 import m3u8
@@ -28,7 +28,7 @@ class Vod:
     """Ordinal number of the VOD in the playlist"""
     path: str
     """Path part of the VOD URL"""
-    duration: int
+    duration: float
     """Segment duration in seconds"""
 
 
@@ -54,29 +54,47 @@ def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
     return m3u8.loads(playlist_m3u8)
 
 
-def enumerate_vods(
-    document: m3u8.M3U8,
+def enumerate_vods(document: m3u8.M3U8) -> Generator[Vod, None, None]:
+    for index, segment in enumerate(document.segments):
+        yield Vod(index, segment.uri, segment.duration)
+
+
+def filter_vods(
+    vods: Iterable[Vod],
     start: Optional[int] = None,
     end: Optional[int] = None,
-) -> List[Vod]:
-    """Extract VODs for download from document."""
-    vods = []
+) -> Tuple[List[Vod], Optional[float], Optional[float]]:
+    filtered_vods: List[Vod] = []
     vod_start = 0
 
-    for index, segment in enumerate(document.segments):
-        vod_end = vod_start + segment.duration
+    # VODs are typically 10 seconds long, if the VODs don't align with the
+    # requested start/end time, we'll need to tell ffmpeg to crop off bits from
+    # the start or the end of the video.
+    crop_start = None
+    crop_end = None
 
-        # `vod_end > start` is used here becuase it's better to download a bit
-        # more than a bit less, similar for the end condition
+    for vod in vods:
+        vod_end = vod_start + vod.duration
+
+        if start and start > vod_start and start < vod_end:
+            crop_start = start - vod_start
+
+        if end and end > vod_start and end < vod_end:
+            crop_end = vod_end - end
+
         start_condition = not start or vod_end > start
         end_condition = not end or vod_start < end
-
         if start_condition and end_condition:
-            vods.append(Vod(index, segment.uri, segment.duration))
+            filtered_vods.append(vod)
 
         vod_start = vod_end
 
-    return vods
+    crop_duration = None
+    if crop_end:
+        total_duration = sum(v.duration for v in filtered_vods)
+        crop_duration = total_duration - (crop_start or 0) - crop_end
+
+    return filtered_vods, crop_start, crop_duration
 
 
 def make_join_playlist(
