@@ -39,7 +39,7 @@ def test_get_videos():
 
     playlist_m3u8 = load_m3u8(playlist_txt)
     vods = enumerate_vods(playlist_m3u8)
-    assert vods[0].path == "0.ts"
+    assert next(vods).path == "0.ts"
 
 
 def test_get_clips():
