@@ -57,7 +57,6 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
 
     click.echo("Playlists:\n")
 
-    playlist_headers = ["Name", "Group", "Resolution", "URL"]
     playlist_data = [
         [
             f"{p.name} {dim('source')}" if p.is_source else p.name,
@@ -67,7 +66,7 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
         ]
         for p in parse_playlists(playlists)
     ]
-    print_table(playlist_headers, playlist_data)
+    print_table(playlist_data, headers=["Name", "Group", "Resolution", "URL"])
 
     if chapters:
         click.echo()
@@ -80,7 +79,7 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
     placeholders = video_placeholders(video, format="mkv")
     placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
     click.echo("")
-    print_table(["Placeholder", "Value"], placeholders)
+    print_table(placeholders, headers=["Placeholder", "Value"])
 
 
 def video_json(video: Video, playlists: str, chapters: List[Chapter]):

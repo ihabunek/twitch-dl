@@ -1,7 +1,7 @@
 import json
 import sys
 from itertools import islice
-from typing import Any, Callable, Generator, List, Optional, TypeVar
+from typing import Any, Callable, Generator, List, Literal, Mapping, Optional, TypeVar
 
 import click
 
@@ -58,22 +58,55 @@ def visual_len(text: str):
     return len(click.unstyle(text))
 
 
+# Additional lenght to take into account due to invisible chars like ansi codes
+def _extra_len(text: str):
+    return len(text) - visual_len(text)
+
+
 def ljust(text: str, width: int):
-    diff = width - visual_len(text)
-    return text + (" " * diff) if diff > 0 else text
+    return text.ljust(width + _extra_len(text))
 
 
-def print_table(headers: List[str], data: List[List[str]]):
-    widths = [[visual_len(cell) for cell in row] for row in data + [headers]]
+def rjust(text: str, width: int):
+    return text.rjust(width + _extra_len(text))
+
+
+def center(text: str, width: int):
+    return text.center(width + _extra_len(text))
+
+
+Align = Literal["left", "right", "center"]
+
+
+def print_table(
+    data: List[List[str]],
+    *,
+    alignments: Mapping[int, Align] = {},
+    headers: Optional[List[str]] = None,
+):
+    data_with_headers = data + [headers] if headers else data
+    widths = [[visual_len(cell) for cell in row] for row in data_with_headers]
     widths = [max(width) for width in zip(*widths)]
     underlines = ["-" * width for width in widths]
 
+    def format_cell(cell: str, idx: int):
+        width = widths[idx]
+        align = alignments.get(idx, "left")
+
+        if align == "right":
+            return rjust(cell, width)
+        elif align == "center":
+            return center(cell, width)
+        else:
+            return ljust(cell, width)
+
     def print_row(row: List[str]):
-        parts = (ljust(cell, widths[idx]) for idx, cell in enumerate(row))
+        parts = (format_cell(cell, idx) for idx, cell in enumerate(row))
         click.echo("  ".join(parts).strip())
 
-    print_row(headers)
-    print_row(underlines)
+    if headers:
+        print_row([bold(h) for h in headers])
+        print_row(underlines)
 
     for row in data:
         print_row(row)

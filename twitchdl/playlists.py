@@ -144,7 +144,6 @@ def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist
 
 def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
     playlists = sorted(playlists, key=_playlist_key)
-    headers = ["#", "Name", "Group ID", "Resolution"]
 
     rows = [
         [
@@ -157,7 +156,7 @@ def select_playlist_interactive(playlists: List[Playlist]) -> Playlist:
     ]
 
     click.echo()
-    print_table(headers, rows)
+    print_table(rows, headers=["#", "Name", "Group ID", "Resolution"])
 
     default = 1
     for index, playlist in enumerate(playlists):
