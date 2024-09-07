@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from twitchdl.http import download_file
 from twitchdl.output import print_status
@@ -39,6 +39,14 @@ def get_cache_dir(subdir: Optional[str] = None) -> Path:
         path = path / subdir
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def get_cache_subdirs() -> List[Path]:
+    subdirs: List[Path] = []
+    for item in _cache_dir_path().iterdir():
+        if item.is_dir():
+            subdirs.append(item)
+    return subdirs
 
 
 def _cache_dir_path() -> Path:

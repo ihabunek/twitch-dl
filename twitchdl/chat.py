@@ -96,7 +96,7 @@ def render_chat(
     screen = Screen(width, height, fonts, foreground, background, padding)
     frames: List[Tuple[Path, int]] = []
 
-    cache_dir = cache.get_cache_dir(f"chat/{video_id}")
+    cache_dir = cache.get_cache_dir(f"chats/{video_id}")
     print_log(f"Rendering frames to: {cache_dir}")
 
     first = True

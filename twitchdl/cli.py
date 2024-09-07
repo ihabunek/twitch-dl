@@ -1,20 +1,22 @@
 import logging
 import platform
 import re
+import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import click
 
 from twitchdl import __version__
-from twitchdl.cache import get_cache_dir
+from twitchdl.cache import get_cache_dir, get_cache_subdirs
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
-from twitchdl.output import print_log
+from twitchdl.output import print_log, print_table
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
+from twitchdl.utils import format_size, get_size
 
 # Tweak the Click context
 # https://click.palletsprojects.com/en/8.1.x/api/#context
@@ -553,3 +555,43 @@ def chat(
                 https://twitch-dl.bezdomni.net/commands/chat.html
             """)
         )
+
+
+@cli.command
+@click.option(
+    "-c",
+    "--clear",
+    "clear_subdir",
+    help="Clear cached files",
+    type=click.Choice(["all", "fonts", "chats", "videos", "emotes", "badges"]),
+)
+def cache(clear_subdir: str):
+    """View and manage cached files"""
+    if clear_subdir:
+        clear_path = get_cache_dir() if clear_subdir == "all" else get_cache_dir(clear_subdir)
+        size = get_size(clear_path)
+        shutil.rmtree(clear_path)
+        click.echo(f"Cleared {clear_subdir} cache ({format_size(size)})")
+        return
+
+    cache_dir = get_cache_dir()
+    click.echo(f"Cache dir: {cache_dir}")
+
+    rows: List[List[str]] = []
+    total_size = 0
+    for directory in get_cache_subdirs():
+        size = get_size(directory)
+        rows.append([str(directory), format_size(size)])
+        total_size += size
+
+    if not rows:
+        click.echo("No files cached")
+        return
+
+    click.echo()
+    print_table(
+        rows,
+        headers=["Directory", "Size"],
+        footers=["Total", format_size(total_size)],
+        alignments={1: "right"},
+    )

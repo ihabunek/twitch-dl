@@ -83,9 +83,10 @@ def print_table(
     *,
     alignments: Mapping[int, Align] = {},
     headers: Optional[List[str]] = None,
+    footers: Optional[List[str]] = None,
 ):
-    data_with_headers = data + [headers] if headers else data
-    widths = [[visual_len(cell) for cell in row] for row in data_with_headers]
+    all_rows = data + ([headers] if headers else []) + ([footers] if footers else [])
+    widths = [[visual_len(cell) for cell in row] for row in all_rows]
     widths = [max(width) for width in zip(*widths)]
     underlines = ["-" * width for width in widths]
 
@@ -110,6 +111,10 @@ def print_table(
 
     for row in data:
         print_row(row)
+
+    if footers:
+        print_row(underlines)
+        print_row([bold(f) for f in footers])
 
 
 def print_paged(

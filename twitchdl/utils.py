@@ -1,9 +1,11 @@
+import os
 import re
 import time
 import unicodedata
 from collections import defaultdict, deque
 from contextlib import contextmanager
 from itertools import chain, islice, tee
+from pathlib import Path
 from statistics import fmean
 from typing import Deque, Dict, Iterable, Optional, Tuple, TypeVar, Union
 
@@ -102,9 +104,9 @@ VIDEO_PATTERNS = [
 CLIP_SLUG_PATTERN = r"(?P<slug>[A-Za-z0-9-_]+)"
 
 CLIP_PATTERNS = [
-    fr"^{CLIP_SLUG_PATTERN}$",
-    fr"^https://(www\.|m\.)?twitch\.tv/\w+/clip/{CLIP_SLUG_PATTERN}(\?.+)?$",
-    fr"^https://clips\.twitch\.tv/{CLIP_SLUG_PATTERN}(\?.+)?$",
+    rf"^{CLIP_SLUG_PATTERN}$",
+    rf"^https://(www\.|m\.)?twitch\.tv/\w+/clip/{CLIP_SLUG_PATTERN}(\?.+)?$",
+    rf"^https://clips\.twitch\.tv/{CLIP_SLUG_PATTERN}(\?.+)?$",
 ]
 
 
@@ -158,3 +160,16 @@ def monitor_performance(group: str):
     yield
     perfs[group].append(time.monotonic() - start)
     print_status(f"{group}: {1000 * fmean(perfs[group]):.1f}ms")
+
+
+def get_size(path: Path):
+    """Get the total size of all files in the given directory."""
+    if path.is_file():
+        return os.path.getsize(path)
+
+    size = 0
+    for subpath, _, filenames in os.walk(path):
+        for filename in filenames:
+            full_path = os.path.join(subpath, filename)
+            size += os.path.getsize(full_path)
+    return size
