@@ -397,19 +397,24 @@ def _write_metadata(
     start_offset_ms = 1000 * (start_offset or 0)
     end_offset_ms = 1000 * (end_offset or video["lengthSeconds"])
 
+    date = _escape_metadata(video["publishedAt"][:10])
     title = _escape_metadata(video["title"])
     artist = _escape_metadata(video["creator"]["displayName"])
     description = _escape_metadata(video["description"])
+    show = _escape_metadata(video["game"]["name"]) if video["game"] else None
 
     with open(path, "w") as f:
         # Header
         f.write(";FFMETADATA1\n")
 
         # Global metadata
+        f.write(f"date={date}\n")
         f.write(f"title={title}\n")
         f.write(f"artist={artist}\n")
         if description:
             f.write(f"description={description}\n")
+        if show:
+            f.write(f"show={show}\n")
         f.write("encoded_by=twitch-dl\n")
 
         # Chapter metadata
