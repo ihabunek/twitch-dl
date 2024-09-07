@@ -1,3 +1,8 @@
+2.8.1:
+  date: 2024-09-07
+  changes:
+    - "Embed additional metadata to videos: `date` (publish date) and `show` (game name)"
+
 2.8.0:
   date: 2024-09-07
   changes:
