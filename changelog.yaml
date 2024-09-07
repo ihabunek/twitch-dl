@@ -1,3 +1,8 @@
+2.8.0:
+  date: 2024-09-07
+  changes:
+    - "When downloading a video with `--start` and/or `--end` offsets, crop the video to the exact times given, used to be rounded to the nearest VOD boundary (usually 10s)"
+
 2.7.0:
   date: 2024-09-05
   changes:
