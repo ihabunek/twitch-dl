@@ -45,8 +45,8 @@ def _cache_dir_path() -> Path:
     """Returns the path to the cache directory"""
 
     # Windows
-    if sys.platform == "win32" and "APPDATA" in os.environ:
-        return Path(os.environ["APPDATA"], CACHE_SUBFOLDER, "cache")
+    if sys.platform == "win32" and "LOCALAPPDATA" in os.environ:
+        return Path(os.environ["LOCALAPPDATA"], CACHE_SUBFOLDER)
 
     # Mac OS
     if sys.platform == "darwin":
