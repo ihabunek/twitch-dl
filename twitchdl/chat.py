@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw
 from twitchdl import cache
 from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
-from twitchdl.fonts import Font, char_name, group_by_font, load_font, make_group_by_font
+from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
 from twitchdl.output import green, print_json, print_log, print_status
 from twitchdl.twitch import get_comments, get_video, get_video_comments
@@ -262,8 +262,7 @@ class Screen:
     def draw_text(self, text: str, color: Optional[str] = None):
         # Split into words while keeping the whitespace
         for word in re.split(r"(?=\s)", text):
-            # for fragment, font in self.group_by_font(word):
-            for fragment, font in group_by_font(word, self.fonts):
+            for fragment, font in self.group_by_font(word):
                 if font.is_bitmap:
                     for emoji in fragment:
                         self.draw_emoji(emoji, font)
