@@ -1,3 +1,8 @@
+2.8.2:
+  date: 2024-09-08
+  changes:
+    - "Fix breaking bug in chat renderer"
+
 2.8.1:
   date: 2024-09-07
   changes:
