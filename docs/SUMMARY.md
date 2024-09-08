@@ -10,7 +10,7 @@
     - [twitch-dl env](commands/env.md)
     - [twitch-dl info](commands/info.md)
     - [twitch-dl videos](commands/videos.md)
-- [Environemnt variables](environment_variables.md)
+- [Environment variables](environment_variables.md)
 - [Shell completion](shell_completion.md)
 - [Advanced](advanced.md)
 
