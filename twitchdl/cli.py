@@ -9,6 +9,7 @@ from typing import Optional, Tuple
 import click
 
 from twitchdl import __version__
+from twitchdl.cache import get_cache_dir
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
@@ -348,6 +349,7 @@ def env():
     click.echo(f"twitch-dl {__version__}")
     click.echo(f"Python {sys.version}")
     click.echo(f"Platform: {platform.platform()}")
+    click.echo(f"Cache dir: {get_cache_dir()}")
 
 
 @cli.command()
