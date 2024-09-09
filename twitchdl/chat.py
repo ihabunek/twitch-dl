@@ -97,6 +97,7 @@ def render_chat(
     frames: List[Tuple[Path, int]] = []
 
     cache_dir = cache.get_cache_dir(f"chat/{video_id}")
+    print_log(f"Rendering frames to: {cache_dir}")
 
     first = True
     start = time.monotonic()
@@ -209,7 +210,9 @@ def draw_comment(screen: Screen, comment: Comment, dark: bool, badges_by_id: Dic
         if not badge_path:
             print_status(f"Failed downloading badge {message_badge}")
             continue
+        # TODO: cache resized badge images
         badge_image = Image.open(badge_path)
+        badge_image.thumbnail((screen.max_ascent, screen.max_ascent))
         screen.draw_image(badge_image)
 
     if comment["message"]["userBadges"]:
@@ -227,6 +230,7 @@ def draw_comment(screen: Screen, comment: Comment, dark: bool, badges_by_id: Dic
             emote_path = download_emote(fragment["emote"], dark)
             if emote_path:
                 emote_image = Image.open(emote_path)
+                emote_image.thumbnail((screen.line_height, screen.line_height))
                 screen.draw_image(emote_image)
             else:
                 print_status(f"Failed downloading emote {fragment['emote']}")
@@ -406,16 +410,13 @@ def generate_video(spec_path: Path, target: Path, overwrite: bool):
 
 
 def download_badge(badge: Badge) -> Optional[Path]:
-    # TODO: make badge size configurable?
-    url = badge["image1x"]
-    return cache.download_cached(url, subdir="badges")
+    return cache.download_cached(badge["image4x"], subdir="badges")
 
 
 def download_emote(emote: Emote, dark: bool) -> Optional[Path]:
-    # TODO: make emote size customizable
     emote_id = emote["emoteID"]
     variant = "dark" if dark else "light"
-    url = f"https://static-cdn.jtvnw.net/emoticons/v2/{emote_id}/default/{variant}/1.0"
+    url = f"https://static-cdn.jtvnw.net/emoticons/v2/{emote_id}/default/{variant}/4.0"
     return cache.download_cached(url, subdir="emotes")
 
 
