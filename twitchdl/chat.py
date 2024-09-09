@@ -136,7 +136,8 @@ def load_fonts(font_size: int):
     def print_font_info(font: Font):
         print_log(f"    Name: {font.name}")
         print_log(f"    Codepoints: {len(font.codepoints)}")
-        print_log(f"    Variations: {', '.join(font.variations)}")
+        if font.variations:
+            print_log(f"    Variations: {', '.join(font.variations)}")
 
     for url in TEXT_FONTS:
         filename = Path(urlparse(url).path).name
