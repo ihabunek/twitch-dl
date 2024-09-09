@@ -108,9 +108,10 @@ def render_chat(
             frames.append((frame_path, offset))
 
         for comment in comments:
-            if not first:
-                screen.next_line()
-            draw_comment(screen, comment, dark, badges_by_id)
+            if comment["commenter"]:
+                if not first:
+                    screen.next_line()
+                draw_comment(screen, comment, dark, badges_by_id)
             first = False
 
         frame_path = cache_dir / f"chat_{offset:05d}.bmp"
@@ -192,6 +193,7 @@ def add_frame_to_spec(concat_spec: str, frame_path: Path, duration: int) -> str:
 
 
 def draw_comment(screen: Screen, comment: Comment, dark: bool, badges_by_id: Dict[str, Badge]):
+    assert comment["commenter"] is not None
     time = format_time(comment["contentOffsetSeconds"])
     screen.draw_text(time + " ", "gray")
 

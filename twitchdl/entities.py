@@ -128,7 +128,7 @@ class Message(TypedDict):
 
 class Comment(TypedDict):
     id: str
-    commenter: Commenter
+    commenter: Commenter | None
     contentOffsetSeconds: int
     createdAt: str
     message: Message
