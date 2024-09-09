@@ -1,18 +1,18 @@
-from functools import lru_cache
 import hashlib
 import json
 import math
 import unicodedata
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, Generator, Iterable, List, Optional, Set, Tuple
+from typing import Callable, Generator, Iterable, List, Optional, Set, Tuple
 
 from fontTools.ttLib import TTFont, TTLibFileIsCollectionError  # type: ignore
 from fontTools.ttLib.ttCollection import TTCollection  # type: ignore
 from PIL import ImageFont
 
 from twitchdl.cache import get_cache_dir
-from twitchdl.output import print_log, print_status
+from twitchdl.output import print_log
 
 
 @dataclass
@@ -26,6 +26,10 @@ class Font:
     @property
     def name(self) -> Optional[str]:
         return self.image_font.getname()[0]
+
+    @property
+    def ascent(self) -> int:
+        return self.image_font.getmetrics()[0]
 
     @property
     def height(self) -> int:
@@ -124,7 +128,6 @@ def make_group_by_font(
     fonts: List[Font],
     on_char_not_found: Callable[[str], None],
 ) -> Callable[[str], Generator[Tuple[str, Font], None, None]]:
-
     @lru_cache
     def get_font(char: str) -> Optional[Font]:
         for font in fonts:

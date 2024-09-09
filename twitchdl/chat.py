@@ -252,16 +252,18 @@ class Screen:
         self.x: int = 0
         self.y: int = 0
 
-        self.group_by_font = make_group_by_font(fonts, self.on_char_not_found)
-
+        default_text_font = next(f for f in fonts if not f.is_bitmap)
         self.line_height = max(f.height for f in fonts if not f.is_bitmap)
-        left, _, right, _ = fonts[0].image_font.getbbox(" ")
-        self.space_size = int(right - left)
+        self.space_size = default_text_font.get_text_length(" ")
+        self.group_by_font = make_group_by_font(fonts, self.on_char_not_found)
 
         px, py = padding
         image_size = (width - 2 * px, height - 2 * py)
         self._image = Image.new("RGBA", image_size, self.background)
         self._draw = ImageDraw.Draw(self._image)
+
+        # Find the largest ascent, this will be used to align everything to a common baseline
+        self.max_ascent = max(f.ascent for f in fonts if not f.is_bitmap)
 
     def on_char_not_found(self, char: str):
         """Invoked when a char cannot be rendered in any of the fonts."""
@@ -294,12 +296,16 @@ class Screen:
         length = font.get_text_length(fragment)
         if self.image.width < self.x + length:
             self.next_line()
+
+        y = self.y + self.max_ascent - font.ascent
+
         self.draw.text(  # type: ignore
-            (self.x, self.y),
+            (self.x, y),
             fragment,
             fill=color or self.foreground,
             font=font.image_font,
         )
+
         self.x += length
 
     def draw_image(self, image: Image.Image):
