@@ -75,6 +75,7 @@ class Video(TypedDict):
     broadcastType: str
     lengthSeconds: int
     game: Optional["Game"]
+    owner: User
     creator: User
 
 

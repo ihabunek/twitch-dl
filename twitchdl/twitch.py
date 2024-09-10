@@ -127,6 +127,10 @@ VIDEO_FIELDS = """
         id
         name
     }
+    owner {
+        login
+        displayName
+    }
     creator {
         login
         displayName

@@ -154,7 +154,7 @@ def print_video(video: Video):
     published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
 
-    channel = blue(video["creator"]["displayName"]) if video["creator"] else ""
+    channel = blue(video["owner"]["displayName"]) if video["owner"] else ""
     playing = f"playing {blue(video['game']['name'])}" if video["game"] else ""
 
     # Can't find URL in video object, strange

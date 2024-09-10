@@ -345,7 +345,7 @@ def _print_found_video(video: Video):
         "Found video:",
         green(video["title"]),
         "by",
-        yellow(video["creator"]["displayName"]),
+        yellow(video["owner"]["displayName"]),
         "playing",
         blue(video["game"]["name"] if video["game"] else "Unknown"),
         f"({utils.format_time(video['lengthSeconds'])})",
@@ -407,7 +407,7 @@ def _write_metadata(
 
     date = _escape_metadata(video["publishedAt"][:10])
     title = _escape_metadata(video["title"])
-    artist = _escape_metadata(video["creator"]["displayName"])
+    artist = _escape_metadata(video["owner"]["displayName"])
     description = _escape_metadata(video["description"])
     show = _escape_metadata(video["game"]["name"]) if video["game"] else None
 

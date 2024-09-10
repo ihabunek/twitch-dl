@@ -18,8 +18,8 @@ def video_placeholders(video: Video, format: str) -> Dict[str, str]:
     game = video["game"]["name"] if video["game"] else "Unknown"
 
     return {
-        "channel": video["creator"]["displayName"],
-        "channel_login": video["creator"]["login"],
+        "channel": video["owner"]["displayName"],
+        "channel_login": video["owner"]["login"],
         "date": date,
         "datetime": video["publishedAt"],
         "format": format,
