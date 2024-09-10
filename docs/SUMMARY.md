@@ -4,6 +4,7 @@
 
 - [Installation](installation.md)
 - [Usage](usage.md)
+    - [twitch-dl cache](commands/cache.md)
     - [twitch-dl chat](commands/chat.md)
     - [twitch-dl clips](commands/clips.md)
     - [twitch-dl download](commands/download.md)

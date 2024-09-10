@@ -20,3 +20,5 @@ twitch-dl cache [OPTIONS]
 </tbody>
 </table>
 
+<!-- ------------------- generated docs end ------------------- -->
+
