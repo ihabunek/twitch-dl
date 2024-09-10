@@ -13,7 +13,6 @@
     - [twitch-dl videos](commands/videos.md)
 - [Environment variables](environment_variables.md)
 - [Shell completion](shell_completion.md)
-- [Advanced](advanced.md)
 
 [License](license.md)
 [Changelog](changelog.md)
