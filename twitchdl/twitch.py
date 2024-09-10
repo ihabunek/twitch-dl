@@ -120,18 +120,24 @@ VIDEO_FIELDS = """
     id
     title
     description
+    recordedAt
     publishedAt
+    updatedAt
     broadcastType
     lengthSeconds
+    status
+    viewCount
     game {
         id
         name
     }
     owner {
+        id
         login
         displayName
     }
     creator {
+        id
         login
         displayName
     }

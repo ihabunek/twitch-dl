@@ -33,6 +33,7 @@ class AccessToken(TypedDict):
 
 
 class User(TypedDict):
+    id: str
     login: str
     displayName: str
 
@@ -72,8 +73,12 @@ class Video(TypedDict):
     title: str
     description: str
     publishedAt: str
+    recordedAt: str
+    updatedAt: str
     broadcastType: str
     lengthSeconds: int
+    status: str
+    viewCount: int
     game: Optional["Game"]
     owner: User
     creator: User
