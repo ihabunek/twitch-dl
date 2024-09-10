@@ -4,16 +4,16 @@ import re
 import shlex
 import shutil
 import subprocess
-import tempfile
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any, List, Optional
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode
 
 import click
 import httpx
 
 from twitchdl import twitch, utils
+from twitchdl.cache import get_cache_dir
 from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
@@ -112,14 +112,6 @@ def _concat_vods(vod_paths: List[Path], target: Path):
         result = subprocess.run(command, stdout=target_file)
         if result.returncode != 0:
             raise ConsoleError(f"Joining files failed: {result.stderr}")
-
-
-def _crete_temp_dir(base_uri: str) -> Path:
-    """Create a temp dir to store downloads if it doesn't exist."""
-    path = urlparse(base_uri).path.lstrip("/")
-    temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    return temp_dir
 
 
 def _get_clip_url(access_token: ClipAccessToken, quality: Optional[str]) -> str:
@@ -266,7 +258,8 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         return
 
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
-    target_dir = _crete_temp_dir(base_uri)
+    target_dir = get_cache_dir(f"videos/{video['id']}/{playlist.name}")
+    print_log(f"Downloading to cache: {target_dir}")
 
     # Create ffmpeg metadata file
     metadata_path = target_dir / "metadata.txt"
@@ -283,7 +276,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         print_log(f"Downloading init section {uri}...")
         download_file(f"{base_uri}{uri}", target_dir / uri)
 
-    print_log(f"Downloading {len(vods)} VODs using {args.max_workers} workers to {target_dir}")
+    print_log(f"Downloading {len(vods)} VODs using {args.max_workers} workers")
 
     sources = [base_uri + vod.path for vod in vods]
     targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]
@@ -324,9 +317,9 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     click.echo()
 
     if args.keep:
-        click.echo(f"Temporary files not deleted: {yellow(target_dir)}")
+        click.echo(f"Cached files not deleted: {yellow(target_dir)}")
     else:
-        print_log("Deleting temporary files...")
+        print_log("Deleting cached files...")
         shutil.rmtree(target_dir)
 
     click.echo(f"Downloaded: {green(target)}")
