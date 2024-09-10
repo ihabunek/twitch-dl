@@ -89,6 +89,11 @@ twitch-dl download [OPTIONS] [IDS]...
     <td class="code">-w, --max-workers INTEGER</td>
     <td>Number of workers for downloading vods concurrently [default: <code>10</code>]</td>
 </tr>
+
+<tr>
+    <td class="code">--cache-dir TEXT</td>
+    <td>Folder where VODs are downloaded before joining. Uses placeholders similar to --output. [default: <code>/home/ihabunek/.cache/twitch-dl/videos/{id}/{quality}</code>]</td>
+</tr>
 </tbody>
 </table>
 
