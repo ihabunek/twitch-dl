@@ -13,13 +13,13 @@ import click
 import httpx
 
 from twitchdl import twitch, utils
-from twitchdl.cache import get_cache_dir
 from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
-from twitchdl.naming import clip_filename, video_filename
+from twitchdl.naming import clip_filename, video_filename, video_placeholders
 from twitchdl.output import blue, bold, green, print_error, print_log, underlined, yellow
 from twitchdl.playlists import (
+    Playlist,
     enumerate_vods,
     filter_vods,
     get_init_sections,
@@ -246,6 +246,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     playlists_text = twitch.get_playlists(video["id"], access_token)
     playlists = parse_playlists(playlists_text)
     playlist = select_playlist(playlists, args.quality)
+    base_uri = re.sub("/[^/]+$", "/", playlist.url)
 
     print_log("Fetching playlist...")
     vods_text = http_get(playlist.url)
@@ -257,29 +258,28 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         click.echo("Dry run, video not downloaded.")
         return
 
-    base_uri = re.sub("/[^/]+$", "/", playlist.url)
-    target_dir = get_cache_dir(f"videos/{video['id']}/{playlist.name}")
-    print_log(f"Downloading to cache: {target_dir}")
+    cache_dir = _get_cache_dir(video, playlist, args)
+    print_log(f"Downloading to cache: {cache_dir}")
 
     # Create ffmpeg metadata file
-    metadata_path = target_dir / "metadata.txt"
+    metadata_path = cache_dir / "metadata.txt"
     _write_metadata(video, chapters, metadata_path, start, end)
 
     # Save playlists for debugging purposes
-    with open(target_dir / "playlists.m3u8", "w") as f:
+    with open(cache_dir / "playlists.m3u8", "w") as f:
         f.write(playlists_text)
-    with open(target_dir / "playlist.m3u8", "w") as f:
+    with open(cache_dir / "playlist.m3u8", "w") as f:
         f.write(vods_text)
 
     init_sections = get_init_sections(vods_m3u8)
     for uri in init_sections:
         print_log(f"Downloading init section {uri}...")
-        download_file(f"{base_uri}{uri}", target_dir / uri)
+        download_file(f"{base_uri}{uri}", cache_dir / uri)
 
     print_log(f"Downloading {len(vods)} VODs using {args.max_workers} workers")
 
     sources = [base_uri + vod.path for vod in vods]
-    targets = [target_dir / f"{vod.index:05d}.ts" for vod in vods]
+    targets = [cache_dir / f"{vod.index:05d}.ts" for vod in vods]
 
     asyncio.run(
         download_all(
@@ -291,13 +291,13 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     )
 
     join_playlist = make_join_playlist(vods_m3u8, vods, targets)
-    join_playlist_path = target_dir / "playlist_downloaded.m3u8"
+    join_playlist_path = cache_dir / "playlist_downloaded.m3u8"
     join_playlist.dump(join_playlist_path)  # type: ignore
     click.echo()
 
     if args.no_join:
         print_log("Skipping joining files...")
-        click.echo(f"VODs downloaded to:\n{blue(target_dir)}")
+        click.echo(f"VODs downloaded to:\n{blue(cache_dir)}")
         return
 
     if args.concat:
@@ -317,12 +317,27 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     click.echo()
 
     if args.keep:
-        click.echo(f"Cached files not deleted: {yellow(target_dir)}")
+        click.echo(f"Cached files not deleted: {yellow(cache_dir)}")
     else:
         print_log("Deleting cached files...")
-        shutil.rmtree(target_dir)
+        shutil.rmtree(cache_dir)
 
     click.echo(f"Downloaded: {green(target)}")
+
+
+def _get_cache_dir(video: Video, playlist: Playlist, options: DownloadOptions):
+    subs = video_placeholders(video, options.format)
+    subs["quality"] = playlist.group_id
+
+    try:
+        path = Path(options.cache_dir.format(**subs))
+        if path.is_file():
+            raise ConsoleError(f"Given cache dir is a file: {path}")
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+    except KeyError as e:
+        supported = ", ".join(subs.keys())
+        raise ConsoleError(f"Invalid key {e} used in --cache-dir. Supported keys are: {supported}")
 
 
 def _print_found_video(video: Video):

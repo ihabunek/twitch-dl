@@ -19,6 +19,7 @@ class DownloadOptions:
     rate_limit: Optional[int]
     start: Optional[int]
     max_workers: int
+    cache_dir: str
 
 
 ClipsPeriod = Literal["last_day", "last_week", "last_month", "all_time"]

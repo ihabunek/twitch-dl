@@ -294,6 +294,11 @@ def clips(
     type=int,
     default=10,
 )
+@click.option(
+    "--cache-dir",
+    help="Folder where VODs are downloaded before joining. Uses placeholders similar to --output.",
+    default=f"{get_cache_dir()}/videos/{{id}}/{{quality}}",
+)
 def download(
     ids: Tuple[str, ...],
     auth_token: Optional[str],
@@ -311,6 +316,7 @@ def download(
     rate_limit: Optional[int],
     start: Optional[int],
     max_workers: int,
+    cache_dir: str,
 ):
     """Download videos or clips.
 
@@ -340,6 +346,7 @@ def download(
         rate_limit=rate_limit,
         start=start,
         max_workers=max_workers,
+        cache_dir=cache_dir,
     )
 
     download(list(ids), options)
