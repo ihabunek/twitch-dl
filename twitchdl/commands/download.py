@@ -81,14 +81,17 @@ def _join_vods(
 
     append("ffmpeg")
     append("-i", playlist_path)
-    append("-i", metadata_path)
-    append("-map_metadata", 1)
 
+    # Cropping is done before metadata becuase it caused issues for some people:
+    # https://github.com/ihabunek/twitch-dl/issues/166
     if crop_start:
         append("-ss", utils.format_time(crop_start))
 
     if crop_duration:
         append("-t", utils.format_time(crop_duration))
+
+    append("-i", metadata_path)
+    append("-map_metadata", 1)
 
     append("-c", "copy")
     append("-stats")
