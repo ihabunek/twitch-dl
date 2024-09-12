@@ -1,3 +1,10 @@
+2.9.2:
+  date: 2024-09-12
+  changes:
+    - "Use video owner instead of creator, since creator can be the person who uploaded the video, not the author."
+    - "Fix issue with cropping where blank frames were generated at the start of video (#166)"
+    - "Add ffmpeg info to `twitch-dl env`"
+
 2.9.1:
   date: 2024-09-10
   changes:
