@@ -2,6 +2,7 @@ import logging
 import platform
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from textwrap import dedent
@@ -358,7 +359,18 @@ def env():
     click.echo(f"twitch-dl {__version__}")
     click.echo(f"Python {sys.version}")
     click.echo(f"Platform: {platform.platform()}")
-    click.echo(f"Cache dir: {get_cache_dir()}")
+
+    click.echo("--")
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg:
+        click.echo(f"ffmpeg path: {ffmpeg}")
+        try:
+            subprocess.run(["ffmpeg", "-version"])
+        except Exception as ex:
+            click.secho("Failed getting ffmpeg version:", fg="red")
+            click.secho(f"{ex}", fg="red")
+    else:
+        click.secho("ffmpeg not found", err=True, fg="red")
 
 
 @cli.command()
