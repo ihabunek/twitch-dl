@@ -23,7 +23,7 @@ def test_info_video(runner: CliRunner):
     assert_ok(result)
 
     assert "Frost Fatales 2024 Day 1" in result.stdout
-    assert "frozenflygone playing Tomb Raider" in result.stdout
+    assert "GamesDoneQuick playing Tomb Raider" in result.stdout
 
 
 def test_info_video_json(runner: CliRunner):
@@ -33,7 +33,16 @@ def test_info_video_json(runner: CliRunner):
     video = json.loads(result.stdout)
     assert video["title"] == "Frost Fatales 2024 Day 1"
     assert video["game"] == {"id": "2770", "name": "Tomb Raider"}
-    assert video["creator"] == {"login": "frozenflygone", "displayName": "frozenflygone"}
+    assert video["creator"] == {
+        "id": "413727206",
+        "login": "frozenflygone",
+        "displayName": "frozenflygone",
+    }
+    assert video["owner"] == {
+        "id": "22510310",
+        "login": "gamesdonequick",
+        "displayName": "GamesDoneQuick",
+    }
 
 
 def test_info_clip(runner: CliRunner):
@@ -102,9 +111,12 @@ def test_download_video(runner: CliRunner):
         ],
     )
     assert_ok(result)
-    assert "Found video: Frost Fatales 2024 Day 1 by frozenflygone playing Tomb Raider (11:44:38)" in result.stderr
     assert (
-        "Target: 2024-03-14_2090131595_frozenflygone_frost_fatales_2024_day_1.mkv" in result.stderr
+        "Found video: Frost Fatales 2024 Day 1 by GamesDoneQuick playing Tomb Raider (11:44:38)"
+        in result.stderr
+    )
+    assert (
+        "Target: 2024-03-14_2090131595_gamesdonequick_frost_fatales_2024_day_1.mkv" in result.stderr
     )
     assert "Dry run, video not downloaded." in result.stdout
 
