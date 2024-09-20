@@ -1,5 +1,6 @@
 import json
 import sys
+import traceback
 from itertools import islice
 from typing import Any, Callable, Generator, List, Literal, Mapping, Optional, TypeVar
 
@@ -38,6 +39,11 @@ def print_log(*args: Any):
 
 def print_error(message: Any):
     click.secho(message, err=True, fg="red")
+
+
+def print_exception(ex: BaseException):
+    for line in traceback.format_exception_only(ex):  # type: ignore
+        print_error(line)
 
 
 _prev_transient = False

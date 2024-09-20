@@ -1,8 +1,10 @@
-from twitchdl.progress import Progress
+from pathlib import Path
+
+from twitchdl.progress import VideoDownloadProgress
 
 
 def test_initial_values():
-    progress = Progress(10)
+    progress = VideoDownloadProgress(10)
     assert progress.downloaded == 0
     assert progress.estimated_total is None
     assert progress.progress_perc == 0
@@ -13,10 +15,10 @@ def test_initial_values():
 
 
 def test_downloaded():
-    progress = Progress(3)
-    progress.start(1, 300)
-    progress.start(2, 300)
-    progress.start(3, 300)
+    progress = VideoDownloadProgress(3)
+    progress.start(1, "foo1", Path("foo1"), 300)
+    progress.start(2, "foo2", Path("foo2"), 300)
+    progress.start(3, "foo3", Path("foo3"), 300)
 
     assert progress.downloaded == 0
     assert progress.progress_bytes == 0
@@ -46,13 +48,13 @@ def test_downloaded():
     assert progress.progress_bytes == 500
     assert progress.progress_perc == 55
 
-    progress.abort(2)
+    progress.abort(2, Exception())
     progress._recalculate()
     assert progress.downloaded == 500
     assert progress.progress_bytes == 300
     assert progress.progress_perc == 33
 
-    progress.start(2, 300)
+    progress.start(2, "foo2", Path("foo2"), 300)
 
     progress.advance(1, 150)
     progress.advance(2, 300)
@@ -73,28 +75,28 @@ def test_downloaded():
 
 
 def test_estimated_total():
-    progress = Progress(3)
+    progress = VideoDownloadProgress(3)
     assert progress.estimated_total is None
 
-    progress.start(1, 12000)
+    progress.start(1, "foo1", Path("foo1"), 12000)
     progress._recalculate()
     assert progress.estimated_total == 12000 * 3
 
-    progress.start(2, 11000)
+    progress.start(2, "foo2", Path("foo2"), 11000)
     progress._recalculate()
     assert progress.estimated_total == 11500 * 3
 
-    progress.start(3, 10000)
+    progress.start(3, "foo3", Path("foo3"), 10000)
     progress._recalculate()
     assert progress.estimated_total == 11000 * 3
 
 
 def test_vod_downloaded_count():
-    progress = Progress(3)
+    progress = VideoDownloadProgress(3)
 
-    progress.start(1, 100)
-    progress.start(2, 100)
-    progress.start(3, 100)
+    progress.start(1, "foo1", Path("foo1"), 100)
+    progress.start(2, "foo2", Path("foo2"), 100)
+    progress.start(3, "foo3", Path("foo3"), 100)
 
     assert progress.downloaded_count == 0
 

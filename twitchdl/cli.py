@@ -349,7 +349,6 @@ def download(
         max_workers=max_workers,
         cache_dir=cache_dir,
     )
-
     download(list(ids), options)
 
 

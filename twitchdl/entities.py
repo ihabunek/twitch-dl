@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Any, List, Literal, Mapping, Optional, TypedDict
 
+TaskID = int
+"""Identifier for a download task"""
+
 
 @dataclass
 class DownloadOptions:
