@@ -17,7 +17,16 @@ from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
-from twitchdl.output import blue, bold, green, print_error, print_log, underlined, yellow
+from twitchdl.output import (
+    blue,
+    bold,
+    green,
+    print_error,
+    print_exception,
+    print_log,
+    underlined,
+    yellow,
+)
 from twitchdl.playlists import (
     Playlist,
     enumerate_vods,
@@ -28,6 +37,7 @@ from twitchdl.playlists import (
     parse_playlists,
     select_playlist,
 )
+from twitchdl.progress import VideoDownloadProgress
 from twitchdl.twitch import Chapter, ClipAccessToken, Video
 
 
@@ -284,14 +294,22 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     sources = [base_uri + vod.path for vod in vods]
     targets = [cache_dir / f"{vod.index:05d}.ts" for vod in vods]
 
-    asyncio.run(
+    result = asyncio.run(
         download_all(
             zip(sources, targets),
             args.max_workers,
+            skip_existing=True,
+            allow_failures=False,
             rate_limit=args.rate_limit,
-            count=len(vods),
+            progress=VideoDownloadProgress(len(vods)),
         )
     )
+
+    if not result.ok:
+        for ex in result.exceptions:
+            print()
+            print_exception(ex)
+        raise ConsoleError("Download failed")
 
     join_playlist = make_join_playlist(vods_m3u8, vods, targets)
     join_playlist_path = cache_dir / "playlist_downloaded.m3u8"

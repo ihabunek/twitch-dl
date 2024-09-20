@@ -2,24 +2,24 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass
+from pathlib import Path
 from statistics import mean
 from typing import Deque, Dict, NamedTuple, Optional
 
 import click
+from typing_extensions import override
 
+from twitchdl.entities import TaskID
 from twitchdl.output import blue, clear_line
 from twitchdl.utils import format_size, format_time
 
 logger = logging.getLogger(__name__)
 
 
-TaskId = int
-
-
 @dataclass
 class Task:
-    id: TaskId
-    size: int
+    id: TaskID
+    size: Optional[int] = None
     downloaded: int = 0
 
     def advance(self, size: int):
@@ -32,6 +32,66 @@ class Sample(NamedTuple):
 
 
 class Progress:
+    def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
+        """Skipping download since it's already been downloaded"""
+        pass
+
+    def start(self, task_id: TaskID, source: str, target: Path):
+        """A new download task is started"""
+        pass
+
+    def content_length(self, task_id: TaskID, size: int):
+        """Received content length from the server"""
+        pass
+
+    def advance(self, task_id: TaskID, size: int):
+        """Advancing a download task by {size} bytes"""
+        pass
+
+    def abort(self, task_id: TaskID, ex: Exception):
+        """Download restarting from beginning due to an error."""
+        pass
+
+    def failed(self, task_id: TaskID, ex: Exception):
+        """Aborting download due to error"""
+        pass
+
+    def end(self, task_id: TaskID):
+        """Download successfully finished"""
+        pass
+
+
+class PrintingProgress(Progress):
+    @override
+    def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
+        print("already_downloaded", task_id, size)
+
+    @override
+    def start(self, task_id: TaskID, source: str, target: Path):
+        print("start", task_id)
+
+    @override
+    def content_length(self, task_id: TaskID, size: int):
+        print("start", task_id, size)
+
+    @override
+    def advance(self, task_id: TaskID, size: int):
+        pass
+
+    @override
+    def abort(self, task_id: TaskID, ex: Exception):
+        print("abort", task_id, repr(ex))
+
+    @override
+    def failed(self, task_id: TaskID, ex: Exception):
+        print("failed", task_id, repr(ex))
+
+    @override
+    def end(self, task_id: TaskID):
+        print("downloaded", task_id)
+
+
+class VideoDownloadProgress(Progress):
     def __init__(self, file_count: Optional[int] = None):
         self.downloaded: int = 0
         self.estimated_total: Optional[int] = None
@@ -41,18 +101,28 @@ class Progress:
         self.remaining_time: Optional[int] = None
         self.samples: Deque[Sample] = deque(maxlen=1000)
         self.speed: Optional[float] = None
-        self.tasks: Dict[TaskId, Task] = {}
+        self.tasks: Dict[TaskID, Task] = {}
         self.file_count = file_count
         self.downloaded_count: int = 0
 
-    def start(self, task_id: int, size: int):
+    @override
+    def start(self, task_id: TaskID, source: str, target: Path, size: Optional[int]):
         if task_id in self.tasks:
             raise ValueError(f"Task {task_id}: cannot start, already started")
 
         self.tasks[task_id] = Task(task_id, size)
         self.print()
 
-    def advance(self, task_id: int, size: int):
+    @override
+    def content_length(self, task_id: TaskID, size: int):
+        if task_id not in self.tasks:
+            raise ValueError(f"Task {task_id}: cannot set size, not started")
+
+        self.tasks[task_id].size = size
+        self.print()
+
+    @override
+    def advance(self, task_id: TaskID, size: int):
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot advance, not started")
 
@@ -62,7 +132,8 @@ class Progress:
         self.samples.append(Sample(self.downloaded, time.time()))
         self.print()
 
-    def already_downloaded(self, task_id: int, size: int):
+    @override
+    def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
         if task_id in self.tasks:
             raise ValueError(f"Task {task_id}: cannot mark as downloaded, already started")
 
@@ -71,7 +142,8 @@ class Progress:
         self.downloaded_count += 1
         self.print()
 
-    def abort(self, task_id: int):
+    @override
+    def abort(self, task_id: TaskID, ex: Exception):
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot abort, not started")
 
@@ -79,7 +151,8 @@ class Progress:
         self.progress_bytes = sum(t.downloaded for t in self.tasks.values())
         self.print()
 
-    def end(self, task_id: int):
+    @override
+    def end(self, task_id: TaskID):
         if task_id not in self.tasks:
             raise ValueError(f"Task {task_id}: cannot end, not started")
 
@@ -93,10 +166,10 @@ class Progress:
         self.print()
 
     def _recalculate(self):
-        if self.tasks and self.file_count:
-            self.estimated_total = int(mean(t.size for t in self.tasks.values()) * self.file_count)
-        else:
-            self.estimated_total = None
+        if self.file_count:
+            sizes = [t.size for t in self.tasks.values() if t.size]
+            if sizes:
+                self.estimated_total = int(mean(sizes) * self.file_count)
 
         self.speed = self._calculate_speed()
         self.progress_perc = (
