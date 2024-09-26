@@ -2,7 +2,17 @@ import json
 import sys
 import traceback
 from itertools import islice
-from typing import Any, Callable, Generator, List, Literal, Mapping, Optional, TypeVar
+from typing import (
+    Any,
+    AsyncIterable,
+    Callable,
+    Generator,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    TypeVar,
+)
 
 import click
 
@@ -154,6 +164,41 @@ def print_paged(
         page = list(islice(iterator, page_size))
         if not page or not prompt_continue():
             break
+
+
+async def batch_async(iterable: AsyncIterable[T], batch_size: int) -> AsyncIterable[List[T]]:
+    batch: List[T] = []
+    async for item in iterable:
+        batch.append(item)
+        if len(batch) == batch_size:
+            yield batch
+            batch = []
+    if batch:  # Yield any remaining items
+        yield batch
+
+
+async def print_paged_async(
+    label: str,
+    iterable: AsyncIterable[T],
+    print_fn: Callable[[T], None],
+    page_size: int,
+    total_count: Optional[int] = None,
+):
+    first = 1
+
+    async for page in batch_async(iterable, page_size):
+        if not page or (first > 1 and not prompt_continue()):
+            break
+
+        click.echo("-" * 80)
+        click.echo()
+        for item in page:
+            print_fn(item)
+
+        last = first + len(page) - 1
+        click.echo("-" * 80)
+        click.echo(f"{label} {first}-{last} of {total_count or '???'}")
+        first = first + len(page)
 
 
 def print_video(video: Video):

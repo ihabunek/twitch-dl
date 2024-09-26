@@ -1,20 +1,23 @@
+import logging
 import re
 import sys
 from os import path
 from pathlib import Path
-from typing import Callable, Generator, List, Optional
+from typing import AsyncGenerator, AsyncIterable, Callable, List, Optional, Tuple
+from urllib.parse import urlencode
 
 import click
 
-from twitchdl import twitch, utils
-from twitchdl.commands.download import get_clip_authenticated_url
-from twitchdl.entities import VideoQuality
-from twitchdl.http import download_file
-from twitchdl.output import green, print_clip, print_clip_compact, print_json, print_paged, yellow
-from twitchdl.twitch import Clip, ClipsPeriod
+from twitchdl import twitch_async, utils
+from twitchdl.entities import Clip, ClipsPeriod, VideoQuality
+from twitchdl.http import download_all
+from twitchdl.output import print_clip, print_clip_compact, print_json, print_paged_async
+from twitchdl.progress import PrintingProgress
+
+logger = logging.getLogger(__name__)
 
 
-def clips(
+async def clips(
     channel_name: str,
     *,
     all: bool = False,
@@ -32,20 +35,21 @@ def clips(
     # Ignore --limit if --pager or --all are given
     limit = sys.maxsize if all or pager else (limit or default_limit)
 
-    generator = twitch.channel_clips_generator(channel_name, period, limit)
+    generator = await twitch_async.channel_clips_generator(channel_name, period, limit)
 
     if json:
-        return print_json(list(generator))
+        return print_json([i async for i in generator])
 
     if download:
-        return _download_clips(target_dir, generator)
+        return await _download_clips(target_dir, generator)
 
     print_fn = print_clip_compact if compact else print_clip
 
     if pager:
-        return print_paged("Clips", generator, print_fn, pager)
+        await print_paged_async("Clips", generator, print_fn, pager)
+        return
 
-    return _print_all(generator, print_fn, all)
+    await _print_all(generator, print_fn, all)
 
 
 def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
@@ -70,35 +74,33 @@ def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
     return f"{name}.{ext}"
 
 
-def _download_clips(target_dir: Path, generator: Generator[Clip, None, None]):
-    if not target_dir.exists():
-        target_dir.mkdir(parents=True, exist_ok=True)
+async def _download_clips(target_dir: Path, clips_generator: AsyncIterable[Clip]):
+    target_dir.mkdir(parents=True, exist_ok=True)
 
-    for clip in generator:
-        # videoQualities can be null in some circumstances, see:
-        # https://github.com/ihabunek/twitch-dl/issues/160
-        if not clip["videoQualities"]:
-            continue
+    async def source_target_gen() -> AsyncGenerator[Tuple[str, Path], None]:
+        async for clip in clips_generator:
+            if clip["videoQualities"]:
+                source = await _get_authenticated_url(clip["slug"])
+                target = target_dir / _target_filename(clip, clip["videoQualities"])
+                print("yielding", clip["slug"])
+                yield (source, target)
 
-        target = target_dir / _target_filename(clip, clip["videoQualities"])
-
-        if target.exists():
-            click.echo(f"Already downloaded: {green(target)}")
-        else:
-            try:
-                url = get_clip_authenticated_url(clip["slug"], "source")
-                click.echo(f"Downloading: {yellow(target)}")
-                download_file(url, target)
-            except Exception as ex:
-                click.secho(ex, err=True, fg="red")
+    await download_all(
+        source_target_gen(),
+        worker_count=5,
+        allow_failures=True,
+        progress=PrintingProgress(),
+        rate_limit=None,
+        skip_existing=True,
+    )
 
 
-def _print_all(
-    generator: Generator[Clip, None, None],
+async def _print_all(
+    clips: AsyncIterable[Clip],
     print_fn: Callable[[Clip], None],
     all: bool,
 ):
-    for clip in generator:
+    async for clip in clips:
         print_fn(clip)
 
     if not all:
@@ -107,3 +109,19 @@ def _print_all(
             + "Increase the --limit, use --all or --pager to see the rest.",
             dim=True,
         )
+
+
+async def _get_authenticated_url(slug: str) -> str:
+    access_token = await twitch_async.get_clip_access_token(slug)
+
+    # Source quality should be first
+    url = access_token["videoQualities"][0]["sourceURL"]
+
+    query = urlencode(
+        {
+            "sig": access_token["playbackAccessToken"]["signature"],
+            "token": access_token["playbackAccessToken"]["value"],
+        }
+    )
+
+    return f"{url}?{query}"
