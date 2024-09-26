@@ -5,7 +5,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Mapping, NamedTuple, Optional, Tuple
+from typing import AsyncIterable, List, Mapping, NamedTuple, Optional, Tuple
 
 import httpx
 from typing_extensions import override
@@ -185,7 +185,7 @@ class DownloadAllResult(NamedTuple):
 
 
 async def download_all(
-    source_targets: Iterable[Tuple[str, Path]],
+    source_targets: AsyncIterable[Tuple[str, Path]],
     worker_count: int,
     *,
     allow_failures: bool = True,
@@ -197,15 +197,22 @@ async def download_all(
     progress = progress or Progress()
     token_bucket = LimitingTokenBucket(rate_limit) if rate_limit else EndlessTokenBucket()
     queue: asyncio.Queue[Task] = asyncio.Queue()
-    tasks = [Task(index, source, target) for index, (source, target) in enumerate(source_targets)]
+    tasks: List[Task] = []
     results_map: Mapping[TaskID, TaskResult] = {}
 
     async def producer():
-        for task in tasks:
+        index = 0
+
+        async for source, target in source_targets:
+            task = Task(index, source, target)
+            print("adding task", task)
             await queue.put(task)
+            tasks.append(task)
+            index += 1
         await queue.join()
 
     async def worker(client: httpx.AsyncClient, worker_id: int):
+        print("worker here", worker_id)
         while True:
             item = await queue.get()
             result = await download_with_retries(

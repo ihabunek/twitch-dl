@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import platform
 import re
@@ -186,16 +187,18 @@ def clips(
     if not target_dir.exists():
         target_dir.mkdir(parents=True, exist_ok=True)
 
-    clips(
-        channel_name,
-        all=all,
-        compact=compact,
-        download=download,
-        json=json,
-        limit=limit,
-        pager=pager,
-        period=period,
-        target_dir=target_dir,
+    asyncio.run(
+        clips(
+            channel_name,
+            all=all,
+            compact=compact,
+            download=download,
+            json=json,
+            limit=limit,
+            pager=pager,
+            period=period,
+            target_dir=target_dir,
+        )
     )
 
 

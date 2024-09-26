@@ -156,7 +156,6 @@ def _get_clip_url(access_token: ClipAccessToken, quality: Optional[str]) -> str:
 
 
 def get_clip_authenticated_url(slug: str, quality: Optional[str]):
-    print_log("Fetching access token...")
     access_token = twitch.get_clip_access_token(slug)
 
     if not access_token:
