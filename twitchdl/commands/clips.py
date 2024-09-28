@@ -3,7 +3,7 @@ import re
 import sys
 from os import path
 from pathlib import Path
-from typing import AsyncGenerator, AsyncIterable, Callable, List, Optional, Tuple
+from typing import AsyncGenerator, AsyncIterable, Awaitable, Callable, List, Optional, Tuple
 from urllib.parse import urlencode
 
 import click
@@ -77,17 +77,16 @@ def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
 async def _download_clips(target_dir: Path, clips_generator: AsyncIterable[Clip]):
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    async def source_target_gen() -> AsyncGenerator[Tuple[str, Path], None]:
+    async def source_target_gen() -> AsyncGenerator[Tuple[Awaitable[str], Path], None]:
         async for clip in clips_generator:
             if clip["videoQualities"]:
-                source = await _get_authenticated_url(clip["slug"])
+                source = _get_authenticated_url(clip["slug"])
                 target = target_dir / _target_filename(clip, clip["videoQualities"])
-                print("yielding", clip["slug"])
                 yield (source, target)
 
     await download_all(
         source_target_gen(),
-        worker_count=5,
+        worker_count=10,
         allow_failures=True,
         progress=PrintingProgress(),
         rate_limit=None,
