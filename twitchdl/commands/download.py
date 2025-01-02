@@ -414,7 +414,7 @@ def _write_metadata(
     description = _escape_metadata(video["description"])
     show = _escape_metadata(video["game"]["name"]) if video["game"] else None
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         # Header
         f.write(";FFMETADATA1\n")
 
