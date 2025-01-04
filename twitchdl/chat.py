@@ -410,14 +410,14 @@ def generate_video(spec_path: Path, target: Path, overwrite: bool):
 
 
 def download_badge(badge: Badge) -> Optional[Path]:
-    return cache.download_cached(badge["image4x"], subdir="badges")
+    return cache.download_cached_or_none(badge["image4x"], subdir="badges")
 
 
 def download_emote(emote: Emote, dark: bool) -> Optional[Path]:
     emote_id = emote["emoteID"]
     variant = "dark" if dark else "light"
     url = f"https://static-cdn.jtvnw.net/emoticons/v2/{emote_id}/default/{variant}/4.0"
-    return cache.download_cached(url, subdir="emotes")
+    return cache.download_cached_or_none(url, subdir="emotes")
 
 
 def group_comments(video_id: str, total_duration: int):

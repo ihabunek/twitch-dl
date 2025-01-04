@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+from httpx import HTTPError
+
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_file
 from twitchdl.output import print_error, print_status
@@ -32,6 +34,19 @@ def download_cached(
         download_file(url, target)
 
     return target
+
+
+def download_cached_or_none(
+    url: str,
+    *,
+    subdir: Optional[str] = None,
+    filename: Optional[str] = None,
+) -> Optional[Path]:
+    try:
+        return download_cached(url, subdir=subdir, filename=filename)
+    except HTTPError as ex:
+        print_error(ex)
+        return None
 
 
 def get_cache_dir(subdir: Optional[str] = None) -> Path:
