@@ -9,10 +9,16 @@ from urllib.parse import urlencode
 import click
 
 from twitchdl import twitch_async, utils
-from twitchdl.entities import Clip, ClipsPeriod, VideoQuality
+from twitchdl.entities import Clip, ClipsPeriod, TaskID, VideoQuality
 from twitchdl.http import download_all
-from twitchdl.output import print_clip, print_clip_compact, print_json, print_paged_async
-from twitchdl.progress import PrintingProgress
+from twitchdl.output import (
+    print_clip,
+    print_clip_compact,
+    print_json,
+    print_paged_async,
+    print_status,
+)
+from twitchdl.progress import Progress
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +94,7 @@ async def _download_clips(target_dir: Path, clips_generator: AsyncIterable[Clip]
         source_target_gen(),
         worker_count=10,
         allow_failures=True,
-        progress=PrintingProgress(),
+        progress=ClipDownloadProgress(),
         rate_limit=None,
         skip_existing=True,
     )
@@ -124,3 +130,14 @@ async def _get_authenticated_url(slug: str) -> str:
     )
 
     return f"{url}?{query}"
+
+
+class ClipDownloadProgress(Progress):
+    def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
+        print_status(f"Already downloaded: {target}")
+
+    def failed(self, task_id: TaskID, ex: Exception):
+        print_status(f"Failed downloading: {ex}")
+
+    def end(self, task_id: TaskID):
+        print_status(f"Downloaded {task_id}")
