@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_file
-from twitchdl.output import print_status
+from twitchdl.output import print_error, print_status
 
 CACHE_SUBFOLDER = "twitch-dl"
 
@@ -66,3 +67,41 @@ def _cache_dir_path() -> Path:
         return Path(os.environ["XDG_CACHE_HOME"], CACHE_SUBFOLDER)
 
     return Path.home() / ".cache" / CACHE_SUBFOLDER
+
+
+class Cache:
+    """Helps keep track of cached files and folders and delete them when finished"""
+
+    def __init__(self, root: Path):
+        self.root = root
+        self.files: List[Path] = []
+        self.dirs: List[Path] = []
+        self.mkdir(root)
+
+    def get_path(self, filename: str) -> Path:
+        path = self.root / filename
+        self.files.append(path)
+        return path
+
+    def mkdir(self, path: Path):
+        """Create a new directory recursively, save created dirs to self.dirs."""
+        try:
+            os.mkdir(path)
+            self.dirs.append(path)
+        except FileNotFoundError:
+            if path.parent == path:
+                raise
+            self.mkdir(path.parent)
+            self.mkdir(path)
+        except NotADirectoryError:
+            raise ConsoleError(f"Failed creating cache dir: {path} is not a directory")
+
+    def delete(self):
+        try:
+            for file in self.files:
+                if file.exists():
+                    os.remove(file)
+            for dir in reversed(self.dirs):
+                os.rmdir(dir)
+        except Exception as ex:
+            print_error(f"Failed deleting cache: {ex}\nSome files are left over in {self.root}")
