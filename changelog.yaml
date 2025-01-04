@@ -1,3 +1,9 @@
+2.9.3:
+  date: 2025-01-04
+  changes:
+    - "IMPORTANT: Fix issue where the folder passed to `--cache-dir` when downloading videos would be deleted (#168)"
+    - "Fix encoding issue on windows where unicode characters in filename could break video download (#170)"
+
 2.9.2:
   date: 2024-09-12
   changes:
