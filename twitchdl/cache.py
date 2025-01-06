@@ -7,7 +7,6 @@ from typing import List, Optional
 
 from httpx import HTTPError
 
-from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_file
 from twitchdl.output import print_error, print_status
 
@@ -99,7 +98,8 @@ class Cache:
         return path
 
     def mkdir(self, path: Path):
-        """Create a new directory recursively, save created dirs to self.dirs."""
+        """Create a new directory recursively, save created dirs to self.dirs.
+        Original: https://github.com/python/cpython/blob/3.13/Lib/pathlib/_local.py#L717"""
         try:
             os.mkdir(path)
             self.dirs.append(path)
@@ -108,8 +108,9 @@ class Cache:
                 raise
             self.mkdir(path.parent)
             self.mkdir(path)
-        except NotADirectoryError:
-            raise ConsoleError(f"Failed creating cache dir: {path} is not a directory")
+        except OSError:
+            if not path.is_dir():
+                raise
 
     def delete(self):
         try:
