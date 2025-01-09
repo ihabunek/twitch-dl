@@ -1,3 +1,10 @@
+2.10.0:
+  date: 2025-01-09
+  changes:
+    - "Add chat --image-format option to specify intermediate frame format"
+    - "Add chat --keep option to keep the generated frames"
+    - "Add chat --no-join option to skip video generation"
+
 2.9.4:
   date: 2025-01-06
   changes:

@@ -56,8 +56,23 @@ twitch-dl chat [OPTIONS] ID
 </tr>
 
 <tr>
+    <td class="code">-i, --image-format TEXT</td>
+    <td>Image format used to render individual frames, bmp (default) is fast but consumes a lot of space. You can switch to png to conserve space at cost of speed. [default: <code>bmp</code>]</td>
+</tr>
+
+<tr>
     <td class="code">--overwrite</td>
     <td>Overwrite the target file if it already exists without prompting.</td>
+</tr>
+
+<tr>
+    <td class="code">-k, --keep</td>
+    <td>Don&#x27;t delete the generated intermediate frame images.</td>
+</tr>
+
+<tr>
+    <td class="code">--no-join</td>
+    <td>Don&#x27;t run ffmpeg to join the generated frames, implies --keep.</td>
 </tr>
 
 <tr>
