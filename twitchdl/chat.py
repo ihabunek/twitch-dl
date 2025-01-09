@@ -62,6 +62,7 @@ def render_chat(
     padding: Tuple[int, int],
     output: str,
     format: str,
+    image_format: str,
     overwrite: bool,
     json: bool,
 ):
@@ -104,7 +105,7 @@ def render_chat(
     for group_index, offset, duration, comments in group_comments(video_id, total_duration):
         if group_index == 0:
             # Save the initial empty frame
-            frame_path = cache_dir / f"chat_{0:05d}.bmp"
+            frame_path = cache_dir / f"chat_{0:05d}.{image_format}"
             screen.padded_image().save(frame_path)
             frames.append((frame_path, offset))
 
@@ -115,7 +116,7 @@ def render_chat(
                 draw_comment(screen, comment, dark, badges_by_id)
             first = False
 
-        frame_path = cache_dir / f"chat_{offset:05d}.bmp"
+        frame_path = cache_dir / f"chat_{offset:05d}.{image_format}"
         screen.padded_image().save(frame_path)
         frames.append((frame_path, duration))
         _print_progress(group_index, offset, start, total_duration)

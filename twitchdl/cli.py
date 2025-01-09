@@ -522,6 +522,14 @@ def videos(
     default="mp4",
 )
 @click.option(
+    "-i",
+    "--image-format",
+    help="""Image format used to render individual frames, bmp (default) is fast
+         but consumes a lot of space. You can switch to png to conserve space
+         at cost of speed.""",
+    default="bmp",
+)
+@click.option(
     "--overwrite",
     help="Overwrite the target file if it already exists without prompting.",
     is_flag=True,
@@ -537,6 +545,7 @@ def chat(
     pad_y: int,
     output: str,
     format: str,
+    image_format: str,
     overwrite: bool,
     json: bool,
 ):
@@ -559,6 +568,7 @@ def chat(
             (pad_x, pad_y),
             output,
             format,
+            image_format,
             overwrite,
             json,
         )
