@@ -19,7 +19,7 @@ from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
-from twitchdl.output import green, print_json, print_log, print_status
+from twitchdl.output import green, print_json, print_log, print_status, yellow
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
@@ -66,6 +66,7 @@ def render_chat(
     format: str,
     image_format: str,
     overwrite: bool,
+    keep: bool,
     json: bool,
 ):
     video_id = parse_video_identifier(id)
@@ -135,8 +136,11 @@ def render_chat(
     print_status("Generating chat video...", dim=True)
     generate_video(spec_path, target_path, overwrite)
 
-    print_status("Deleting cache...", dim=True)
-    shutil.rmtree(cache_dir)
+    if keep:
+        click.echo(f"Cached files not deleted: {yellow(cache_dir)}")
+    else:
+        print_status("Deleting cache...", dim=True)
+        shutil.rmtree(cache_dir)
 
 
 def render_chat_json(video: Video):

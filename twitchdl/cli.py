@@ -534,6 +534,12 @@ def videos(
     help="Overwrite the target file if it already exists without prompting.",
     is_flag=True,
 )
+@click.option(
+    "-k",
+    "--keep",
+    help="Don't delete the generated intermediate frame images.",
+    is_flag=True,
+)
 @json_option
 def chat(
     id: str,
@@ -547,6 +553,7 @@ def chat(
     format: str,
     image_format: str,
     overwrite: bool,
+    keep: bool,
     json: bool,
 ):
     """
@@ -570,6 +577,7 @@ def chat(
             format,
             image_format,
             overwrite,
+            keep,
             json,
         )
     except ModuleNotFoundError as ex:
