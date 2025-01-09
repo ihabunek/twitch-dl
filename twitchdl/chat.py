@@ -19,7 +19,7 @@ from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
-from twitchdl.output import green, print_json, print_log, print_status, yellow
+from twitchdl.output import blue, green, print_json, print_log, print_status, yellow
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
@@ -67,6 +67,7 @@ def render_chat(
     image_format: str,
     overwrite: bool,
     keep: bool,
+    no_join: bool,
     json: bool,
 ):
     video_id = parse_video_identifier(id)
@@ -132,6 +133,11 @@ def render_chat(
         for path, duration in frames:
             f.write(f"file '{path.resolve()}'\n")
             f.write(f"duration {duration}\n")
+
+    if no_join:
+        print_log("Skipping video generation...")
+        click.echo(f"Frames rendered to:\n{blue(cache_dir)}")
+        return
 
     print_status("Generating chat video...", dim=True)
     generate_video(spec_path, target_path, overwrite)

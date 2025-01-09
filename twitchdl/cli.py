@@ -540,6 +540,11 @@ def videos(
     help="Don't delete the generated intermediate frame images.",
     is_flag=True,
 )
+@click.option(
+    "--no-join",
+    help="Don't run ffmpeg to join the generated frames, implies --keep.",
+    is_flag=True,
+)
 @json_option
 def chat(
     id: str,
@@ -554,6 +559,7 @@ def chat(
     image_format: str,
     overwrite: bool,
     keep: bool,
+    no_join: bool,
     json: bool,
 ):
     """
@@ -578,6 +584,7 @@ def chat(
             image_format,
             overwrite,
             keep,
+            no_join,
             json,
         )
     except ModuleNotFoundError as ex:
