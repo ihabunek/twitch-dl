@@ -388,8 +388,6 @@ class Screen:
 
 
 def generate_video(spec_path: Path, target: Path, overwrite: bool):
-    print_status("Generating chat video...")
-
     command = [
         "ffmpeg",
         "-f",
