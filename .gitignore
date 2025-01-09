@@ -17,3 +17,5 @@ tmp/
 /book
 *.mp4
 *.mkv
+/.venv
+/uv.lock
