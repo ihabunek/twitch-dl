@@ -4,9 +4,11 @@ import re
 import shutil
 import subprocess
 import time
+from collections import deque
 from itertools import groupby
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple
+from statistics import mean
+from typing import Deque, Dict, Generator, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import click
@@ -101,7 +103,7 @@ def render_chat(
     print_log(f"Rendering frames to: {cache_dir}")
 
     first = True
-    start = time.monotonic()
+    frame_durations: Deque[float] = deque(maxlen=100)
     for group_index, offset, duration, comments in group_comments(video_id, total_duration):
         if group_index == 0:
             # Save the initial empty frame
@@ -109,6 +111,7 @@ def render_chat(
             screen.padded_image().save(frame_path)
             frames.append((frame_path, offset))
 
+        frame_start = time.monotonic()
         for comment in comments:
             if comment["commenter"]:
                 if not first:
@@ -119,7 +122,9 @@ def render_chat(
         frame_path = cache_dir / f"chat_{offset:05d}.{image_format}"
         screen.padded_image().save(frame_path)
         frames.append((frame_path, duration))
-        _print_progress(group_index, offset, start, total_duration)
+        frame_durations.append(time.monotonic() - frame_start)
+
+        _print_progress(group_index, offset, frame_durations, total_duration)
 
     spec_path = cache_dir / "concat.txt"
     with open(spec_path, "w") as f:
@@ -178,11 +183,11 @@ def load_fonts(font_size: int):
     return fonts
 
 
-def _print_progress(index: int, offset: int, start: float, total_duration: int):
+def _print_progress(index: int, offset: int, frame_durations: Deque[float], total_duration: int):
     perc = 100 * offset / total_duration
-    duration = time.monotonic() - start
+    fps = round(1 / mean(frame_durations)) if frame_durations else 0
     print_status(
-        f"Rendering chat frame {index} at {index / duration:.1f}fps, "
+        f"Rendering chat frame {index} at {fps}fps, "
         + f"{format_time(offset)}/{format_time(total_duration)} ({perc:.0f}%)",
         transient=True,
     )
