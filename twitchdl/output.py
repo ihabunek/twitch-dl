@@ -290,6 +290,10 @@ def green(text: Any) -> str:
     return click.style(text, fg="green")
 
 
+def red(text: Any) -> str:
+    return click.style(text, fg="red")
+
+
 def yellow(text: Any) -> str:
     return click.style(text, fg="yellow")
 

@@ -3,7 +3,7 @@ import re
 import sys
 from os import path
 from pathlib import Path
-from typing import AsyncGenerator, AsyncIterable, Awaitable, Callable, List, Optional, Tuple
+from typing import AsyncGenerator, AsyncIterable, Awaitable, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlencode
 
 import click
@@ -12,11 +12,13 @@ from twitchdl import twitch_async, utils
 from twitchdl.entities import Clip, ClipsPeriod, TaskID, VideoQuality
 from twitchdl.http import download_all
 from twitchdl.output import (
+    green,
     print_clip,
     print_clip_compact,
     print_json,
     print_paged_async,
     print_status,
+    red,
 )
 from twitchdl.progress import Progress
 
@@ -133,11 +135,20 @@ async def _get_authenticated_url(slug: str) -> str:
 
 
 class ClipDownloadProgress(Progress):
+    def __init__(self):
+        self.targets: Dict[TaskID, Path] = {}
+
+    def start(self, task_id: TaskID, source: str, target: Path):
+        self.targets[task_id] = target
+        print_status(f"… {target}", transient=True, dim=True)
+
     def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
-        print_status(f"Already downloaded: {target}")
+        print_status(f"{green('✓')} {target}")
 
     def failed(self, task_id: TaskID, ex: Exception):
-        print_status(f"Failed downloading: {ex}")
+        target = self.targets[task_id]
+        print_status(f"{red('✗')} {target}\n{red(ex)}")
 
     def end(self, task_id: TaskID):
-        print_status(f"Downloaded {task_id}")
+        target = self.targets[task_id]
+        print_status(f"{green('✓')} {target}")
