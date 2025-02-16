@@ -5,7 +5,16 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import AsyncIterable, List, Mapping, NamedTuple, Optional, Tuple
+from typing import (
+    AsyncIterable,
+    Awaitable,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import httpx
 from typing_extensions import override
@@ -30,17 +39,28 @@ Number of seconds to wait before aborting when there is no network activity.
 https://www.python-httpx.org/advanced/#timeout-configuration
 """
 
+Source = Union[str, Awaitable[str]]
 
-class Task(NamedTuple):
+
+@dataclass
+class Task:
     task_id: TaskID
-    url: str
+    source: Source
     target: Path
+    url: Optional[str] = None
+
+    async def get_url(self) -> str:
+        if not self.url:
+            if isinstance(self.source, str):
+                self.url = self.source
+            else:
+                self.url = await self.source
+        return self.url
 
 
 @dataclass
 class TaskResult(ABC):
     task_id: TaskID
-    url: str
     target: Path
 
     @property
@@ -50,18 +70,20 @@ class TaskResult(ABC):
 
 @dataclass
 class TaskSuccess(TaskResult):
+    url: str
     size: int
     existing: bool
 
 
 @dataclass
 class TaskError(TaskResult):
+    url: Optional[str]
     exception: Exception
 
 
 @dataclass
 class TaskCanceled(TaskResult):
-    pass
+    url: Optional[str]
 
 
 class TokenBucket(ABC):
@@ -147,7 +169,7 @@ async def download_with_retries(
     if skip_existing and target.exists():
         size = os.path.getsize(target)
         progress.already_downloaded(task_id, source, target, size)
-        return TaskSuccess(task_id, source, target, size, existing=True)
+        return TaskSuccess(task_id, target, source, size, existing=True)
 
     # Download to a temp file first, then rename to target when over to avoid
     # getting saving chunks which may persist if canceled or --keep is used
@@ -159,18 +181,18 @@ async def download_with_retries(
             size = await download(client, task_id, source, tmp_target, progress, token_bucket)
             progress.end(task_id)
             os.rename(tmp_target, target)
-            return TaskSuccess(task_id, source, target, size, existing=False)
+            return TaskSuccess(task_id, target, source, size, existing=False)
         except httpx.HTTPError as ex:
             if n + 1 >= RETRY_COUNT:
                 progress.failed(task_id, ex)
                 tmp_target.unlink(missing_ok=True)
-                return TaskError(task_id, source, target, ex)
+                return TaskError(task_id, target, source, ex)
             else:
                 progress.abort(task_id, ex)
         except Exception as ex:
             progress.failed(task_id, ex)
             tmp_target.unlink(missing_ok=True)
-            return TaskError(task_id, source, target, ex)
+            return TaskError(task_id, target, source, ex)
 
     raise Exception("Should not happen")
 
@@ -185,7 +207,7 @@ class DownloadAllResult(NamedTuple):
 
 
 async def download_all(
-    source_targets: AsyncIterable[Tuple[str, Path]],
+    source_targets: AsyncIterable[Tuple[Source, Path]],
     worker_count: int,
     *,
     allow_failures: bool = True,
@@ -193,7 +215,7 @@ async def download_all(
     rate_limit: Optional[int] = None,
     progress: Optional[Progress] = None,
 ) -> DownloadAllResult:
-    """Download files concurently."""
+    """Download files concurrently."""
     progress = progress or Progress()
     token_bucket = LimitingTokenBucket(rate_limit) if rate_limit else EndlessTokenBucket()
     queue: asyncio.Queue[Task] = asyncio.Queue()
@@ -202,29 +224,27 @@ async def download_all(
 
     async def producer():
         index = 0
-
         async for source, target in source_targets:
             task = Task(index, source, target)
-            print("adding task", task)
             await queue.put(task)
             tasks.append(task)
             index += 1
         await queue.join()
 
     async def worker(client: httpx.AsyncClient, worker_id: int):
-        print("worker here", worker_id)
         while True:
-            item = await queue.get()
+            task = await queue.get()
+            url = await task.get_url()
             result = await download_with_retries(
                 client,
-                item.task_id,
-                item.url,
-                item.target,
+                task.task_id,
+                url,
+                task.target,
                 progress,
                 token_bucket,
                 skip_existing,
             )
-            results_map[item.task_id] = result
+            results_map[task.task_id] = result
             if not result.ok and not allow_failures:
                 return
             queue.task_done()
@@ -254,7 +274,7 @@ async def download_all(
         await asyncio.gather(producer_task, *worker_tasks, return_exceptions=True)
 
         results = [
-            results_map.get(t.task_id, TaskCanceled(t.task_id, t.url, t.target)) for t in tasks
+            results_map.get(t.task_id, TaskCanceled(t.task_id, t.target, t.url)) for t in tasks
         ]
         return DownloadAllResult(success, results)
 

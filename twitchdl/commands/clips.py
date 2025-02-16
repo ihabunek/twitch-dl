@@ -3,16 +3,22 @@ import re
 import sys
 from os import path
 from pathlib import Path
-from typing import AsyncGenerator, AsyncIterable, Callable, List, Optional, Tuple
+from typing import AsyncGenerator, AsyncIterable, Awaitable, Callable, List, Optional, Tuple
 from urllib.parse import urlencode
 
 import click
 
 from twitchdl import twitch_async, utils
-from twitchdl.entities import Clip, ClipsPeriod, VideoQuality
+from twitchdl.entities import Clip, ClipsPeriod, TaskID, VideoQuality
 from twitchdl.http import download_all
-from twitchdl.output import print_clip, print_clip_compact, print_json, print_paged_async
-from twitchdl.progress import PrintingProgress
+from twitchdl.output import (
+    print_clip,
+    print_clip_compact,
+    print_json,
+    print_paged_async,
+    print_status,
+)
+from twitchdl.progress import Progress
 
 logger = logging.getLogger(__name__)
 
@@ -77,19 +83,18 @@ def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
 async def _download_clips(target_dir: Path, clips_generator: AsyncIterable[Clip]):
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    async def source_target_gen() -> AsyncGenerator[Tuple[str, Path], None]:
+    async def source_target_gen() -> AsyncGenerator[Tuple[Awaitable[str], Path], None]:
         async for clip in clips_generator:
             if clip["videoQualities"]:
-                source = await _get_authenticated_url(clip["slug"])
+                source = _get_authenticated_url(clip["slug"])
                 target = target_dir / _target_filename(clip, clip["videoQualities"])
-                print("yielding", clip["slug"])
                 yield (source, target)
 
     await download_all(
         source_target_gen(),
-        worker_count=5,
+        worker_count=10,
         allow_failures=True,
-        progress=PrintingProgress(),
+        progress=ClipDownloadProgress(),
         rate_limit=None,
         skip_existing=True,
     )
@@ -125,3 +130,14 @@ async def _get_authenticated_url(slug: str) -> str:
     )
 
     return f"{url}?{query}"
+
+
+class ClipDownloadProgress(Progress):
+    def already_downloaded(self, task_id: TaskID, source: str, target: Path, size: int):
+        print_status(f"Already downloaded: {target}")
+
+    def failed(self, task_id: TaskID, ex: Exception):
+        print_status(f"Failed downloading: {ex}")
+
+    def end(self, task_id: TaskID):
+        print_status(f"Downloaded {task_id}")
