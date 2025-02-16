@@ -298,9 +298,10 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     sources = [base_uri + vod.path for vod in vods]
     targets = [cache.get_path(f"{vod.index:05d}.ts") for vod in vods]
 
+    # Bridge to async land
     result = asyncio.run(
         download_all(
-            zip(sources, targets),
+            utils.as_async_iterable(zip(sources, targets)),
             args.max_workers,
             skip_existing=True,
             allow_failures=False,
@@ -397,7 +398,7 @@ def _determine_time_range(chapters: List[Chapter], args: DownloadOptions):
                     f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters."
                 )
 
-        click.echo(f'Chapter selected: {blue(chapter["description"])}\n')
+        click.echo(f"Chapter selected: {blue(chapter['description'])}\n")
         start = chapter["positionMilliseconds"] // 1000
         duration = chapter["durationMilliseconds"] // 1000
         return start, start + duration
@@ -409,7 +410,7 @@ def _choose_chapter_interactive(chapters: List[Chapter]):
     click.echo("\nChapters:")
     for index, chapter in enumerate(chapters):
         duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
-        click.echo(f'{index + 1}) {bold(chapter["description"])} ({duration})')
+        click.echo(f"{index + 1}) {bold(chapter['description'])} ({duration})")
     index = utils.read_int("Select a chapter", 1, len(chapters))
     chapter = chapters[index - 1]
     return chapter

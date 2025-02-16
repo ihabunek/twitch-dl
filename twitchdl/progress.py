@@ -106,11 +106,11 @@ class VideoDownloadProgress(Progress):
         self.downloaded_count: int = 0
 
     @override
-    def start(self, task_id: TaskID, source: str, target: Path, size: Optional[int]):
+    def start(self, task_id: TaskID, source: str, target: Path):
         if task_id in self.tasks:
             raise ValueError(f"Task {task_id}: cannot start, already started")
 
-        self.tasks[task_id] = Task(task_id, size)
+        self.tasks[task_id] = Task(task_id)
         self.print()
 
     @override
@@ -158,7 +158,7 @@ class VideoDownloadProgress(Progress):
 
         task = self.tasks[task_id]
         if task.size != task.downloaded:
-            logger.warn(
+            logger.warning(
                 f"Taks {task_id} ended with {task.downloaded}b downloaded, expected {task.size}b."
             )
 

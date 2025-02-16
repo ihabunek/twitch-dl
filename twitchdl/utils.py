@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from itertools import chain, islice, tee
 from pathlib import Path
 from statistics import fmean
-from typing import Deque, Dict, Iterable, Optional, Tuple, TypeVar, Union
+from typing import AsyncIterable, Deque, Dict, Iterable, Optional, Tuple, TypeVar, Union
 
 import click
 
@@ -173,3 +173,8 @@ def get_size(path: Path):
             full_path = os.path.join(subpath, filename)
             size += os.path.getsize(full_path)
     return size
+
+
+async def as_async_iterable(iterable: Iterable[T]) -> AsyncIterable[T]:
+    for value in iterable:
+        yield value
