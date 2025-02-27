@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 from typing import List, Optional, Tuple
@@ -15,7 +16,7 @@ from twitchdl.cache import get_cache_dir, get_cache_subdirs
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
-from twitchdl.output import print_log, print_table
+from twitchdl.output import print_log, print_table, print_warning
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 from twitchdl.utils import format_size, get_size
 
@@ -31,6 +32,16 @@ CONTEXT = dict(
     # Make help a bit wider
     max_content_width=100,
 )
+
+
+@dataclass
+class Obj:
+    """Custom object to add to Click context
+    https://click.palletsprojects.com/en/stable/api/#click.Context.obj
+    """
+
+    auth_token: Optional[str]
+
 
 json_option = click.option(
     "--json",
@@ -97,14 +108,22 @@ def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> O
 @click.option("--debug/--no-debug", default=False, help="Enable debug logging to stderr")
 @click.option("--verbose/--no-verbose", default=False, help="More verbose debug logging")
 @click.option("--color/--no-color", default=sys.stdout.isatty(), help="Use ANSI color in output")
+@click.option(
+    "-a",
+    "--auth-token",
+    help="""Authentication token, passed to Twitch to access subscriber only
+         VODs. Can be copied from the `auth_token` cookie in any browser logged
+         in on Twitch. See docs for details.""",
+)
 @click.version_option(package_name="twitch-dl")
 @click.pass_context
-def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool):
+def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool, auth_token: Optional[str]):
     """twitch-dl - twitch.tv downloader
 
     https://twitch-dl.bezdomni.net/
     """
     ctx.color = color
+    ctx.obj = Obj(auth_token)
 
     if debug:
         logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
@@ -300,7 +319,9 @@ def clips(
     help="Folder where VODs are downloaded before joining. Uses placeholders similar to --output.",
     default=f"{get_cache_dir()}/videos/{{id}}/{{quality}}",
 )
+@click.pass_obj
 def download(
+    obj: Obj,
     ids: Tuple[str, ...],
     auth_token: Optional[str],
     chapter: Optional[int],
@@ -324,6 +345,14 @@ def download(
     Pass one or more video ID, clip slug or Twitch URL to download.
     """
     from twitchdl.commands.download import download
+
+    if auth_token:
+        print_warning(
+            "WARNING: Passing --auth-token to download command has been deprecated and will be removed in the future.\n" +
+            "You should specify the auth token after twitch-dl instead, e.g.:\n" +
+            "   twitch-dl --auth-token mytoken download ..."
+        )
+        obj.auth_token = auth_token
 
     if not format:
         format = "ts" if concat else "mkv"

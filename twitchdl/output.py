@@ -40,6 +40,10 @@ def print_error(message: Any):
     click.secho(message, err=True, fg="red")
 
 
+def print_warning(message: Any):
+    click.secho(message, err=True, fg="yellow")
+
+
 _prev_transient = False
 
 

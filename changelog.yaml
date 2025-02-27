@@ -2,6 +2,8 @@
   date: TBA
   changes:
     - "Download clips concurrently, which greatly improves the download speed when downloading multiple clips when using `clips --download`"
+    - "Deprecate `--auth-token` option for the `download` command"
+    - "Add `--auth-token` global option (given after `twitch-dl` and before the command)"
 
 2.10.0:
   date: 2025-01-09
