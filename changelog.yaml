@@ -1,3 +1,8 @@
+2.11.0:
+  date: TBA
+  changes:
+    - "Download clips concurrently, which greatly improves the download speed when downloading multiple clips when using `clips --download`"
+
 2.10.0:
   date: 2025-01-09
   changes:
