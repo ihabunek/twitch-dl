@@ -243,7 +243,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     start, end = _determine_time_range(chapters, args)
 
     print_log("Fetching access token...")
-    access_token = twitch.get_access_token(video["id"], auth_token=args.auth_token)
+    access_token = twitch.get_access_token(video["id"])
 
     print_log("Fetching playlists...")
     playlists_text = twitch.get_playlists(video["id"], access_token)

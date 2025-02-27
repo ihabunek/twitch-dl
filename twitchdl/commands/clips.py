@@ -4,7 +4,6 @@ import re
 import sys
 from os import path
 from pathlib import Path
-import time
 from typing import Callable, Generator, List, NamedTuple, Optional
 from urllib.parse import urlencode
 
@@ -22,7 +21,6 @@ from twitchdl.output import (
     print_json,
     print_paged,
     print_status,
-    yellow,
 )
 from twitchdl.twitch import Clip, ClipsPeriod
 

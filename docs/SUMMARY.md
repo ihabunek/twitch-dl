@@ -11,6 +11,7 @@
     - [twitch-dl env](commands/env.md)
     - [twitch-dl info](commands/info.md)
     - [twitch-dl videos](commands/videos.md)
+- [Authentication](authentication.md)
 - [Environment variables](environment_variables.md)
 - [Shell completion](shell_completion.md)
 
