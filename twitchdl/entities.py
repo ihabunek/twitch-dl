@@ -1,5 +1,18 @@
 from dataclasses import dataclass
-from typing import Any, List, Literal, Mapping, Optional, TypedDict
+from typing import Any, Generic, List, Literal, Mapping, Optional, TypeVar, TypedDict
+
+
+T = TypeVar("T")
+
+@dataclass
+class Page(Generic[T]):
+    page_no: int
+    has_next: bool
+    items: List[T]
+
+    @property
+    def size(self):
+        return len(self.items)
 
 
 @dataclass

@@ -85,7 +85,7 @@ class Progress:
 
         task = self.tasks[task_id]
         if task.size != task.downloaded:
-            logger.warn(
+            logger.warning(
                 f"Taks {task_id} ended with {task.downloaded}b downloaded, expected {task.size}b."
             )
 

@@ -18,6 +18,7 @@ from twitchdl.entities import (
     ClipAccessToken,
     ClipsPeriod,
     Data,
+    Page,
     Video,
     VideoComments,
     VideosSort,
@@ -284,6 +285,24 @@ def channel_clips_generator(
     req_limit = min(limit, 100)
     clips = get_channel_clips(channel_id, period, req_limit)
     return _generator(clips, limit)
+
+
+def channel_clips_page_generator(
+    channel_id: str,
+    period: ClipsPeriod,
+    page_size: int = 40,
+) -> Generator[Page[Clip], None, None]:
+    cursor = None
+    has_next = True
+    page_no = 1
+
+    while has_next:
+        response = get_channel_clips(channel_id, period, page_size, cursor)
+        has_next = response["pageInfo"]["hasNextPage"]
+        clips = [edge["node"] for edge in response["edges"]]
+        yield Page(page_no, has_next, clips)
+        cursor = response["edges"][-1]["cursor"] if response["edges"] else None
+        page_no += 1
 
 
 def get_channel_videos(
