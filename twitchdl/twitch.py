@@ -40,25 +40,42 @@ Content = Union[str, bytes]
 Headers = Dict[str, str]
 
 
-def authenticated_post(
-    url: str,
-    *,
-    json: Any = None,
-    content: Optional[Content] = None,
-    auth_token: Optional[str] = None,
-):
+def get_auth_token_from_context() -> Optional[str]:
+    try:
+        return click.get_current_context().obj.auth_token
+    except Exception:
+        return None
+
+
+def authenticated_post(url: str, *, json: Any = None, content: Optional[Content] = None):
     headers = {"Client-ID": CLIENT_ID}
+
+    auth_token = get_auth_token_from_context()
     if auth_token is not None:
         headers["authorization"] = f"OAuth {auth_token}"
 
     response = request("POST", url, content=content, json=json, headers=headers)
+    raise_for_status(response, auth_token)
+    return response
+
+
+def raise_for_status(response: httpx.Response, auth_token: Optional[str]):
     if response.status_code == 400:
         data = response.json()
         raise ConsoleError(data["message"])
 
-    response.raise_for_status()
+    # Provide a more useful error message when server returns HTTP 401
+    # Unauthorized while using a user-provided auth token.
+    if response.status_code == 401:
+        if auth_token:
+            raise ConsoleError("Unauthorized. The provided auth token is invalid.")
+        else:
+            raise ConsoleError(
+                "Unauthorized. This video may be subscriber-only. See docs:\n"
+                "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
+            )
 
-    return response
+    response.raise_for_status()
 
 
 def request(
@@ -103,9 +120,9 @@ def gql_persisted_query(query: Data):
     return response.json()
 
 
-def gql_query(query: str, auth_token: Optional[str] = None):
+def gql_query(query: str):
     url = "https://gql.twitch.tv/gql"
-    response = authenticated_post(url, json={"query": query}, auth_token=auth_token)
+    response = authenticated_post(url, json={"query": query})
     gql_raise_on_error(response)
     return response.json()
 
@@ -381,7 +398,7 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessToken:
+def get_access_token(video_id: str) -> AccessToken:
     query = f"""
     {{
         videoPlaybackAccessToken(
@@ -398,22 +415,8 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
     }}
     """
 
-    try:
-        response = gql_query(query, auth_token=auth_token)
-        return response["data"]["videoPlaybackAccessToken"]
-    except httpx.HTTPStatusError as error:
-        # Provide a more useful error message when server returns HTTP 401
-        # Unauthorized while using a user-provided auth token.
-        if error.response.status_code == 401:
-            if auth_token:
-                raise ConsoleError("Unauthorized. The provided auth token is not valid.")
-            else:
-                raise ConsoleError(
-                    "Unauthorized. This video may be subscriber-only. See docs:\n"
-                    "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
-                )
-
-        raise
+    response = gql_query(query)
+    return response["data"]["videoPlaybackAccessToken"]
 
 
 def get_playlists(video_id: str, access_token: AccessToken) -> str:

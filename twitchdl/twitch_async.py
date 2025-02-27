@@ -9,8 +9,7 @@ import httpx
 
 from twitchdl import CLIENT_ID
 from twitchdl.entities import ClipAccessToken, Data
-from twitchdl.exceptions import ConsoleError
-from twitchdl.twitch import Content, gql_raise_on_error, log_request, log_response
+from twitchdl.twitch import Content, get_auth_token_from_context, gql_raise_on_error, log_request, log_response, raise_for_status
 
 
 async def authenticated_post(
@@ -19,19 +18,15 @@ async def authenticated_post(
     *,
     json: Any = None,
     content: Optional[Content] = None,
-    auth_token: Optional[str] = None,
 ):
     headers = {"Client-ID": CLIENT_ID}
+
+    auth_token = get_auth_token_from_context()
     if auth_token is not None:
         headers["authorization"] = f"OAuth {auth_token}"
 
     response = await request(client, "POST", url, content=content, json=json, headers=headers)
-    if response.status_code == 400:
-        data = response.json()
-        raise ConsoleError(data["message"])
-
-    response.raise_for_status()
-
+    raise_for_status(response, auth_token)
     return response
 
 
