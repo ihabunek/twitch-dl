@@ -388,7 +388,7 @@ def info(id: str, json: bool):
 @click.option(
     "-a",
     "--all",
-    help="Fetch all clips, overrides --limit",
+    help="Fetch all videos, overrides --limit",
     is_flag=True,
 )
 @click.option(
