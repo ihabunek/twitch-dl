@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import click
 import m3u8
@@ -11,7 +11,7 @@ from twitchdl.playlists import parse_playlists
 from twitchdl.twitch import Chapter, Clip, Video
 
 
-def info(id: str, *, json: bool = False):
+def info(id: str, *, json: bool = False, auth_token: Optional[str]):
     video_id = utils.parse_video_identifier(id)
     if video_id:
         print_log("Fetching video...")
@@ -21,7 +21,7 @@ def info(id: str, *, json: bool = False):
             raise ConsoleError(f"Video {video_id} not found")
 
         print_log("Fetching access token...")
-        access_token = twitch.get_access_token(video_id)
+        access_token = twitch.get_access_token(video_id, auth_token)
 
         print_log("Fetching playlists...")
         playlists = twitch.get_playlists(video_id, access_token)

@@ -375,12 +375,19 @@ def env():
 
 @cli.command()
 @click.argument("id")
+@click.option(
+    "-a",
+    "--auth-token",
+    help="""Authentication token, passed to Twitch to access subscriber only
+         VODs. Can be copied from the `auth_token` cookie in any browser logged
+         in on Twitch.""",
+)
 @json_option
-def info(id: str, json: bool):
+def info(id: str, json: bool, auth_token: Optional[str]):
     """Print information for a given Twitch URL, video ID or clip slug."""
     from twitchdl.commands.info import info
 
-    info(id, json=json)
+    info(id, json=json, auth_token=auth_token)
 
 
 @cli.command()
