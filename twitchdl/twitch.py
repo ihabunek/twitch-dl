@@ -381,6 +381,12 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
+UNAUTHORIZED_ERROR = (
+    "Unauthorized. This video may be subscriber-only. See docs:\n" +
+    "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
+)
+
+
 def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessToken:
     query = f"""
     {{
@@ -408,10 +414,7 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
             if auth_token:
                 raise ConsoleError("Unauthorized. The provided auth token is not valid.")
             else:
-                raise ConsoleError(
-                    "Unauthorized. This video may be subscriber-only. See docs:\n"
-                    "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
-                )
+                raise ConsoleError(UNAUTHORIZED_ERROR)
 
         raise
 
@@ -422,22 +425,25 @@ def get_playlists(video_id: str, access_token: AccessToken) -> str:
     """
     url = f"https://usher.ttvnw.net/vod/{video_id}"
 
-    response = httpx.get(
-        url,
-        params={
-            "nauth": access_token["value"],
-            "nauthsig": access_token["signature"],
-            "allow_audio_only": "true",
-            "allow_source": "true",
-            "player": "twitchweb",
-            "platform": "web",
-            "supported_codecs": "av1,h265,h264",
-            "p": random.randint(1000000, 10000000),
-        },
-    )
+    params = {
+        "nauth": access_token["value"],
+        "nauthsig": access_token["signature"],
+        "allow_audio_only": "true",
+        "allow_source": "true",
+        "player": "twitchweb",
+        "platform": "web",
+        "supported_codecs": "av1,h265,h264",
+        "p": random.randint(1000000, 10000000),
+    }
 
-    response.raise_for_status()
-    return response.content.decode("utf-8")
+    try:
+        response = httpx.get(url, params=params)
+        response.raise_for_status()
+        return response.content.decode("utf-8")
+    except httpx.HTTPStatusError as ex:
+        if ex.response.status_code == 403:
+            raise ConsoleError(UNAUTHORIZED_ERROR)
+        raise
 
 
 def get_game_id(name: str):
