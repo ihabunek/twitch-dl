@@ -2,9 +2,13 @@
 
 > Introduced in twitch-dl 2.2.0
 
-twitch-dl uses [Click shell completion](https://click.palletsprojects.com/en/8.1.x/shell-completion/) which works on Bash, Fish and Zsh.
+twitch-dl uses
+[Click shell completion](https://click.palletsprojects.com/en/8.1.x/shell-completion/)
+which works on Bash, Fish and Zsh.
 
-To enable completion, twitch-dl must be [installed](./installation.html) as a command and available by ivoking `twitch-dl`. Then follow the instructions for your shell.
+To enable completion, twitch-dl must be [installed](./installation.md) as a
+command and available by ivoking `twitch-dl`. Then follow the instructions for
+your shell.
 
 **Bash**
 

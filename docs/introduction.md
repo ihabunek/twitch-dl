@@ -51,8 +51,8 @@ or by slug
 twitch-dl download PlacidColdClipsdadDeIlluminati-hL2s_aLE4CHvVN4J
 ```
 
-For more info and examples see [usage](usage.html).
+For more info and examples see [usage](usage.md).
 
 ## License
 
-twitch-dl is open source and licensed under the [GNU General Public License v3](/license.html).
+twitch-dl is open source and licensed under the [GNU General Public License v3](/license.md).
