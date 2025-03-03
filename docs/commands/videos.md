@@ -15,7 +15,7 @@ twitch-dl videos [OPTIONS] CHANNEL_NAME
 <tbody>
 <tr>
     <td class="code">-a, --all</td>
-    <td>Fetch all clips, overrides --limit</td>
+    <td>Fetch all videos, overrides --limit</td>
 </tr>
 
 <tr>

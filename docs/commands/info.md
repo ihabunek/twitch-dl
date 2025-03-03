@@ -14,6 +14,11 @@ twitch-dl info [OPTIONS] ID
 <table>
 <tbody>
 <tr>
+    <td class="code">-a, --auth-token TEXT</td>
+    <td>Authentication token, passed to Twitch to access subscriber only VODs. Can be copied from the <code>auth_token</code> cookie in any browser logged in on Twitch.</td>
+</tr>
+
+<tr>
     <td class="code">--json</td>
     <td>Print data as JSON rather than human readable text</td>
 </tr>
