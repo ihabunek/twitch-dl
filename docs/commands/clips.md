@@ -49,6 +49,11 @@ twitch-dl clips [OPTIONS] CHANNEL_NAME
 </tr>
 
 <tr>
+    <td class="code">-w, --workers INTEGER</td>
+    <td>Number of workers for downloading clips concurrently [default: <code>10</code>]</td>
+</tr>
+
+<tr>
     <td class="code">--json</td>
     <td>Print data as JSON rather than human readable text</td>
 </tr>

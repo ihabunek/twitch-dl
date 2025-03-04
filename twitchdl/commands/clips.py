@@ -4,7 +4,6 @@ import re
 import sys
 from os import path
 from pathlib import Path
-import time
 from typing import Callable, Generator, List, NamedTuple, Optional
 from urllib.parse import urlencode
 
@@ -22,7 +21,6 @@ from twitchdl.output import (
     print_json,
     print_paged,
     print_status,
-    yellow,
 )
 from twitchdl.twitch import Clip, ClipsPeriod
 
@@ -38,6 +36,7 @@ def clips(
     pager: Optional[int] = None,
     period: ClipsPeriod = "all_time",
     target_dir: Path = Path(),
+    workers: int = 10,
 ):
     # Set different defaults for limit for compact display
     default_limit = 40 if compact else 10
@@ -46,7 +45,7 @@ def clips(
     limit = sys.maxsize if all or pager else (limit or default_limit)
 
     if download:
-        asyncio.run(_download_clips(channel_name, period, limit, target_dir))
+        asyncio.run(_download_clips(channel_name, period, target_dir, workers))
         return
 
     generator = twitch.channel_clips_generator(channel_name, period, limit)
@@ -86,10 +85,14 @@ def _target_filename(clip: Clip, video_qualities: List[VideoQuality]):
 
 # TODO: add --quality
 # TODO: add --limit
-# TODO: add --workers
 
 
-async def _download_clips(channel_name: str, period: ClipsPeriod, limit: int, target_dir: Path):
+async def _download_clips(
+    channel_name: str,
+    period: ClipsPeriod,
+    target_dir: Path,
+    workers: int,
+):
     if not target_dir.exists():
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -97,7 +100,7 @@ async def _download_clips(channel_name: str, period: ClipsPeriod, limit: int, ta
 
     for page in generator:
         print_status(f"Fetched page {page.page_no} of {page.size} clips", dim=True)
-        await _download_page(page.items, target_dir)
+        await _download_page(page.items, target_dir, workers)
 
 
 class Task(NamedTuple):
@@ -105,7 +108,7 @@ class Task(NamedTuple):
     target: Path
 
 
-async def _download_page(clips: List[Clip], target_dir: Path):
+async def _download_page(clips: List[Clip], target_dir: Path, workers: int):
     queue: asyncio.Queue[Task] = asyncio.Queue()
 
     # Fill the download queue
@@ -119,7 +122,7 @@ async def _download_page(clips: List[Clip], target_dir: Path):
             else:
                 await queue.put(Task(clip["slug"], target))
 
-    tasks = [asyncio.create_task(_download_worker(queue)) for _ in range(10)]
+    tasks = [asyncio.create_task(_download_worker(queue)) for _ in range(workers)]
 
     await queue.join()
 

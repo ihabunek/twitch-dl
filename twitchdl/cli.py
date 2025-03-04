@@ -168,6 +168,13 @@ def cli(ctx: click.Context, color: bool, debug: bool, verbose: bool):
     ),
     default=Path(),
 )
+@click.option(
+    "-w",
+    "--workers",
+    help="Number of workers for downloading clips concurrently",
+    type=int,
+    default=10,
+)
 @json_option
 def clips(
     channel_name: str,
@@ -179,6 +186,7 @@ def clips(
     pager: Optional[int],
     period: ClipsPeriod,
     target_dir: Path,
+    workers: int,
 ):
     """List or download clips for given CHANNEL_NAME."""
     from twitchdl.commands.clips import clips
@@ -196,6 +204,7 @@ def clips(
         pager=pager,
         period=period,
         target_dir=target_dir,
+        workers=workers,
     )
 
 
