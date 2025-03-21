@@ -29,7 +29,8 @@ from twitchdl.playlists import (
     select_playlist,
 )
 from twitchdl.twitch import Chapter, ClipAccessToken, Video
-
+from twitchdl.playlists_auth import fetch_auth_playlist
+from twitchdl.exceptions import PlaylistAuthRequireError
 
 def download(ids: List[str], args: DownloadOptions):
     if not ids:
@@ -246,7 +247,15 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     access_token = twitch.get_access_token(video["id"], auth_token=args.auth_token)
 
     print_log("Fetching playlists...")
-    playlists_text = twitch.get_playlists(video["id"], access_token)
+
+    auth_playlist = False
+    try:
+        playlists_text = twitch.get_playlists(video["id"], access_token)
+    except PlaylistAuthRequireError:
+        print_log("Possible subscriber-only try via fake playlist")
+        playlists_text = fetch_auth_playlist(video["id"])
+        auth_playlist = True
+
     playlists = parse_playlists(playlists_text)
     playlist = select_playlist(playlists, args.quality)
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
@@ -288,6 +297,13 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
 
     sources = [base_uri + vod.path for vod in vods]
     targets = [cache.get_path(f"{vod.index:05d}.ts") for vod in vods]
+
+    # replace unmuted to muted for subscriptions
+    if auth_playlist:
+        sources_muted = []
+        for line in sources:
+            sources_muted.append(line.replace("-unmuted", "-muted"))
+        sources = sources_muted
 
     asyncio.run(
         download_all(

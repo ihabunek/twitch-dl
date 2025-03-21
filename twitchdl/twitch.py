@@ -24,7 +24,7 @@ from twitchdl.entities import (
     VideosSort,
     VideosType,
 )
-from twitchdl.exceptions import ConsoleError
+from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
 from twitchdl.utils import format_size, remove_null_values
 
 
@@ -414,7 +414,7 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
             if auth_token:
                 raise ConsoleError("Unauthorized. The provided auth token is not valid.")
             else:
-                raise ConsoleError(UNAUTHORIZED_ERROR)
+                raise PlaylistAuthRequireError(UNAUTHORIZED_ERROR)
 
         raise
 
@@ -442,7 +442,7 @@ def get_playlists(video_id: str, access_token: AccessToken) -> str:
         return response.content.decode("utf-8")
     except httpx.HTTPStatusError as ex:
         if ex.response.status_code == 403:
-            raise ConsoleError(UNAUTHORIZED_ERROR)
+            raise PlaylistAuthRequireError(UNAUTHORIZED_ERROR)
         raise
 
 
