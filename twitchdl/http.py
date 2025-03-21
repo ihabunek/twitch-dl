@@ -82,7 +82,11 @@ async def download(
     tmp_target = f"{target}.tmp"
     with open(tmp_target, "wb") as f:
         async with client.stream("GET", source) as response:
-            size = int(response.headers.get("content-length"))
+            content_length = response.headers.get("content-length")
+            if content_length is None:
+                raise ConsoleError('No content length: {}'.format(source))
+
+            size = int(content_length)
             progress.start(task_id, size)
             async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
                 f.write(chunk)
