@@ -35,7 +35,7 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
     current_url = urlparse(video["seekPreviewsURL"])
     domain = current_url.hostname
     paths = current_url.path.split("/")
-    vod_special_id = paths[paths.index(next(p for p in paths if "storyboards" in p)) - 1]
+    vod_special_id = paths[paths.index("storyboards") - 1]
 
     now = datetime.strptime("2023-02-10", "%Y-%m-%d")
     created = datetime.strptime(video["createdAt"], "%Y-%m-%dT%H:%M:%SZ")
