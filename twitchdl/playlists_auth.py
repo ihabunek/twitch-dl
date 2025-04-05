@@ -56,9 +56,6 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
         else:
             url = f"https://{domain}/{vod_special_id}/{group_id}/index-dvr.m3u8"
 
-        if not url:
-            continue
-
         if is_valid_quality(url):
             playlist = Playlist(
                 group_id=group_id,
