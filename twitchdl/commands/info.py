@@ -7,7 +7,7 @@ from twitchdl import twitch, utils
 from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
 from twitchdl.naming import video_placeholders
 from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
-from twitchdl.playlists import parse_playlists
+from twitchdl.playlists import Playlist, parse_playlists
 from twitchdl.twitch import Chapter, Clip, Video
 from twitchdl.playlists_auth import fetch_auth_playlist
 
@@ -25,9 +25,10 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str]):
 
         print_log("Fetching playlists...")
         try:
-            playlists = twitch.get_playlists(video["id"], access_token)
+            playlists_text = twitch.get_playlists(video["id"], access_token)
+            playlists = parse_playlists(playlists_text)
         except PlaylistAuthRequireError:
-            print_log("Possible subscriber-only try via fake playlist")
+            print_log("Possible subscriber-only VOD, attempting workaround...")
             playlists = fetch_auth_playlist(video["id"])
 
         print_log("Fetching chapters...")
@@ -55,7 +56,7 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str]):
     raise ConsoleError(f"Invalid input: {id}")
 
 
-def video_info(video: Video, playlists: str, chapters: List[Chapter]):
+def video_info(video: Video, playlists: List[Playlist], chapters: List[Chapter]):
     click.echo()
     print_video(video)
 
@@ -68,7 +69,7 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
             f"{p.resolution}",
             p.url,
         ]
-        for p in parse_playlists(playlists)
+        for p in playlists
     ]
     print_table(playlist_data, headers=["Name", "Group", "Resolution", "URL"])
 
@@ -86,23 +87,9 @@ def video_info(video: Video, playlists: str, chapters: List[Chapter]):
     print_table(placeholders, headers=["Placeholder", "Value"])
 
 
-def video_json(video: Video, playlists: str, chapters: List[Chapter]):
-    playlists = m3u8.loads(playlists).playlists
-
-    video["playlists"] = [
-        {
-            "bandwidth": p.stream_info.bandwidth,
-            "resolution": p.stream_info.resolution,
-            "codecs": p.stream_info.codecs,
-            "video": p.stream_info.video,
-            "uri": p.uri,
-        }
-        for p in playlists
-    ]
-
-    video["chapters"] = chapters
-
-    print_json(video)
+def video_json(video: Video, playlists: List[Playlist], chapters: List[Chapter]):
+    info = {**video, "playlists": [p.__dict__ for p in playlists], "chapters": chapters}
+    print_json(info)
 
 
 def clip_info(clip: Clip):

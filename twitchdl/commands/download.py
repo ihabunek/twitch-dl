@@ -253,7 +253,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         playlists_text = twitch.get_playlists(video["id"], access_token)
         playlists = parse_playlists(playlists_text)
     except PlaylistAuthRequireError:
-        print_log("Possible subscriber-only try via fake playlist")
+        print_log("Possible subscriber-only VOD, attempting workaround...")
         playlists_text = ""
         playlists = fetch_auth_playlist(video["id"])
         auth_playlist = True
