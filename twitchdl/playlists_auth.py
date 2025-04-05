@@ -25,17 +25,17 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
         {"name": "Audio Only", "group_id": "audio_only", "resolution": None, "is_source": False},
     ]
 
-    current_url = urlparse(video['seekPreviewsURL'])
+    current_url = urlparse(video["seekPreviewsURL"])
     domain = current_url.hostname
-    paths = current_url.path.split('/')
+    paths = current_url.path.split("/")
     vod_special_id = paths[paths.index(next(p for p in paths if "storyboards" in p)) - 1]
 
     now = datetime.strptime("2023-02-10", "%Y-%m-%d")
-    created = datetime.strptime(video['createdAt'], "%Y-%m-%dT%H:%M:%SZ")
+    created = datetime.strptime(video["createdAt"], "%Y-%m-%dT%H:%M:%SZ")
     time_difference = (now - created).total_seconds()
     days_difference = time_difference / (3600 * 24)
 
-    broadcast_type = video['broadcastType'].lower()
+    broadcast_type = video["broadcastType"].lower()
 
     playlists: List[Playlist] = []
     for resolution in resolutions:
@@ -43,7 +43,7 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
         url = None
 
         if broadcast_type == "highlight":
-            url = f"https://{domain}/{vod_special_id}/{group_id}/highlight-{video["id"]}.m3u8"
+            url = f"https://{domain}/{vod_special_id}/{group_id}/highlight-{video['id']}.m3u8"
         elif broadcast_type == "upload" and days_difference > 7:
             url = f"https://{domain}/{owner_login}/{vod_id}/{vod_special_id}/{group_id}/index-dvr.m3u8"
         else:
@@ -58,7 +58,7 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
                 is_source=resolution["is_source"],
                 name=resolution["name"],
                 resolution=resolution["resolution"],
-                url=url
+                url=url,
             )
             playlists.append(playlist)
 
