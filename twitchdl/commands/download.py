@@ -255,7 +255,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     except PlaylistAuthRequireError:
         print_log("Possible subscriber-only VOD, attempting workaround...")
         playlists_text = ""
-        playlists = fetch_auth_playlist(video["id"])
+        playlists = fetch_auth_playlist(video)
         auth_playlist = True
 
     playlist = select_playlist(playlists, args.quality)

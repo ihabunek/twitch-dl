@@ -121,6 +121,7 @@ VIDEO_FIELDS = """
     id
     title
     description
+    createdAt
     recordedAt
     publishedAt
     updatedAt
@@ -128,6 +129,7 @@ VIDEO_FIELDS = """
     lengthSeconds
     status
     viewCount
+    seekPreviewsURL
     game {
         id
         name

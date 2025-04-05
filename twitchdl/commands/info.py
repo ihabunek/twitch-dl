@@ -29,7 +29,7 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str]):
             playlists = parse_playlists(playlists_text)
         except PlaylistAuthRequireError:
             print_log("Possible subscriber-only VOD, attempting workaround...")
-            playlists = fetch_auth_playlist(video["id"])
+            playlists = fetch_auth_playlist(video)
 
         print_log("Fetching chapters...")
         chapters = twitch.get_video_chapters(video_id)

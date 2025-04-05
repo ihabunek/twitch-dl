@@ -2,14 +2,8 @@ from typing import List
 import httpx
 from datetime import datetime
 from urllib.parse import urlparse
-from twitchdl.exceptions import ConsoleError
+from twitchdl.entities import Video
 from twitchdl.playlists import Playlist
-from twitchdl.twitch import gql_query
-
-
-def fetch_twitch_data_gql(vod_id):
-    query = f'query {{ video(id: "{vod_id}") {{ broadcastType, createdAt, seekPreviewsURL, owner {{ login }} }} }}'
-    return gql_query(query)
 
 
 def is_valid_quality(url: str):
@@ -18,14 +12,8 @@ def is_valid_quality(url: str):
         return response.is_success
 
 
-def fetch_auth_playlist(vod_id) -> List[Playlist]:
-    data = fetch_twitch_data_gql(vod_id)
-
-    if not data:
-        raise ConsoleError('Invalid vodId')
-
-    vod_data = data['data']['video']
-    channel_data = vod_data['owner']
+def fetch_auth_playlist(video: Video) -> List[Playlist]:
+    owner_login = video["owner"]["login"]
 
     resolutions = [
         {"name": "1080p60", "group_id": "chunked", "resolution": "1920x1080", "is_source": True},
@@ -37,17 +25,17 @@ def fetch_auth_playlist(vod_id) -> List[Playlist]:
         {"name": "Audio Only", "group_id": "audio_only", "resolution": None, "is_source": False},
     ]
 
-    current_url = urlparse(vod_data['seekPreviewsURL'])
+    current_url = urlparse(video['seekPreviewsURL'])
     domain = current_url.hostname
     paths = current_url.path.split('/')
     vod_special_id = paths[paths.index(next(p for p in paths if "storyboards" in p)) - 1]
 
     now = datetime.strptime("2023-02-10", "%Y-%m-%d")
-    created = datetime.strptime(vod_data['createdAt'], "%Y-%m-%dT%H:%M:%SZ")
+    created = datetime.strptime(video['createdAt'], "%Y-%m-%dT%H:%M:%SZ")
     time_difference = (now - created).total_seconds()
     days_difference = time_difference / (3600 * 24)
 
-    broadcast_type = vod_data['broadcastType'].lower()
+    broadcast_type = video['broadcastType'].lower()
 
     playlists: List[Playlist] = []
     for resolution in resolutions:
@@ -55,9 +43,9 @@ def fetch_auth_playlist(vod_id) -> List[Playlist]:
         url = None
 
         if broadcast_type == "highlight":
-            url = f"https://{domain}/{vod_special_id}/{group_id}/highlight-{vod_id}.m3u8"
+            url = f"https://{domain}/{vod_special_id}/{group_id}/highlight-{video["id"]}.m3u8"
         elif broadcast_type == "upload" and days_difference > 7:
-            url = f"https://{domain}/{channel_data['login']}/{vod_id}/{vod_special_id}/{group_id}/index-dvr.m3u8"
+            url = f"https://{domain}/{owner_login}/{vod_id}/{vod_special_id}/{group_id}/index-dvr.m3u8"
         else:
             url = f"https://{domain}/{vod_special_id}/{group_id}/index-dvr.m3u8"
 

@@ -85,6 +85,7 @@ class Video(TypedDict):
     id: str
     title: str
     description: str
+    createdAt: str
     publishedAt: str
     recordedAt: str
     updatedAt: str
@@ -92,6 +93,7 @@ class Video(TypedDict):
     lengthSeconds: int
     status: str
     viewCount: int
+    seekPreviewsURL: str
     game: Optional["Game"]
     owner: User
     creator: User
