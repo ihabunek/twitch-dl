@@ -26,9 +26,11 @@ def fetch_auth_playlist(video: Video) -> List[Playlist]:
         Resolution(name="1080p60", group_id="chunked", resolution="1920x1080", is_source=True),
         Resolution(name="1080p60", group_id="1080p60", resolution="1920x1080", is_source=False),
         Resolution(name="720p60", group_id="720p60", resolution="1280x720", is_source=False),
+        Resolution(name="720p", group_id="720p30", resolution="1280x720", is_source=False),
         Resolution(name="480p", group_id="480p30", resolution="852x480", is_source=False),
         Resolution(name="360p", group_id="360p30", resolution="640x360", is_source=False),
         Resolution(name="160p", group_id="160p30", resolution="284x160", is_source=False),
+        Resolution(name="144p", group_id="144p30", resolution="256x144", is_source=False),
         Resolution(name="Audio Only", group_id="audio_only", resolution=None, is_source=False),
     ]
 
