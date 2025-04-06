@@ -229,11 +229,11 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
                 overwrite = True
                 args.overwrite = True
             elif response == Overwrite.SKIP:
-                click.echo(f"Skipping clip: {green(target)}")
+                click.echo(f"Skipping video: {green(target)}")
                 return
             elif response == Overwrite.SKIP_ALL:
                 args.skip_existing = True
-                click.echo(f"Skipping clip: {green(target)}")
+                click.echo(f"Skipping video: {green(target)}")
                 return
             elif response == Overwrite.ABORT:
                 raise click.Abort()
