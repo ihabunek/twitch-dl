@@ -82,6 +82,8 @@ async def download(
     tmp_target = f"{target}.tmp"
     with open(tmp_target, "wb") as f:
         async with client.stream("GET", source) as response:
+            response.raise_for_status()
+
             content_length = response.headers.get("content-length")
             if content_length is None:
                 raise ConsoleError('No content length: {}'.format(source))
