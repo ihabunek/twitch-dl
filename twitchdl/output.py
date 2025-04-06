@@ -36,6 +36,10 @@ def print_log(*args: Any):
     click.secho(message, err=True)
 
 
+def print_warning(message: Any):
+    click.secho(message, err=True, fg="yellow")
+
+
 def print_error(message: Any):
     click.secho(message, err=True, fg="red")
 

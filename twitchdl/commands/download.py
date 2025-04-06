@@ -17,7 +17,7 @@ from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
-from twitchdl.output import blue, bold, green, print_error, print_log, underlined, yellow
+from twitchdl.output import blue, bold, green, print_error, print_log, print_warning, underlined, yellow
 from twitchdl.playlists import (
     Playlist,
     enumerate_vods,
@@ -299,12 +299,22 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     sources = [base_uri + vod.path for vod in vods]
     targets = [cache.get_path(f"{vod.index:05d}.ts") for vod in vods]
 
-    # replace unmuted to muted for subscriptions
+    # When a video contains muted segments, there are unmuted variants available
+    # only to subscribers. When using the workaround to download the sub-only
+    # video without an access token, these segments must be converted
+    # to "muted", or they will return HTTP 403.
     if auth_playlist:
-        sources_muted = []
-        for line in sources:
-            sources_muted.append(line.replace("-unmuted", "-muted"))
-        sources = sources_muted
+        muted_count = 0
+        muted_sources: List[str] = []
+        for source in sources:
+            if "-unmuted" in source:
+                source = source.replace("-unmuted", "-muted")
+                muted_count += 1
+            muted_sources.append(source)
+        sources = muted_sources
+
+        if muted_count > 0:
+            print_warning(f"Muted {muted_count} VODs available only to subscribers. Use an access token to get the unmuted audio.")
 
     asyncio.run(
         download_all(
