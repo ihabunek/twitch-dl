@@ -116,7 +116,7 @@ async def download_with_retries(
             try:
                 return await download(client, task_id, source, target, progress, token_bucket)
             except httpx.RequestError:
-                logger.exception("Task {task_id} failed. Retrying. Maybe.")
+                logger.exception(f"Task {task_id} failed. Retrying. Maybe.")
                 progress.abort(task_id)
                 if n + 1 >= RETRY_COUNT:
                     raise
