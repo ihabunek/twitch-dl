@@ -462,7 +462,7 @@ def videos(
     sort: VideosSort,
     type: VideosType,
 ):
-    """List or download clips for given CHANNEL_NAME."""
+    """List or download videos for given CHANNEL_NAME."""
     from twitchdl.commands.videos import videos
 
     # Click provides a tuple, make it a list instead
