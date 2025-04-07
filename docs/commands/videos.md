@@ -1,7 +1,7 @@
 <!-- ------------------- generated docs start ------------------- -->
 # twitch-dl videos
 
-List or download clips for given CHANNEL_NAME.
+List or download videos for given CHANNEL_NAME.
 
 ### USAGE
 
