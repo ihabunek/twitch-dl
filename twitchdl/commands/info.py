@@ -11,7 +11,7 @@ from twitchdl.playlists import Playlist, parse_playlists
 from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, Clip, Video
 
-def info(id: str, *, json: bool = False, auth_token: Optional[str]):
+def info(id: str, *, json: bool = False, auth_token: Optional[str], sub_only: bool):
     video_id = utils.parse_video_identifier(id)
     if video_id:
         print_log("Fetching video...")
@@ -23,13 +23,17 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str]):
         print_log("Fetching access token...")
         access_token = twitch.get_access_token(video_id, auth_token)
 
-        print_log("Fetching playlists...")
-        try:
-            playlists_text = twitch.get_playlists(video["id"], access_token)
-            playlists = parse_playlists(playlists_text)
-        except PlaylistAuthRequireError:
-            print_log("Possible subscriber-only VOD, attempting workaround...")
+        if sub_only:
+            print_log("Fetching sub-only playlists...")
             playlists = get_subonly_playlists(video)
+        else:
+            print_log("Fetching playlists...")
+            try:
+                playlists_text = twitch.get_playlists(video["id"], access_token)
+                playlists = parse_playlists(playlists_text)
+            except PlaylistAuthRequireError:
+                print_log("Possible subscriber-only VOD, attempting workaround...")
+                playlists = get_subonly_playlists(video)
 
         print_log("Fetching chapters...")
         chapters = twitch.get_video_chapters(video_id)

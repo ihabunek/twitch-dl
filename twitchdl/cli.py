@@ -391,12 +391,18 @@ def env():
          VODs. Can be copied from the `auth_token` cookie in any browser logged
          in on Twitch.""",
 )
+@click.option(
+    "--sub-only",
+    help="Use sub-only workaround to fetch playlists. Used for testing.",
+    is_flag=True,
+    hidden=True,
+)
 @json_option
-def info(id: str, json: bool, auth_token: Optional[str]):
+def info(id: str, json: bool, auth_token: Optional[str], sub_only: bool):
     """Print information for a given Twitch URL, video ID or clip slug."""
     from twitchdl.commands.info import info
 
-    info(id, json=json, auth_token=auth_token)
+    info(id, json=json, auth_token=auth_token, sub_only=sub_only)
 
 
 @cli.command()
