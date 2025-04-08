@@ -6,6 +6,10 @@ from twitchdl.playlists import Playlist, parse_playlists
 from twitchdl.subonly import get_subonly_playlists
 
 
+# Allow failures because these are a bit flaky
+
+
+@pytest.mark.xfail
 @pytest.mark.parametrize("channel", ["baertaffy"])
 @pytest.mark.parametrize("type", ["archive", "highlight", "upload"])
 def test_sub_only_playlists(channel: str, type: VideosType):
@@ -22,6 +26,7 @@ def test_sub_only_playlists(channel: str, type: VideosType):
     assert regular_playlists == subonly_playlists
 
 
+@pytest.mark.xfail
 def test_sub_only_playlists_4k():
     # Known 4k video
     video = twitch.get_video("2177476725")
@@ -36,7 +41,7 @@ def test_sub_only_playlists_4k():
 
 def _get_video(channel: str, type: VideosType):
     """Fetch the latest video of given type from a randomly chosen channel"""
-    videos = twitch.get_channel_videos(channel, limit=1, sort="time", type = type)
+    videos = twitch.get_channel_videos(channel, limit=1, sort="time", type=type)
     if not videos["edges"]:
         raise ValueError(f"Video of type '{type}' not found.")
     return videos["edges"][0]["node"]

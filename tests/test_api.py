@@ -11,7 +11,7 @@ from twitchdl.commands.videos import get_game_ids
 from twitchdl.exceptions import ConsoleError
 from twitchdl.playlists import enumerate_vods, load_m3u8, parse_playlists
 
-TEST_CHANNEL = "bananasaurus_rex"
+TEST_CHANNEL = "baertaffy"
 
 
 def test_get_videos():
