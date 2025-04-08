@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 import shutil
 import subprocess
@@ -55,6 +56,9 @@ def get_subonly_playlists(video: Video) -> List[Playlist]:
 
 async def _get_subonly_playlists_async(video: Video) -> List[Playlist]:
     async with httpx.AsyncClient() as client:
+        client.event_hooks["request"] = [log_request]
+        client.event_hooks["response"] = [log_response]
+
         tasks = [_get_source_playlist(client, video)]
         for resolution in RESOLUTIONS:
             tasks.append(_get_playlist(client, video, resolution))
@@ -200,3 +204,16 @@ def _parse_frame_rate(value: str) -> Optional[int]:
         return round(int(left) / int(right))
     except Exception:
         return None
+
+
+# TODO: dedupe logging from the one in twitch.py
+logger = logging.getLogger(__name__)
+
+
+async def log_request(request: httpx.Request):
+    logger.info(f"--> {request.method} {request.url}")
+
+
+async def log_response(response: httpx.Response):
+    request = response.request
+    logger.info(f"<-- {request.method} {request.url} HTTP {response.status_code}")
