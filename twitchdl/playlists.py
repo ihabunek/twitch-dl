@@ -47,7 +47,8 @@ def parse_playlists(playlists_m3u8: str) -> List[Playlist]:
             is_source = media.group_id == "chunked"
             yield Playlist(media.name, media.group_id, resolution, p.uri, is_source)
 
-    return list(_parse(playlists_m3u8))
+    playlists = list(_parse(playlists_m3u8))
+    return sorted(playlists, key=_playlist_key)
 
 
 def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
