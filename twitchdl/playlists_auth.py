@@ -1,3 +1,4 @@
+import asyncio
 import json
 import re
 import shutil
@@ -41,10 +42,7 @@ def get_subonly_playlists(video: Video) -> List[Playlist]:
 
     Used for sub-only videos which return HTTP 403 when fetching playlists.
     """
-    source_playlist = get_source_playlist(video)
-    other_playlists = [get_playlist(video, r) for r in RESOLUTIONS]
-    playlists = [source_playlist] + other_playlists
-    playlists = [p for p in playlists if p]
+    playlists = asyncio.run(_get_subonly_playlists_async(video))
 
     if not playlists:
         raise ConsoleError(
@@ -55,48 +53,64 @@ def get_subonly_playlists(video: Video) -> List[Playlist]:
     return playlists
 
 
-def get_source_playlist(video: Video) -> Optional[Playlist]:
+async def _get_subonly_playlists_async(video: Video) -> List[Playlist]:
+    async with httpx.AsyncClient() as client:
+        tasks = [_get_source_playlist(client, video)]
+        for resolution in RESOLUTIONS:
+            tasks.append(_get_playlist(client, video, resolution))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for r in results:
+            if isinstance(r, BaseException):
+                print_warning(f"Failed fetching playlist: {r}")
+
+        return [r for r in results if isinstance(r, Playlist)]
+
+
+async def _get_source_playlist(client: httpx.AsyncClient, video: Video) -> Optional[Playlist]:
     """Source playlist is special because we cannot predict the resolution and
     framerate."""
     group_id = "chunked"
     playlist_url = get_playlist_url(video, group_id)
-    with httpx.Client() as client:
-        response = client.get(playlist_url)
-        if not response.is_success:
-            return None
+    response = await client.get(playlist_url)
+    if not response.is_success:
+        return None
 
-        resolution = detect_source_resolution(playlist_url, response.text, group_id)
-        # Don't break if unable to determine source stream parameters
-        if not resolution:
-            return Playlist(
-                name="source",
-                group_id=group_id,
-                resolution="???",
-                url=playlist_url,
-                is_source=True,
-            )
-
+    resolution = detect_source_resolution(playlist_url, response.text, group_id)
+    # Don't break if unable to determine source stream parameters
+    if not resolution:
         return Playlist(
-            name=resolution.name,
-            group_id=resolution.group_id,
-            resolution=resolution.resolution,
+            name="source",
+            group_id=group_id,
+            resolution="???",
             url=playlist_url,
             is_source=True,
         )
 
+    return Playlist(
+        name=resolution.name,
+        group_id=resolution.group_id,
+        resolution=resolution.resolution,
+        url=playlist_url,
+        is_source=True,
+    )
 
-def get_playlist(video: Video, resolution: Resolution) -> Optional[Playlist]:
+
+async def _get_playlist(
+    client: httpx.AsyncClient,
+    video: Video,
+    resolution: Resolution,
+) -> Optional[Playlist]:
     url = get_playlist_url(video, resolution.group_id)
-    with httpx.Client() as client:
-        response = client.get(url)
-        if response.is_success:
-            return Playlist(
-                name=resolution.name,
-                group_id=resolution.group_id,
-                resolution=resolution.resolution,
-                url=url,
-                is_source=False,
-            )
+    response = await client.get(url)
+    if response.is_success:
+        return Playlist(
+            name=resolution.name,
+            group_id=resolution.group_id,
+            resolution=resolution.resolution,
+            url=url,
+            is_source=False,
+        )
 
 
 def get_playlist_url(video: Video, group_id: str):
