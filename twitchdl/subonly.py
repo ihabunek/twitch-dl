@@ -82,7 +82,7 @@ async def _get_source_playlist(client: httpx.AsyncClient, video: Video) -> Optio
     if not response.is_success:
         return None
 
-    resolution = _detect_source_resolution(playlist_url, response.text, group_id)
+    resolution = await _detect_source_resolution(playlist_url, response.text, group_id)
     # Don't break if unable to determine source stream parameters
     if not resolution:
         return Playlist(
@@ -140,7 +140,7 @@ def _get_playlist_url(video: Video, group_id: str):
     raise ConsoleError(f"Unknown broadcast type: {broadcast_type}")
 
 
-def _detect_source_resolution(
+async def _detect_source_resolution(
     playlist_url: str,
     playlists: str,
     group_id: str,
@@ -170,26 +170,25 @@ def _detect_source_resolution(
         print_warning("ffprobe not found, cannot detect source resulution")
         return None
 
-    process = subprocess.run(
-        [
-            ffprobe,
-            "-v",
-            "error",
-            "-print_format",
-            "json",
-            "-show_streams",
-            "-select_streams",
-            "v",
-            url,
-        ],
-        stdout=subprocess.PIPE,
+    process = await asyncio.subprocess.create_subprocess_exec(
+        ffprobe,
+        "-v",
+        "error",
+        "-print_format",
+        "json",
+        "-show_streams",
+        "-select_streams",
+        "v",
+        url,
+        stdout=asyncio.subprocess.PIPE,
     )
 
+    stdout, _ = await process.communicate()
     if process.returncode != 0:
         print_warning("failed detecting source resolution")
         return None
 
-    data = json.loads(process.stdout)
+    data = json.loads(stdout)
     stream = data["streams"][0]
     resolution = f"{stream['width']}x{stream['height']}"
 
