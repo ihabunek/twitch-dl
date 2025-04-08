@@ -3,7 +3,7 @@ import pytest
 from twitchdl import twitch
 from twitchdl.entities import VideosType
 from twitchdl.playlists import Playlist, parse_playlists
-from twitchdl.playlists_auth import fetch_auth_playlist
+from twitchdl.subonly import get_subonly_playlists
 
 
 @pytest.mark.parametrize("channel", ["baertaffy"])
@@ -17,7 +17,7 @@ def test_sub_only_playlists(channel: str, type: VideosType):
     access_token = twitch.get_access_token(video["id"])
     playlists_text = twitch.get_playlists(video["id"], access_token)
     regular_playlists = sorted(parse_playlists(playlists_text), key=lambda p: p.group_id)
-    subonly_playlists = sorted(fetch_auth_playlist(video), key=lambda p: p.group_id)
+    subonly_playlists = sorted(get_subonly_playlists(video), key=lambda p: p.group_id)
 
     assert regular_playlists == subonly_playlists
 
@@ -29,7 +29,7 @@ def test_sub_only_playlists_4k():
     access_token = twitch.get_access_token(video["id"])
     playlists_text = twitch.get_playlists(video["id"], access_token)
     regular_playlists = sorted(parse_playlists(playlists_text), key=lambda p: p.group_id)
-    subonly_playlists = sorted(fetch_auth_playlist(video), key=lambda p: p.group_id)
+    subonly_playlists = sorted(get_subonly_playlists(video), key=lambda p: p.group_id)
 
     assert regular_playlists == subonly_playlists
 
