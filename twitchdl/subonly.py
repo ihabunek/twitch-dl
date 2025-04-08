@@ -148,10 +148,22 @@ def _detect_source_resolution(
     """Attempt to determine video resolution and framerate by examining the first
     VOD in the playlist via ffprobe."""
     m3u8 = load_m3u8(playlists)
-    vod_path = m3u8.segments[0].uri
-    assert vod_path is not None
+
+    # Examine the init section if it exists, otherwise examine the first segment
+    # Examining the first segment when an init section exists will not work when
+    # the video is in mp4 format because we'll miss the file header.
+    first_segment = m3u8.segments[0]
+    if first_segment.init_section:
+        path = first_segment.init_section.uri
+    else:
+        path = first_segment.uri
+
+    assert path is not None
     base_url = re.sub("/[^/]+$", "/", playlist_url)
-    vod_url = base_url + vod_path.replace("-unmuted", "-muted")
+
+    # For muted segments, use the -muted variants because -unmuted variants will
+    # return HTTP 403
+    url = base_url + path.replace("-unmuted", "-muted")
 
     ffprobe = shutil.which("ffprobe")
     if not ffprobe:
@@ -168,7 +180,7 @@ def _detect_source_resolution(
             "-show_streams",
             "-select_streams",
             "v",
-            vod_url,
+            url,
         ],
         stdout=subprocess.PIPE,
     )
