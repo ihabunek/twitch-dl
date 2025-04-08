@@ -8,8 +8,8 @@ from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
 from twitchdl.naming import video_placeholders
 from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
 from twitchdl.playlists import Playlist, parse_playlists
+from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, Clip, Video
-from twitchdl.playlists_auth import fetch_auth_playlist
 
 def info(id: str, *, json: bool = False, auth_token: Optional[str]):
     video_id = utils.parse_video_identifier(id)
@@ -29,7 +29,7 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str]):
             playlists = parse_playlists(playlists_text)
         except PlaylistAuthRequireError:
             print_log("Possible subscriber-only VOD, attempting workaround...")
-            playlists = fetch_auth_playlist(video)
+            playlists = get_subonly_playlists(video)
 
         print_log("Fetching chapters...")
         chapters = twitch.get_video_chapters(video_id)

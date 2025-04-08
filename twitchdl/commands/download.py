@@ -14,7 +14,7 @@ import httpx
 from twitchdl import twitch, utils
 from twitchdl.cache import Cache
 from twitchdl.entities import Clip, DownloadOptions
-from twitchdl.exceptions import ConsoleError
+from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
 from twitchdl.output import blue, bold, green, print_error, print_log, print_warning, underlined, yellow
@@ -28,9 +28,8 @@ from twitchdl.playlists import (
     parse_playlists,
     select_playlist,
 )
+from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, ClipAccessToken, Video
-from twitchdl.playlists_auth import get_subonly_playlists
-from twitchdl.exceptions import PlaylistAuthRequireError
 
 def download(ids: List[str], args: DownloadOptions):
     if not ids:

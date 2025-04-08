@@ -1,3 +1,5 @@
+"""Attempt to handle sub-only videos."""
+
 import asyncio
 import json
 import logging
