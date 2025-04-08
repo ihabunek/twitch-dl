@@ -77,12 +77,12 @@ async def _get_source_playlist(client: httpx.AsyncClient, video: Video) -> Optio
     """Source playlist is special because we cannot predict the resolution and
     framerate."""
     group_id = "chunked"
-    playlist_url = get_playlist_url(video, group_id)
+    playlist_url = _get_playlist_url(video, group_id)
     response = await client.get(playlist_url)
     if not response.is_success:
         return None
 
-    resolution = detect_source_resolution(playlist_url, response.text, group_id)
+    resolution = _detect_source_resolution(playlist_url, response.text, group_id)
     # Don't break if unable to determine source stream parameters
     if not resolution:
         return Playlist(
@@ -107,7 +107,7 @@ async def _get_playlist(
     video: Video,
     resolution: Resolution,
 ) -> Optional[Playlist]:
-    url = get_playlist_url(video, resolution.group_id)
+    url = _get_playlist_url(video, resolution.group_id)
     response = await client.get(url)
     if response.is_success:
         return Playlist(
@@ -119,7 +119,7 @@ async def _get_playlist(
         )
 
 
-def get_playlist_url(video: Video, group_id: str):
+def _get_playlist_url(video: Video, group_id: str):
     broadcast_type = video["broadcastType"]
     owner_login = video["owner"]["login"]
 
@@ -140,7 +140,7 @@ def get_playlist_url(video: Video, group_id: str):
     raise ConsoleError(f"Unknown broadcast type: {broadcast_type}")
 
 
-def detect_source_resolution(
+def _detect_source_resolution(
     playlist_url: str,
     playlists: str,
     group_id: str,
