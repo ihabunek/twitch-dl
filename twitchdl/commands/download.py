@@ -29,7 +29,7 @@ from twitchdl.playlists import (
     select_playlist,
 )
 from twitchdl.twitch import Chapter, ClipAccessToken, Video
-from twitchdl.playlists_auth import fetch_auth_playlist
+from twitchdl.playlists_auth import get_subonly_playlists
 from twitchdl.exceptions import PlaylistAuthRequireError
 
 def download(ids: List[str], args: DownloadOptions):
@@ -255,7 +255,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     except PlaylistAuthRequireError:
         print_log("Possible subscriber-only VOD, attempting workaround...")
         playlists_text = ""
-        playlists = fetch_auth_playlist(video)
+        playlists = get_subonly_playlists(video)
         auth_playlist = True
 
     playlist = select_playlist(playlists, args.quality)
