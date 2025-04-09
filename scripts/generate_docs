@@ -97,7 +97,7 @@ def render_options(ctx, command: Command):
 
 def get_options(command: Command):
     for option in command.params:
-        if isinstance(option, click.Option):
+        if isinstance(option, click.Option) and not option.hidden:
             opts = ", ".join(option.opts)
             opts += option_type(option)
 
