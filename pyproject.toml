@@ -69,3 +69,7 @@ pythonVersion = "3.8"
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.pytest.ini_options]
+addopts = "-v"
+testpaths = ["tests"]
