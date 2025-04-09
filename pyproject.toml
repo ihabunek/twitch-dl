@@ -41,20 +41,6 @@ chat = [
     "fonttools>=4,<5",
 ]
 
-dev = [
-    "build",
-    "pytest",
-    "pyyaml",
-    "setuptools",
-    "twine",
-    "vermin",
-]
-
-test = [
-    "pytest",
-    "vermin",
-]
-
 [project.urls]
 "Homepage" = "https://twitch-dl.bezdomni.net/"
 "Source" = "https://github.com/ihabunek/twitch-dl"
@@ -73,3 +59,18 @@ target-version = "py38"
 [tool.pytest.ini_options]
 addopts = "-v"
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "build",
+    "pytest",
+    "pyyaml",
+    "setuptools",
+    "twine",
+    "vermin",
+]
+
+test = [
+    "pytest",
+    "vermin",
+]
