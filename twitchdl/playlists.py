@@ -194,5 +194,5 @@ def get_init_sections(playlist: m3u8.M3U8) -> Set[str]:
     return set(
         segment.init_section.uri
         for segment in playlist.segments
-        if segment.init_section is not None
+        if segment.init_section is not None and segment.init_section.uri is not None
     )

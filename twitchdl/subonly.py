@@ -5,7 +5,6 @@ import json
 import logging
 import re
 import shutil
-import subprocess
 from typing import List, NamedTuple, Optional
 from urllib.parse import urlparse
 
