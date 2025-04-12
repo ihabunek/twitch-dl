@@ -252,7 +252,10 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         playlists_text = twitch.get_playlists(video["id"], access_token)
         playlists = parse_playlists(playlists_text)
     except PlaylistAuthRequireError:
-        print_log("Possible subscriber-only VOD, attempting workaround...")
+        print_warning("\nPossible subscriber-only VOD, attempting workaround...")
+        print_warning("If this does not work, check out the authentication chapter in docs:")
+        print_warning("https://twitch-dl.bezdomni.net/authentication.html")
+
         playlists_text = ""
         playlists = get_subonly_playlists(video)
         auth_playlist = True
