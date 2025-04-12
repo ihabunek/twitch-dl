@@ -14,14 +14,20 @@ def video_filename(video: Video, format: str, output: str) -> str:
 
 
 def video_placeholders(video: Video, format: str) -> Dict[str, str]:
-    date, time = video["publishedAt"].split("T")
+    datetime = video["publishedAt"]
+
+    # Windows don't allow colons in filenames
+    if os.name == "nt":
+        datetime = datetime.replace(":", "_")
+
+    date, time = datetime.split("T")
     game = video["game"]["name"] if video["game"] else "Unknown"
 
     return {
         "channel": video["owner"]["displayName"],
         "channel_login": video["owner"]["login"],
         "date": date,
-        "datetime": video["publishedAt"],
+        "datetime": datetime,
         "format": format,
         "game": game,
         "game_slug": utils.slugify(game),
