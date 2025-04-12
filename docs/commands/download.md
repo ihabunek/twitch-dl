@@ -42,7 +42,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">-f, --format TEXT</td>
-    <td>Video format to convert into, passed to ffmpeg as the target file extension. Defaults to <code>mkv</code>. If <code>--concat</code> is passed, defaults to <code>ts</code>.</td>
+    <td>Video format to convert into, passed to ffmpeg as the target file extension. Defaults to <code>mp4</code>. If <code>--concat</code> is passed, defaults to <code>ts</code>.</td>
 </tr>
 
 <tr>

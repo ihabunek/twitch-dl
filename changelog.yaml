@@ -1,3 +1,11 @@
+3.0.0:
+  date: 2025-04-12
+  changes:
+    - "Add ability to download sub-only videos without authentication (thanks to @Haehnchen)"
+    - "**BREAKING**: Default video format has been changed from mkv to mp4, since that's a more common format."
+    - "**BREAKING**: When running `twitch-dl info --json`, the JSON format for playlists has changed."
+    - "Fix invalid filenames on windows when using {datetime} or {time} placeholders."
+
 2.11.0:
   date: 2025-03-03
   changes:

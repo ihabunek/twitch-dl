@@ -1,9 +1,12 @@
 Authentication
 ==============
 
-Some videos are subscriber-only and require you to be logged in. To accomplish
-this you need to find your auth token. It can be found using your browser, in a
-cookie named `auth_token`.
+Some videos are visible to channel subscribers only. Twitch will attempt a
+workaround and download them anyway, but if this does not work you can use your
+own user account to download the stream.
+
+To accomplish this you need to find your auth token. It can be found using your
+browser, in a cookie named `auth_token`.
 
 1. Open twitch.tv in your browser and make sure you're logged in.
 2. Open developer tools (F12 shortcut in Firefox and Chrome).
