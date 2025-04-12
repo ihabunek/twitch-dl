@@ -408,7 +408,17 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
 
     try:
         response = gql_query(query, auth_token=auth_token)
-        return response["data"]["videoPlaybackAccessToken"]
+        access_token = response["data"]["videoPlaybackAccessToken"]
+
+        # Sometimes Twitch returns a null access token in a HTTP 200 response
+        # see: https://github.com/ihabunek/twitch-dl/issues/175
+        if access_token is None:
+            raise ConsoleError(
+                "Twitch did not return an access token.\n" +
+                "This sometimes happens with fresh VODs. Try again a bit later."
+            )
+
+        return access_token
     except httpx.HTTPStatusError as error:
         # Provide a more useful error message when server returns HTTP 401
         # Unauthorized while using a user-provided auth token.
