@@ -84,7 +84,7 @@ logger = logging.getLogger(__name__)
 def log_request(request: httpx.Request):
     logger.info(f"--> {request.method} {request.url}")
     if request.content:
-        logger.debug(f"--> {request.content}")
+        logger.debug(f"--> {request.content.decode()}")
 
 
 def log_response(response: httpx.Response, duration_seconds: float):
@@ -93,7 +93,7 @@ def log_response(response: httpx.Response, duration_seconds: float):
     size = format_size(len(response.content))
     logger.info(f"<-- {request.method} {request.url} HTTP {response.status_code} {duration} {size}")
     if response.content:
-        logger.debug(f"<-- {response.content}")
+        logger.debug(f"<-- {response.content.decode()}")
 
 
 def gql_persisted_query(query: Data):
