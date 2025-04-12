@@ -24,7 +24,7 @@ from twitchdl.entities import (
     VideosSort,
     VideosType,
 )
-from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
+from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.utils import format_size, remove_null_values
 
 
@@ -383,12 +383,6 @@ def channel_videos_generator(
     return videos["totalCount"], _generator(videos, max_videos)
 
 
-UNAUTHORIZED_ERROR = (
-    "Unauthorized. This video may be subscriber-only. See docs:\n" +
-    "https://twitch-dl.bezdomni.net/commands/download.html#downloading-subscriber-only-vods"
-)
-
-
 def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessToken:
     query = f"""
     {{
@@ -426,7 +420,7 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
             if auth_token:
                 raise ConsoleError("Unauthorized. The provided auth token is not valid.")
             else:
-                raise PlaylistAuthRequireError(UNAUTHORIZED_ERROR)
+                raise AuthRequiredError()
 
         raise
 
@@ -454,7 +448,7 @@ def get_playlists(video_id: str, access_token: AccessToken) -> str:
         return response.content.decode("utf-8")
     except httpx.HTTPStatusError as ex:
         if ex.response.status_code == 403:
-            raise PlaylistAuthRequireError(UNAUTHORIZED_ERROR)
+            raise AuthRequiredError()
         raise
 
 

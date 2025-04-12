@@ -6,7 +6,7 @@ class ConsoleError(click.ClickException):
 
     pass
 
-class PlaylistAuthRequireError(Exception):
+class AuthRequiredError(Exception):
     """Raised when playlist auth requirement is missing."""
 
     pass

@@ -14,7 +14,7 @@ import httpx
 from twitchdl import twitch, utils
 from twitchdl.cache import Cache
 from twitchdl.entities import Clip, DownloadOptions
-from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
+from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
 from twitchdl.output import blue, bold, green, print_error, print_log, print_warning, underlined, yellow
@@ -247,18 +247,18 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
 
     print_log("Fetching playlists...")
 
-    auth_playlist = False
+    subonly_playlist = False
     try:
         playlists_text = twitch.get_playlists(video["id"], access_token)
         playlists = parse_playlists(playlists_text)
-    except PlaylistAuthRequireError:
+    except AuthRequiredError:
         print_warning("\nPossible subscriber-only VOD, attempting workaround...")
         print_warning("If this does not work, check out the authentication chapter in docs:")
         print_warning("https://twitch-dl.bezdomni.net/authentication.html")
 
         playlists_text = ""
         playlists = get_subonly_playlists(video)
-        auth_playlist = True
+        subonly_playlist = True
 
     playlist = select_playlist(playlists, args.quality)
     base_uri = re.sub("/[^/]+$", "/", playlist.url)
@@ -305,7 +305,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     # only to subscribers. When using the workaround to download the sub-only
     # video without an access token, these segments must be converted
     # to "muted", or they will return HTTP 403.
-    if auth_playlist:
+    if subonly_playlist:
         muted_count = 0
         muted_sources: List[str] = []
         for source in sources:

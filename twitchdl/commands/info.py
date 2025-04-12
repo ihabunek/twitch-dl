@@ -4,7 +4,7 @@ import click
 
 from twitchdl import twitch, utils
 from twitchdl.cli import DEFAULT_VIDEO_FORMAT
-from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
+from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.naming import video_placeholders
 from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
 from twitchdl.playlists import Playlist, parse_playlists
@@ -32,7 +32,7 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str], sub_only: bo
             try:
                 playlists_text = twitch.get_playlists(video["id"], access_token)
                 playlists = parse_playlists(playlists_text)
-            except PlaylistAuthRequireError:
+            except AuthRequiredError:
                 print_log("Possible subscriber-only VOD, attempting workaround...")
                 playlists = get_subonly_playlists(video)
 
