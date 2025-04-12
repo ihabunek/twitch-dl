@@ -1,15 +1,16 @@
 from typing import List, Optional
 
 import click
-import m3u8
 
 from twitchdl import twitch, utils
+from twitchdl.cli import DEFAULT_VIDEO_FORMAT
 from twitchdl.exceptions import ConsoleError, PlaylistAuthRequireError
 from twitchdl.naming import video_placeholders
 from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
 from twitchdl.playlists import Playlist, parse_playlists
 from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, Clip, Video
+
 
 def info(id: str, *, json: bool = False, auth_token: Optional[str], sub_only: bool):
     video_id = utils.parse_video_identifier(id)
@@ -85,7 +86,7 @@ def video_info(video: Video, playlists: List[Playlist], chapters: List[Chapter])
             duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
             click.echo(f'{start} {bold(chapter["description"])} ({duration})')
 
-    placeholders = video_placeholders(video, format="mkv")
+    placeholders = video_placeholders(video, format=DEFAULT_VIDEO_FORMAT)
     placeholders = [[f"{{{k}}}", v] for k, v in placeholders.items()]
     click.echo("")
     print_table(placeholders, headers=["Placeholder", "Value"])

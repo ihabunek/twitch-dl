@@ -116,7 +116,7 @@ def test_download_video(runner: CliRunner):
         in result.stderr
     )
     assert (
-        "Target: 2024-03-14_2090131595_gamesdonequick_frost_fatales_2024_day_1.mkv" in result.stderr
+        "Target: 2024-03-14_2090131595_gamesdonequick_frost_fatales_2024_day_1.mp4" in result.stderr
     )
     assert "Dry run, video not downloaded." in result.stdout
 

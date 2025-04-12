@@ -19,6 +19,9 @@ from twitchdl.output import print_log, print_table
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 from twitchdl.utils import format_size, get_size
 
+DEFAULT_VIDEO_FORMAT = "mp4"
+"""Default format to pass to ffmpeg"""
+
 # Tweak the Click context
 # https://click.palletsprojects.com/en/8.1.x/api/#context
 CONTEXT = dict(
@@ -248,9 +251,9 @@ def clips(
 @click.option(
     "-f",
     "--format",
-    help="""Video format to convert into, passed to ffmpeg as the target file
-         extension. Defaults to `mkv`. If `--concat` is passed, defaults to
-         `ts`.""",
+    help=f"""Video format to convert into, passed to ffmpeg as the target file
+         extension. Defaults to `{DEFAULT_VIDEO_FORMAT}`. If `--concat` is
+         passed, defaults to `ts`.""",
 )
 @click.option(
     "-k",
@@ -335,7 +338,7 @@ def download(
     from twitchdl.commands.download import download
 
     if not format:
-        format = "ts" if concat else "mkv"
+        format = "ts" if concat else DEFAULT_VIDEO_FORMAT
 
     if start is not None and end is not None and end <= start:
         raise ConsoleError("End time must be greater than start time")
