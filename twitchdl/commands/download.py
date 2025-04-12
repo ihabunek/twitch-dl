@@ -296,7 +296,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
     print_log(f"Downloading {len(vods)} VODs using {args.max_workers} workers")
 
     sources = [base_uri + vod.path for vod in vods]
-    targets = [cache.get_path(f"{vod.index:05d}.ts") for vod in vods]
+    targets = [cache.get_path(vod.filename) for vod in vods]
 
     # When a video contains muted segments, there are unmuted variants available
     # only to subscribers. When using the workaround to download the sub-only

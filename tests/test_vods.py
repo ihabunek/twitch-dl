@@ -2,7 +2,7 @@ from twitchdl.playlists import Vod, filter_vods
 
 
 def test_filter_vods():
-    vods = [Vod(index, path=f"vod_{index}.ts", duration=10.0) for index in range(100)]
+    vods = [Vod(index, path=f"vod_{index}.ts", duration=10.0, filename=f"vod_{index}.ts") for index in range(100)]
 
     # No cropping required
     filtered_vods, crop_start, crop_duration = filter_vods(vods, 60, 120)

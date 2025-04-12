@@ -3,8 +3,10 @@ Parse and manipulate m3u8 playlists.
 """
 
 from dataclasses import dataclass
+from os.path import splitext
 from pathlib import Path
 from typing import Generator, Iterable, List, Optional, OrderedDict, Set, Tuple
+from urllib.parse import urlparse
 
 import click
 import m3u8
@@ -30,6 +32,8 @@ class Vod:
     """Path part of the VOD URL"""
     duration: float
     """Segment duration in seconds"""
+    filename: str
+    """File name to which to download the VOD"""
 
 
 def parse_playlists(playlists_m3u8: str) -> List[Playlist]:
@@ -57,7 +61,11 @@ def load_m3u8(playlist_m3u8: str) -> m3u8.M3U8:
 
 def enumerate_vods(document: m3u8.M3U8) -> Generator[Vod, None, None]:
     for index, segment in enumerate(document.segments):
-        yield Vod(index, segment.uri, segment.duration)
+        assert segment.uri is not None
+        assert segment.duration is not None
+        _, ext = splitext(urlparse(segment.uri).path)
+        filename = f"{index:05d}{ext}"
+        yield Vod(index, segment.uri, segment.duration, filename)
 
 
 def filter_vods(
