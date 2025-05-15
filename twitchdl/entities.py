@@ -86,7 +86,8 @@ class Video(TypedDict):
     title: str
     description: str
     createdAt: str
-    publishedAt: str
+    # null in rare cases
+    publishedAt: Optional[str]
     recordedAt: str
     updatedAt: str
     broadcastType: str
