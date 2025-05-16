@@ -14,7 +14,7 @@ from twitchdl import __version__
 from twitchdl.cache import get_cache_dir, get_cache_subdirs
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
-from twitchdl.naming import DEFAULT_OUTPUT_TEMPLATE
+from twitchdl.naming import DEFAULT_CHAT_OUTPUT, DEFAULT_VIDEO_OUTPUT
 from twitchdl.output import print_log, print_table
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 from twitchdl.utils import format_size, get_size
@@ -280,7 +280,7 @@ def clips(
     "-o",
     "--output",
     help="Output file name template. See docs for details.",
-    default=DEFAULT_OUTPUT_TEMPLATE,
+    default=DEFAULT_VIDEO_OUTPUT,
 )
 @click.option(
     "-q",
@@ -538,7 +538,7 @@ def videos(
     "-o",
     "--output",
     help="Output file name template. See docs for details.",
-    default="chat_{id}.{format}",
+    default=DEFAULT_CHAT_OUTPUT,
 )
 @click.option(
     "-f",
@@ -596,6 +596,9 @@ def chat(
 
     try:
         from twitchdl.chat import render_chat
+
+        if json:
+            format = "json"
 
         render_chat(
             id,

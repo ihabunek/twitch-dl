@@ -5,8 +5,8 @@ from twitchdl import utils
 from twitchdl.entities import Clip, Video
 from twitchdl.exceptions import ConsoleError
 
-DEFAULT_OUTPUT_TEMPLATE = "{date}_{id}_{channel_login}_{title_slug}.{format}"
-
+DEFAULT_VIDEO_OUTPUT = "{date}_{id}_{channel_login}_{title_slug}.{format}"
+DEFAULT_CHAT_OUTPUT = "chat_{id}_{title_slug}.{format}"
 
 def video_filename(video: Video, format: str, output: str) -> str:
     subs = video_placeholders(video, format)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -19,7 +20,7 @@ from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
-from twitchdl.output import blue, green, print_json, print_log, print_status, yellow
+from twitchdl.output import blue, green, print_log, print_status, yellow
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
@@ -80,16 +81,16 @@ def render_chat(
         raise ConsoleError(f"Video {video_id} not found")
     total_duration = video["lengthSeconds"]
 
-    if json:
-        render_chat_json(video)
-        return
-
     target_path = Path(video_filename(video, format, output))
     if not overwrite and target_path.exists():
         response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
         if response.lower().strip() != "y":
             raise click.Abort()
         overwrite = True
+
+    if json:
+        download_chat_json(video, target_path)
+        return
 
     print_log("Loading video comments...")
     video_comments = get_video_comments(video_id)
@@ -149,20 +150,22 @@ def render_chat(
         shutil.rmtree(cache_dir)
 
 
-def render_chat_json(video: Video):
+def download_chat_json(video: Video, target: Path):
     print_log("Loading VideoComments...")
     video_comments = get_video_comments(video["id"])
 
     print_log("Loading Comments...")
     comments = list(generate_comments(video["id"]))
 
-    print_json(
-        {
+    with open(target, "w", encoding="utf8") as f:
+        obj = {
             "video": video,
             "video_comments": video_comments,
             "comments": comments,
         }
-    )
+        json.dump(obj, f)
+
+    click.echo("Chat saved to: {path}")
 
 
 def load_fonts(font_size: int):
