@@ -111,9 +111,12 @@ def gql_query(query: str, auth_token: Optional[str] = None):
 
 
 def gql_raise_on_error(response: httpx.Response):
+    request = response.request
     data = response.json()
     if "errors" in data:
         errors = [e["message"] for e in data["errors"]]
+        str_errors = ", ".join(errors)
+        logger.info(f"<-- {request.method} {request.url} GQL ERROR: {str_errors}")
         raise GQLError(errors)
 
 
