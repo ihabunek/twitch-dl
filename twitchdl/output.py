@@ -187,6 +187,18 @@ def print_video_compact(video: Video):
     click.echo(f"{bold(id)} {date} {green(title)} {blue(game)}")
 
 
+def print_found_video(video: Video):
+    print_log(
+        "Found video:",
+        green(video["title"]),
+        "by",
+        yellow(video["owner"]["displayName"]),
+        "playing",
+        blue(video["game"]["name"] if video["game"] else "Unknown"),
+        f"({utils.format_time(video['lengthSeconds'])})",
+    )
+
+
 def print_clip(clip: Clip):
     published_at = clip["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(clip["durationSeconds"])

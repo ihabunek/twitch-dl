@@ -17,7 +17,7 @@ from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
-from twitchdl.output import blue, bold, green, print_error, print_log, print_warning, underlined, yellow
+from twitchdl.output import blue, bold, green, print_error, print_found_video, print_log, print_warning, underlined, yellow
 from twitchdl.playlists import (
     Playlist,
     enumerate_vods,
@@ -212,7 +212,7 @@ def _print_found_clip(clip: Clip):
 
 def _download_video(video: Video, args: DownloadOptions) -> None:
     target = Path(video_filename(video, args.format, args.output))
-    _print_found_video(video)
+    print_found_video(video)
     print_log(f"Target: {blue(target)}")
 
     overwrite = args.overwrite
@@ -371,18 +371,6 @@ def _get_cache_dir(video: Video, playlist: Playlist, options: DownloadOptions) -
     except KeyError as e:
         supported = ", ".join(subs.keys())
         raise ConsoleError(f"Invalid key {e} used in --cache-dir. Supported keys are: {supported}")
-
-
-def _print_found_video(video: Video):
-    print_log(
-        "Found video:",
-        green(video["title"]),
-        "by",
-        yellow(video["owner"]["displayName"]),
-        "playing",
-        blue(video["game"]["name"] if video["game"] else "Unknown"),
-        f"({utils.format_time(video['lengthSeconds'])})",
-    )
 
 
 def http_get(url: str) -> str:

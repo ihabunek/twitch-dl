@@ -20,7 +20,7 @@ from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
-from twitchdl.output import blue, green, print_log, print_status, yellow
+from twitchdl.output import blue, green, print_found_video, print_log, print_status, yellow
 from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
@@ -79,9 +79,12 @@ def render_chat(
     video = get_video(video_id)
     if not video:
         raise ConsoleError(f"Video {video_id} not found")
+    print_found_video(video)
     total_duration = video["lengthSeconds"]
 
     target_path = Path(video_filename(video, format, output))
+    print_log(f"Target: {blue(target_path)}")
+
     if not overwrite and target_path.exists():
         response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
         if response.lower().strip() != "y":
