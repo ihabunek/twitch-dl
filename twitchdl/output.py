@@ -37,11 +37,11 @@ def print_log(*args: Any):
 
 
 def print_warning(message: Any):
-    click.secho(message, err=True, fg="yellow")
+    click.secho(message, err=True, fg="bright_yellow")
 
 
 def print_error(message: Any):
-    click.secho(message, err=True, fg="red")
+    click.secho(message, err=True, fg="bright_red")
 
 
 _prev_transient = False
@@ -165,7 +165,7 @@ def print_video(video: Video):
     url = f"https://www.twitch.tv/videos/{video['id']}"
 
     click.secho(f"Video {video['id']}", bold=True)
-    click.secho(video["title"], fg="green")
+    click.secho(video["title"], fg="bright_green")
 
     if channel or playing:
         click.echo(" ".join([channel, playing]))
@@ -206,7 +206,7 @@ def print_clip(clip: Clip):
     playing = f"playing {blue(clip['game']['name'])}" if clip["game"] else ""
 
     click.echo(f"Clip {bold(clip['slug'])}")
-    click.secho(clip["title"], fg="green")
+    click.secho(clip["title"], fg="bright_green")
     click.echo(f"{blue(channel)} {playing}")
     click.echo(
         f"Published {blue(published_at)}"
@@ -228,8 +228,8 @@ def print_clip_compact(clip: Clip):
 
 
 def prompt_continue():
-    enter = click.style("Enter", bold=True, fg="green")
-    ctrl_c = click.style("Ctrl+C", bold=True, fg="yellow")
+    enter = click.style("Enter", bold=True, fg="bright_green")
+    ctrl_c = click.style("Ctrl+C", bold=True, fg="bright_yellow")
     click.echo(f"Press {enter} to continue, {ctrl_c} to break.")
 
     try:
@@ -244,19 +244,19 @@ def prompt_continue():
 
 
 def blue(text: Any) -> str:
-    return click.style(text, fg="blue")
+    return click.style(text, fg="bright_blue")
 
 
 def cyan(text: Any) -> str:
-    return click.style(text, fg="cyan")
+    return click.style(text, fg="bright_cyan")
 
 
 def green(text: Any) -> str:
-    return click.style(text, fg="green")
+    return click.style(text, fg="bright_green")
 
 
 def yellow(text: Any) -> str:
-    return click.style(text, fg="yellow")
+    return click.style(text, fg="bright_yellow")
 
 
 def bold(text: Any) -> str:
