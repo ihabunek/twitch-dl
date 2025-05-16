@@ -153,14 +153,19 @@ def render_chat(
         shutil.rmtree(cache_dir)
 
 
-def download_chat_json(video: Video, target: Path):
+def download_chat_json(video: Video, target_path: Path):
     print_log("Loading VideoComments...")
     video_comments = get_video_comments(video["id"])
 
-    print_log("Loading Comments...")
-    comments = list(generate_comments(video["id"]))
+    comments: List[Comment] = []
+    total_duration = video["lengthSeconds"]
+    for page in generate_paged_comments(video["id"]):
+        if page:
+            comments.extend(page)
+            offset_seconds = page[-1]["contentOffsetSeconds"]
+            print_status(f"Loading Comments {format_time(offset_seconds)}/{format_time(total_duration)}", transient=True, dim=True)
 
-    with open(target, "w", encoding="utf8") as f:
+    with open(target_path, "w", encoding="utf8") as f:
         obj = {
             "video": video,
             "video_comments": video_comments,
@@ -168,7 +173,7 @@ def download_chat_json(video: Video, target: Path):
         }
         json.dump(obj, f)
 
-    click.echo("Chat saved to: {path}")
+    click.echo(f"Chat saved to: {target_path}")
 
 
 def load_fonts(font_size: int):
@@ -464,6 +469,20 @@ def generate_comments(video_id: str) -> Generator[Comment, None, None]:
         video = get_comments(video_id, cursor=cursor)
         for comment in video["comments"]["edges"]:
             yield comment["node"]
+
+        has_next = video["comments"]["pageInfo"]["hasNextPage"]
+        cursor = video["comments"]["edges"][-1]["cursor"]
+        page += 1
+
+
+def generate_paged_comments(video_id: str) -> Generator[List[Comment], None, None]:
+    page = 1
+    has_next = True
+    cursor = None
+
+    while has_next:
+        video = get_comments(video_id, cursor=cursor)
+        yield [comment["node"] for comment in video["comments"]["edges"]]
 
         has_next = video["comments"]["pageInfo"]["hasNextPage"]
         cursor = video["comments"]["edges"][-1]["cursor"]
