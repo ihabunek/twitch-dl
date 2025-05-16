@@ -7,7 +7,7 @@ twitch-dl uses
 which works on Bash, Fish and Zsh.
 
 To enable completion, twitch-dl must be [installed](./installation.md) as a
-command and available by ivoking `twitch-dl`. Then follow the instructions for
+command and available by invoking `twitch-dl`. Then follow the instructions for
 your shell.
 
 **Bash**
