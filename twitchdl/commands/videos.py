@@ -51,7 +51,6 @@ def videos(
         if compact:
             print_video_compact(video)
         else:
-            click.echo()
             print_video(video)
         count += 1
 
