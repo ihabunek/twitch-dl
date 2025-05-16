@@ -6,7 +6,7 @@ from twitchdl import twitch, utils
 from twitchdl.cli import DEFAULT_VIDEO_FORMAT
 from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.naming import video_placeholders
-from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video
+from twitchdl.output import bold, dim, print_clip, print_json, print_log, print_table, print_video, print_warning
 from twitchdl.playlists import Playlist, parse_playlists
 from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, Clip, Video
@@ -36,8 +36,7 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str], sub_only: bo
                 print_log("Possible subscriber-only VOD, attempting workaround...")
                 playlists = get_subonly_playlists(video)
 
-        print_log("Fetching chapters...")
-        chapters = twitch.get_video_chapters(video_id)
+        chapters = fetch_chapters(video_id)
 
         if json:
             video_json(video, playlists, chapters)
@@ -59,6 +58,15 @@ def info(id: str, *, json: bool = False, auth_token: Optional[str], sub_only: bo
         return
 
     raise ConsoleError(f"Invalid input: {id}")
+
+
+def fetch_chapters(video_id: str) -> List[Chapter]:
+    print_log("Fetching chapters...")
+    try:
+        return twitch.get_video_chapters(video_id)
+    except Exception:
+        print_warning("Failed fetching chapters")
+        return []
 
 
 def video_info(video: Video, playlists: List[Playlist], chapters: List[Chapter]):

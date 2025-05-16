@@ -13,6 +13,7 @@ import httpx
 
 from twitchdl import twitch, utils
 from twitchdl.cache import Cache
+from twitchdl.commands.info import fetch_chapters
 from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.http import download_all, download_file
@@ -238,8 +239,7 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
             elif response == Overwrite.ABORT:
                 raise click.Abort()
 
-    print_log("Fetching chapters...")
-    chapters = twitch.get_video_chapters(video["id"])
+    chapters = fetch_chapters(video["id"])
     start, end = _determine_time_range(chapters, args)
 
     print_log("Fetching access token...")
