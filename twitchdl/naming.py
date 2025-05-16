@@ -14,7 +14,7 @@ def video_filename(video: Video, format: str, output: str) -> str:
 
 
 def video_placeholders(video: Video, format: str) -> Dict[str, str]:
-    datetime = video["publishedAt"]
+    datetime = video["createdAt"]
 
     # Windows don't allow colons in filenames
     if os.name == "nt":

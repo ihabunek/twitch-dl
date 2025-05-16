@@ -155,7 +155,7 @@ def print_paged(
 
 
 def print_video(video: Video):
-    published_at = video["publishedAt"].replace("T", " @ ").replace("Z", "")
+    published_at = video["createdAt"].replace("T", " @ ").replace("Z", "")
     length = utils.format_duration(video["lengthSeconds"])
 
     channel = blue(video["owner"]["displayName"]) if video["owner"] else ""
@@ -181,7 +181,7 @@ def print_video(video: Video):
 
 def print_video_compact(video: Video):
     id = video["id"]
-    date = video["publishedAt"][:10]
+    date = video["createdAt"][:10]
     game = video["game"]["name"] if video["game"] else ""
     title = truncate(video["title"], 80).ljust(80)
     click.echo(f"{bold(id)} {date} {green(title)} {blue(game)}")

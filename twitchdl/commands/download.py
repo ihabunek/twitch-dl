@@ -438,7 +438,7 @@ def _write_metadata(
     start_offset_ms = 1000 * (start_offset or 0)
     end_offset_ms = 1000 * (end_offset or video["lengthSeconds"])
 
-    date = _escape_metadata(video["publishedAt"][:10])
+    date = _escape_metadata(video["createdAt"][:10])
     title = _escape_metadata(video["title"])
     artist = _escape_metadata(video["owner"]["displayName"])
     description = _escape_metadata(video["description"])
