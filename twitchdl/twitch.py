@@ -486,7 +486,8 @@ def get_video_chapters(video_id: str) -> List[Chapter]:
     }
 
     response = gql_persisted_query(query)
-    return list(_chapter_nodes(response["data"]["video"]["moments"]))
+    video = response["data"]["video"]
+    return list(_chapter_nodes(video["moments"])) if video else []
 
 
 def _chapter_nodes(moments: Data) -> Generator[Chapter, None, None]:
