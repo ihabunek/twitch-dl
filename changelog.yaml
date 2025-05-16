@@ -1,3 +1,10 @@
+3.1.0:
+  date: 2025-05-16
+  changes:
+    - "**BREAKING** Running `chat --json` will output to file instead of printing JSON to screen"
+    - "Use video creation date instead of publishing date because the latter can be blank in some cases (#183)"
+    - "Don't break if chapters failed to load, print warning and continue without chapter info"
+
 3.0.0:
   date: 2025-04-12
   changes:

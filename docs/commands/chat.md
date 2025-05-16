@@ -47,7 +47,7 @@ twitch-dl chat [OPTIONS] ID
 
 <tr>
     <td class="code">-o, --output TEXT</td>
-    <td>Output file name template. See docs for details. [default: <code>chat_{id}.{format}</code>]</td>
+    <td>Output file name template. See docs for details. [default: <code>chat_{id}_{title_slug}.{format}</code>]</td>
 </tr>
 
 <tr>
