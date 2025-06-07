@@ -1,6 +1,7 @@
+"""Generate chat as video"""
+
 from __future__ import annotations
 
-import json
 import re
 import shutil
 import subprocess
@@ -19,10 +20,9 @@ from twitchdl import cache
 from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
-from twitchdl.naming import video_filename
-from twitchdl.output import blue, green, print_found_video, print_log, print_status, yellow
-from twitchdl.twitch import get_comments, get_video, get_video_comments
-from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
+from twitchdl.output import blue, green, print_log, print_status, yellow
+from twitchdl.twitch import get_comments, get_video_comments
+from twitchdl.utils import format_time, iterate_with_next
 
 # Use NotoSans for latin, greek, cyrillic
 # Use NotoSansCJK for Chinese, Japanese, and Korean
@@ -56,44 +56,21 @@ USER_COLORS = [
 ]
 
 
-def render_chat(
-    id: str,
+def generate_chat_video(
+    video: Video,
     width: int,
     height: int,
     font_size: int,
     dark: bool,
     padding: Tuple[int, int],
-    output: str,
-    format: str,
     image_format: str,
     overwrite: bool,
     keep: bool,
     no_join: bool,
-    json: bool,
+    target_path: Path,
 ):
-    video_id = parse_video_identifier(id)
-    if not video_id:
-        raise ConsoleError("Invalid video ID")
-
-    print_log("Looking up video...")
-    video = get_video(video_id)
-    if not video:
-        raise ConsoleError(f"Video {video_id} not found")
-    print_found_video(video)
+    video_id = video["id"]
     total_duration = video["lengthSeconds"]
-
-    target_path = Path(video_filename(video, format, output))
-    print_log(f"Target: {blue(target_path)}")
-
-    if not overwrite and target_path.exists():
-        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
-        if response.lower().strip() != "y":
-            raise click.Abort()
-        overwrite = True
-
-    if json:
-        download_chat_json(video, target_path)
-        return
 
     print_log("Loading video comments...")
     video_comments = get_video_comments(video_id)
@@ -151,29 +128,6 @@ def render_chat(
     else:
         print_status("Deleting cache...", dim=True)
         shutil.rmtree(cache_dir)
-
-
-def download_chat_json(video: Video, target_path: Path):
-    print_log("Loading VideoComments...")
-    video_comments = get_video_comments(video["id"])
-
-    comments: List[Comment] = []
-    total_duration = video["lengthSeconds"]
-    for page in generate_paged_comments(video["id"]):
-        if page:
-            comments.extend(page)
-            offset_seconds = page[-1]["contentOffsetSeconds"]
-            print_status(f"Loading Comments {format_time(offset_seconds)}/{format_time(total_duration)}", transient=True, dim=True)
-
-    with open(target_path, "w", encoding="utf8") as f:
-        obj = {
-            "video": video,
-            "video_comments": video_comments,
-            "comments": comments,
-        }
-        json.dump(obj, f)
-
-    click.echo(f"Chat saved to: {target_path}")
 
 
 def load_fonts(font_size: int):
@@ -469,20 +423,6 @@ def generate_comments(video_id: str) -> Generator[Comment, None, None]:
         video = get_comments(video_id, cursor=cursor)
         for comment in video["comments"]["edges"]:
             yield comment["node"]
-
-        has_next = video["comments"]["pageInfo"]["hasNextPage"]
-        cursor = video["comments"]["edges"][-1]["cursor"]
-        page += 1
-
-
-def generate_paged_comments(video_id: str) -> Generator[List[Comment], None, None]:
-    page = 1
-    has_next = True
-    cursor = None
-
-    while has_next:
-        video = get_comments(video_id, cursor=cursor)
-        yield [comment["node"] for comment in video["comments"]["edges"]]
 
         has_next = video["comments"]["pageInfo"]["hasNextPage"]
         cursor = video["comments"]["edges"][-1]["cursor"]

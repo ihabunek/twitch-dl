@@ -570,7 +570,12 @@ def videos(
     help="Don't run ffmpeg to join the generated frames, implies --keep.",
     is_flag=True,
 )
-@json_option
+@click.option(
+    "--json",
+    is_flag=True,
+    default=False,
+    help="Render chat in JSON instead of video format",
+)
 def chat(
     id: str,
     width: int,
