@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -17,10 +18,11 @@ import click
 from PIL import Image, ImageDraw
 
 from twitchdl import cache
+from twitchdl.chat.utils import USER_COLORS, get_commenter_color
 from twitchdl.entities import Badge, Comment, Emote, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
-from twitchdl.output import blue, green, print_log, print_status, yellow
+from twitchdl.output import blue, green, print_log, print_status, print_warning, yellow
 from twitchdl.twitch import get_comments, get_video_comments
 from twitchdl.utils import format_time, iterate_with_next
 
@@ -36,23 +38,6 @@ TEXT_FONTS = [
 # Use NotoColorEmoji for rendering Emoji
 BITMAP_FONTS = [
     ("https://github.com/googlefonts/noto-emoji/raw/refs/heads/main/fonts/NotoColorEmoji.ttf", 109),
-]
-
-# Some nice colors taken from
-# https://flatuicolors.com/
-USER_COLORS = [
-    "#16a085",  # GREEN SEA
-    "#27ae60",  # NEPHRITIS
-    "#2980b9",  # BELIZE HOLE
-    "#686de0",  # EXODUS FRUIT
-    "#7f8c8d",  # ASBESTOS
-    "#9b59b6",  # AMETHYST
-    "#be2edd",  # STEEL PINK
-    "#c0392b",  # POMEGRANATE
-    "#d35400",  # PUMPKIN
-    "#e67e22",  # CARROT
-    "#e74c3c",  # ALIZARIN
-    "#f1c40f",  # SUN FLOWER
 ]
 
 
@@ -175,7 +160,11 @@ def add_frame_to_spec(concat_spec: str, frame_path: Path, duration: int) -> str:
 
 
 def draw_comment(screen: Screen, comment: Comment, dark: bool, badges_by_id: Dict[str, Badge]):
-    assert comment["commenter"] is not None
+    if not comment["commenter"]:
+        print_warning("Encountered a comment with no commenter, skipping.")
+        print_log(json.dumps(comment))
+        return
+
     time = format_time(comment["contentOffsetSeconds"])
     screen.draw_text(time + " ", "gray")
 

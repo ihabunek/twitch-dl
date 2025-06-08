@@ -5,6 +5,7 @@ import click
 
 from twitchdl.chat.json import generate_chat_json
 from twitchdl.chat.video import generate_chat_video
+from twitchdl.chat.ytt import generate_chat_ytt
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import video_filename
 from twitchdl.output import blue, print_found_video, print_log
@@ -26,6 +27,7 @@ def render_chat(
     keep: bool,
     no_join: bool,
     json: bool,
+    ytt: bool,
 ):
     video_id = parse_video_identifier(id)
     if not video_id:
@@ -48,6 +50,10 @@ def render_chat(
 
     if json:
         generate_chat_json(video, target_path)
+        return
+
+    if ytt:
+        generate_chat_ytt(video, target_path)
         return
 
     generate_chat_video(

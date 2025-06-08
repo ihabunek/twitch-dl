@@ -15,18 +15,7 @@ from twitchdl.utils import format_time
 def generate_chat_json(video: Video, target_path: Path):
     print_log("Loading VideoComments...")
     video_comments = get_video_comments(video["id"])
-
-    comments: List[Comment] = []
-    total_duration = video["lengthSeconds"]
-    for page in generate_paged_comments(video["id"]):
-        if page:
-            comments.extend(page)
-            offset_seconds = page[-1]["contentOffsetSeconds"]
-            print_status(
-                f"Loading Comments {format_time(offset_seconds)}/{format_time(total_duration)}",
-                transient=True,
-                dim=True,
-            )
+    comments = load_comments(video)
 
     with open(target_path, "w", encoding="utf8") as f:
         obj = {
@@ -51,3 +40,18 @@ def generate_paged_comments(video_id: str) -> Generator[List[Comment], None, Non
         has_next = video["comments"]["pageInfo"]["hasNextPage"]
         cursor = video["comments"]["edges"][-1]["cursor"]
         page += 1
+
+
+def load_comments(video: Video) -> List[Comment]:
+    comments: List[Comment] = []
+    total_duration = video["lengthSeconds"]
+    for page in generate_paged_comments(video["id"]):
+        if page:
+            comments.extend(page)
+            offset_seconds = page[-1]["contentOffsetSeconds"]
+            print_status(
+                f"Loading Comments {format_time(offset_seconds)}/{format_time(total_duration)}",
+                transient=True,
+                dim=True,
+            )
+    return comments

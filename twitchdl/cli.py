@@ -574,7 +574,13 @@ def videos(
     "--json",
     is_flag=True,
     default=False,
-    help="Render chat in JSON instead of video format",
+    help="Render chat in JSON",
+)
+@click.option(
+    "--ytt",
+    is_flag=True,
+    default=False,
+    help="Render chat in YTT (Youtube captions)",
 )
 def chat(
     id: str,
@@ -591,6 +597,7 @@ def chat(
     keep: bool,
     no_join: bool,
     json: bool,
+    ytt: bool,
 ):
     """
     Render chat for a given video.
@@ -599,11 +606,17 @@ def chat(
     """
     print_log("Chat command is still experimental, try it out and report any bugs.")
 
+    if ytt and json:
+        raise ConsoleError("Cannot have both --json and --ytt")
+
     try:
         from twitchdl.chat import render_chat
 
         if json:
             format = "json"
+
+        if ytt:
+            format = "ytt"
 
         render_chat(
             id,
@@ -619,6 +632,7 @@ def chat(
             keep,
             no_join,
             json,
+            ytt,
         )
     except ModuleNotFoundError as ex:
         raise ConsoleError(

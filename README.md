@@ -74,5 +74,12 @@ Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
 Useful links for dev
 --------------------
 
+Twitch GQL:
+
 * https://supersonichub1.github.io/twitch-graphql-api/index.html
 * https://github.com/SuperSonicHub1/twitch-graphql-api
+
+YTT Subs:
+
+* https://github.com/arcusmaximus/YTSubConverter
+* https://github.com/Kam1k4dze/SubChat
