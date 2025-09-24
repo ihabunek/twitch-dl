@@ -15,6 +15,7 @@ import click
 from PIL import Image, ImageDraw
 
 from twitchdl import cache
+from twitchdl.chat.utils import get_commenter_color
 from twitchdl.entities import Badge, Comment, Emote
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
@@ -35,23 +36,6 @@ TEXT_FONTS = [
 # Use NotoColorEmoji for rendering Emoji
 BITMAP_FONTS = [
     ("https://github.com/googlefonts/noto-emoji/raw/refs/heads/main/fonts/NotoColorEmoji.ttf", 109),
-]
-
-# Some nice colors taken from
-# https://flatuicolors.com/
-USER_COLORS = [
-    "#16a085",  # GREEN SEA
-    "#27ae60",  # NEPHRITIS
-    "#2980b9",  # BELIZE HOLE
-    "#686de0",  # EXODUS FRUIT
-    "#7f8c8d",  # ASBESTOS
-    "#9b59b6",  # AMETHYST
-    "#be2edd",  # STEEL PINK
-    "#c0392b",  # POMEGRANATE
-    "#d35400",  # PUMPKIN
-    "#e67e22",  # CARROT
-    "#e74c3c",  # ALIZARIN
-    "#f1c40f",  # SUN FLOWER
 ]
 
 
@@ -217,8 +201,7 @@ def draw_comment(screen: Screen, comment: Comment, dark: bool, badges_by_id: Dic
         screen.draw_text(" ")
 
     user_name = comment["commenter"]["displayName"] if comment["commenter"] else "UNKWNOW"
-    user_color_index = int(comment["commenter"]["id"]) % len(USER_COLORS)
-    user_color = USER_COLORS[user_color_index]
+    user_color = get_commenter_color(comment["commenter"])
 
     screen.draw_text(user_name, user_color)
     screen.draw_text(": ")
