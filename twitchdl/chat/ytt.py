@@ -73,6 +73,20 @@ class HorizontalAlignment(Enum):
     Center = "2"
 
 
+class YttParams(NamedTuple):
+    # see:
+    # https://github.com/Kam1k4dze/SubChat/blob/master/ytt.ytt
+    # https://github.com/Kam1k4dze/SubChat/blob/master/ytt_generator.h#L261
+    foreground_color: str
+    foreground_opacity: int
+    background_color: str
+    background_opacity: int
+    text_edge_color: str
+    text_edge_type: str
+    font_style: str
+    font_size: int
+
+
 # Parametrize
 FOREGROUND_COLOR = "#FEFEFE"
 FOREGROUND_OPACITY = "254"
@@ -106,7 +120,7 @@ class Comment(NamedTuple):
     lines: List[str]
 
 
-def render_chat_ytt(id: str, output: str, overwrite: bool):
+def render_chat_ytt(id: str, output: str, overwrite: bool, params: YttParams):
     format = "ytt"
     video = get_video(id)
     target_path = get_target_path(video, format, output, overwrite)

@@ -1,3 +1,4 @@
+import enum
 import logging
 import platform
 import re
@@ -12,6 +13,7 @@ import click
 
 from twitchdl import __version__
 from twitchdl.cache import get_cache_dir, get_cache_subdirs
+from twitchdl.chat.ytt import EdgeType, FontStyle, HorizontalAlignment, YttParams
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_CHAT_OUTPUT, DEFAULT_VIDEO_OUTPUT
@@ -94,6 +96,29 @@ def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> O
         return amount * 1024 * 1024
 
     return amount
+
+
+# RGBA represented as color in #RRGGBB string and int opacity
+ColorParam = Tuple[str, int]
+
+
+def validate_color_rgba(_c: click.Context, _p: click.Parameter, value: str) -> Optional[ColorParam]:
+    match = re.match(r"^#?([0-9a-f]{8})$", value, re.IGNORECASE)
+    if not match:
+        raise click.BadParameter("must be a color in #RRBBGGAA format")
+
+    value = match.group(1)
+    color = f"#{value[0:6]}"
+    opacity = int(value[6:], 16)
+    return color, opacity
+
+
+def validate_color_rgb(_c: click.Context, _p: click.Parameter, value: str) -> Optional[str]:
+    match = re.match(r"^#?([0-9a-f]{6})$", value, re.IGNORECASE)
+    if not match:
+        raise click.BadParameter("must be a color in #RRBBGG format")
+
+    return f"#{match.group(1)}"
 
 
 @click.group(context_settings=CONTEXT)
@@ -490,6 +515,17 @@ def videos(
     )
 
 
+# FOREGROUND_COLOR = "#FEFEFE"
+# FOREGROUND_OPACITY = "254"
+# BACKGROUND_COLOR = "#FEFEFE"
+# BACKGROUND_OPACITY = "0"
+# TEXT_EDGE_COLOR = "#000000"
+# TEXT_EDGE_TYPE = EdgeType.SoftShadow.value
+# FONT_STYLE = FontStyle.MonospacedSansSerif.value
+# FONT_SIZE_PERCENT = 0
+# TEXT_ALIGNMENT = HorizontalAlignment.Left.value
+
+
 @cli.group()
 def chat():
     """Render chat in various formats (experimental)"""
@@ -643,8 +679,57 @@ def chat_json(id: str, output: str, overwrite: bool):
     render_chat_json(id, output, overwrite)
 
 
+class HashType(enum.Enum):
+    MD5 = enum.auto()
+    SHA1 = enum.auto()
+
+
 @chat.command("ytt")
 @click.argument("id")
+@click.option(
+    "-f",
+    "--foreground",
+    default="#FEFEFEFE",
+    help="Foreground color in #RRGGBBAA format",
+    callback=validate_color_rgba,
+)
+@click.option(
+    "-b",
+    "--background",
+    default="#FEFEFE00",
+    help="Background color in #RRGGBBAA format",
+    callback=validate_color_rgba,
+)
+@click.option(
+    "--text-edge-color",
+    default="#000000",
+    help="Text edge color in #RRGGBB format",
+    callback=validate_color_rgb,
+)
+@click.option(
+    "--text-edge-type",
+    type=click.Choice([x.name for x in EdgeType], case_sensitive=False),
+    default=EdgeType.SoftShadow.name,
+    help="Text edge type",
+)
+@click.option(
+    "--text-align",
+    type=click.Choice([x.name for x in HorizontalAlignment], case_sensitive=False),
+    default=HorizontalAlignment.Left.name,
+    help="Text alignemnt",
+)
+@click.option(
+    "--font-style",
+    type=click.Choice([x.name for x in FontStyle], case_sensitive=False),
+    default=FontStyle.MonospacedSansSerif.name,
+    help="Font style",
+)
+@click.option(
+    "--font-size",
+    type=click.IntRange(0, 300),
+    default=100,
+    help="Font size, values 0 - 300 are equivalent to relative 75% - 150% font size.",
+)
 @click.option(
     "-o",
     "--output",
@@ -656,11 +741,42 @@ def chat_json(id: str, output: str, overwrite: bool):
     help="Overwrite the target file if it already exists without prompting.",
     is_flag=True,
 )
-def chat_ytt(id: str, output: str, overwrite: bool):
+def chat_ytt(
+    id: str,
+    output: str,
+    overwrite: bool,
+    foreground: ColorParam,
+    background: ColorParam,
+    text_edge_color: str,
+    text_edge_type: str,
+    font_style: str,
+    font_size: int,
+    text_align: str,
+):
     """Render twitch chat as youtube subtitles"""
     from twitchdl.chat.ytt import render_chat_ytt
 
-    render_chat_ytt(id, output, overwrite)
+    fg_color, fg_opacity = foreground
+    bg_color, bg_opacity = background
+
+    params = YttParams(
+        foreground_color=fg_color,
+        foreground_opacity=fg_opacity,
+        background_color=bg_color,
+        background_opacity=bg_opacity,
+        text_edge_color=text_edge_color,
+        text_edge_type=EdgeType[text_edge_type].value,
+        font_style=FontStyle[font_style].value,
+        font_size=font_size,
+        text_align=text_align,
+    )
+
+    from pprint import pp
+
+    pp(params)
+    return
+
+    render_chat_ytt(id, output, overwrite, params)
 
 
 @cli.command
