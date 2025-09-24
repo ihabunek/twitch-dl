@@ -492,12 +492,8 @@ def videos(
 
 @cli.group()
 def chat():
-    """
-    Render chat in various formats (experimental)
-
-    WARNING: These commands are experimental and may change in the future!
-    """
-    pass
+    """Render chat in various formats (experimental)"""
+    print_warning("Chat commands are still experimental, try them out and report any bugs.")
 
 
 @chat.command("video")
@@ -596,8 +592,6 @@ def chat_video(
     no_join: bool,
 ):
     """Render twitch chat as video"""
-    print_warning("Chat commands are still experimental, try them out and report any bugs.")
-
     try:
         from twitchdl.chat.video import render_chat
 
@@ -644,10 +638,29 @@ def chat_video(
 )
 def chat_json(id: str, output: str, overwrite: bool):
     """Render twitch chat as json"""
-    print_warning("Chat commands are still experimental, try them out and report any bugs.")
     from twitchdl.chat.json import render_chat_json
 
     render_chat_json(id, output, overwrite)
+
+
+@chat.command("ytt")
+@click.argument("id")
+@click.option(
+    "-o",
+    "--output",
+    help="Output file name template. See docs for details.",
+    default=DEFAULT_CHAT_OUTPUT,
+)
+@click.option(
+    "--overwrite",
+    help="Overwrite the target file if it already exists without prompting.",
+    is_flag=True,
+)
+def chat_ytt(id: str, output: str, overwrite: bool):
+    """Render twitch chat as youtube subtitles"""
+    from twitchdl.chat.ytt import render_chat_ytt
+
+    render_chat_ytt(id, output, overwrite)
 
 
 @cli.command
