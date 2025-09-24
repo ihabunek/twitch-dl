@@ -18,7 +18,17 @@ from twitchdl.entities import Clip, DownloadOptions
 from twitchdl.exceptions import ConsoleError, AuthRequiredError
 from twitchdl.http import download_all, download_file
 from twitchdl.naming import clip_filename, video_filename, video_placeholders
-from twitchdl.output import blue, bold, green, print_error, print_found_video, print_log, print_warning, underlined, yellow
+from twitchdl.output import (
+    blue,
+    bold,
+    green,
+    print_error,
+    print_found_video,
+    print_log,
+    print_warning,
+    underlined,
+    yellow,
+)
 from twitchdl.playlists import (
     Playlist,
     enumerate_vods,
@@ -31,6 +41,7 @@ from twitchdl.playlists import (
 )
 from twitchdl.subonly import get_subonly_playlists
 from twitchdl.twitch import Chapter, ClipAccessToken, Video
+
 
 def download(ids: List[str], args: DownloadOptions):
     if not ids:
@@ -166,6 +177,9 @@ def get_clip_authenticated_url(slug: str, quality: Optional[str]):
 
 
 def _download_clip(clip: Clip, args: DownloadOptions) -> None:
+    if args.start or args.end:
+        print_warning("Options --start and --end are not supported for clips, ignoring.")
+
     target = Path(clip_filename(clip, args.output))
     _print_found_clip(clip)
     print_log(f"Target: {target}")
@@ -316,7 +330,9 @@ def _download_video(video: Video, args: DownloadOptions) -> None:
         sources = muted_sources
 
         if muted_count > 0:
-            print_warning(f"Muted {muted_count} VODs available only to subscribers. Use an access token to get the unmuted audio.")
+            print_warning(
+                f"Muted {muted_count} VODs available only to subscribers. Use an access token to get the unmuted audio."
+            )
 
     asyncio.run(
         download_all(
@@ -397,7 +413,7 @@ def _determine_time_range(chapters: List[Chapter], args: DownloadOptions):
                     f"Chapter {args.chapter} does not exist. This video has {len(chapters)} chapters."
                 )
 
-        click.echo(f'Chapter selected: {blue(chapter["description"])}\n')
+        click.echo(f"Chapter selected: {blue(chapter['description'])}\n")
         start = chapter["positionMilliseconds"] // 1000
         duration = chapter["durationMilliseconds"] // 1000
         return start, start + duration
@@ -409,7 +425,7 @@ def _choose_chapter_interactive(chapters: List[Chapter]):
     click.echo("\nChapters:")
     for index, chapter in enumerate(chapters):
         duration = utils.format_time(chapter["durationMilliseconds"] // 1000)
-        click.echo(f'{index + 1}) {bold(chapter["description"])} ({duration})')
+        click.echo(f"{index + 1}) {bold(chapter['description'])} ({duration})")
     index = utils.read_int("Select a chapter", 1, len(chapters))
     chapter = chapters[index - 1]
     return chapter

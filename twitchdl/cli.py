@@ -245,7 +245,7 @@ def clips(
 @click.option(
     "-e",
     "--end",
-    help="Download video up to this time (hh:mm or hh:mm:ss)",
+    help="Download video up to this time (hh:mm or hh:mm:ss), not supported for clips",
     callback=validate_time,
 )
 @click.option(
@@ -297,7 +297,7 @@ def clips(
 @click.option(
     "-s",
     "--start",
-    help="Download video from this time (hh:mm or hh:mm:ss)",
+    help="Download video from this time (hh:mm or hh:mm:ss), not supported for clips",
     callback=validate_time,
 )
 @click.option(

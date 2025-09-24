@@ -37,7 +37,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">-e, --end TEXT</td>
-    <td>Download video up to this time (hh:mm or hh:mm:ss)</td>
+    <td>Download video up to this time (hh:mm or hh:mm:ss), not supported for clips</td>
 </tr>
 
 <tr>
@@ -82,7 +82,7 @@ twitch-dl download [OPTIONS] [IDS]...
 
 <tr>
     <td class="code">-s, --start TEXT</td>
-    <td>Download video from this time (hh:mm or hh:mm:ss)</td>
+    <td>Download video from this time (hh:mm or hh:mm:ss), not supported for clips</td>
 </tr>
 
 <tr>
