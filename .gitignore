@@ -19,3 +19,4 @@ tmp/
 *.mkv
 /.venv
 /uv.lock
+/*.json
