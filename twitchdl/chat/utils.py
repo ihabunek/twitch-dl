@@ -70,6 +70,7 @@ def get_all_comments(video: Video) -> List[Comment]:
             offset_seconds = page[-1]["contentOffsetSeconds"]
             progress = _format_progress(offset_seconds, total_duration)
             print_status(f"Loading Comments {progress}", transient=True, dim=True)
+
     return comments
 
 

@@ -1,3 +1,4 @@
+import enum
 import logging
 import platform
 import re
@@ -12,6 +13,7 @@ import click
 
 from twitchdl import __version__
 from twitchdl.cache import get_cache_dir, get_cache_subdirs
+from twitchdl.chat.ytt import EdgeType, FontStyle, HorizontalAlignment, YttOptions
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_CHAT_OUTPUT, DEFAULT_VIDEO_OUTPUT
@@ -94,6 +96,29 @@ def validate_rate(_ctx: click.Context, _param: click.Parameter, value: str) -> O
         return amount * 1024 * 1024
 
     return amount
+
+
+# RGBA represented as color in #RRGGBB string and int opacity
+RGBA = Tuple[str, int]
+
+
+def validate_color_rgba(_c: click.Context, _p: click.Parameter, value: str) -> Optional[RGBA]:
+    match = re.match(r"^#?([0-9a-f]{8})$", value, re.IGNORECASE)
+    if not match:
+        raise click.BadParameter("must be a color in #RRBBGGAA format")
+
+    value = match.group(1)
+    color = f"#{value[0:6]}"
+    opacity = int(value[6:], 16)
+    return color, opacity
+
+
+def validate_color_rgb(_c: click.Context, _p: click.Parameter, value: str) -> Optional[str]:
+    match = re.match(r"^#?([0-9a-f]{6})$", value, re.IGNORECASE)
+    if not match:
+        raise click.BadParameter("must be a color in #RRBBGG format")
+
+    return f"#{match.group(1)}"
 
 
 @click.group(context_settings=CONTEXT)
@@ -643,8 +668,101 @@ def chat_json(id: str, output: str, overwrite: bool):
     render_chat_json(id, output, overwrite)
 
 
+class HashType(enum.Enum):
+    MD5 = enum.auto()
+    SHA1 = enum.auto()
+
+
 @chat.command("ytt")
 @click.argument("id")
+@click.option(
+    "-f",
+    "--foreground",
+    default="#FEFEFEFE",
+    help="Foreground color in #RRGGBBAA format",
+    callback=validate_color_rgba,
+)
+@click.option(
+    "-b",
+    "--background",
+    default="#FEFEFE00",
+    help="Background color in #RRGGBBAA format",
+    callback=validate_color_rgba,
+)
+@click.option(
+    "--text-edge-color",
+    default="#000000",
+    help="Text edge color in #RRGGBB format",
+    callback=validate_color_rgb,
+)
+@click.option(
+    "--text-edge-type",
+    type=click.Choice([x.name for x in EdgeType], case_sensitive=False),
+    default=EdgeType.SoftShadow.name,
+    help="Text edge type",
+)
+@click.option(
+    "--text-align",
+    type=click.Choice([x.name for x in HorizontalAlignment], case_sensitive=False),
+    default=HorizontalAlignment.Left.name,
+    help="Text alignemnt",
+)
+@click.option(
+    "--font-style",
+    type=click.Choice([x.name for x in FontStyle], case_sensitive=False),
+    default=FontStyle.MonospacedSansSerif.name,
+    help="Font style",
+)
+@click.option(
+    "--font-size",
+    type=click.IntRange(0, 300),
+    default=0,
+    help="Font size, values 0 - 300 are equivalent to relative 75% - 150% font size",
+)
+@click.option(
+    "-x",
+    "--horizontal-offset",
+    type=click.IntRange(0, 100),
+    default=70,
+    help="Position of subtitles, distance from left edge",
+)
+@click.option(
+    "-y",
+    "--vertical-offset",
+    type=click.IntRange(0, 100),
+    default=0,
+    help="Position of subtitles, distance from top edge",
+)
+@click.option(
+    "--vertical-spacing",
+    type=click.IntRange(0, 50),
+    default=4,
+    help="Spacing between lines",
+)
+@click.option(
+    "--vertical-spacing",
+    type=click.IntRange(min=0),
+    default=4,
+    help="Spacing between lines",
+)
+@click.option(
+    "--line-count",
+    type=click.IntRange(min=0),
+    default=13,
+    help="Number of lines to render",
+)
+@click.option(
+    "--line-chars",
+    type=click.IntRange(min=0),
+    default=25,
+    help="Max. number of characters per line",
+)
+@click.option(
+    "--pretty",
+    is_flag=True,
+    help="Output indented XML. For debugging purposes only, don't upload subtitles generated with this flag because it breaks formatting.",
+    hidden=True,
+)
 @click.option(
     "-o",
     "--output",
@@ -656,11 +774,54 @@ def chat_json(id: str, output: str, overwrite: bool):
     help="Overwrite the target file if it already exists without prompting.",
     is_flag=True,
 )
-def chat_ytt(id: str, output: str, overwrite: bool):
-    """Render twitch chat as youtube subtitles"""
+def chat_ytt(
+    id: str,
+    output: str,
+    overwrite: bool,
+    foreground: RGBA,
+    background: RGBA,
+    text_edge_color: str,
+    text_edge_type: str,
+    font_style: str,
+    font_size: int,
+    text_align: str,
+    pretty: bool,
+    horizontal_offset: int,
+    vertical_offset: int,
+    vertical_spacing: int,
+    line_count: int,
+    line_chars: int,
+):
+    """
+    Render twitch chat as youtube subtitles
+
+    If you upload your twitch VOD to YouTube, you can use this command to
+    generate a ytt file which can be uploaded to the youtube video to show the
+    chat as subtitles.
+    """
     from twitchdl.chat.ytt import render_chat_ytt
 
-    render_chat_ytt(id, output, overwrite)
+    fg_color, fg_opacity = foreground
+    bg_color, bg_opacity = background
+
+    params = YttOptions(
+        background_color=bg_color,
+        background_opacity=bg_opacity,
+        font_size=font_size,
+        font_style=FontStyle[font_style].value,
+        foreground_color=fg_color,
+        foreground_opacity=fg_opacity,
+        horizontal_offset=horizontal_offset,
+        text_align=HorizontalAlignment[text_align].value,
+        text_edge_color=text_edge_color,
+        text_edge_type=EdgeType[text_edge_type].value,
+        vertical_offset=vertical_offset,
+        vertical_spacing=vertical_spacing,
+        line_count=line_count,
+        line_chars=line_chars,
+    )
+
+    render_chat_ytt(id, output, overwrite, params, pretty)
 
 
 @cli.command

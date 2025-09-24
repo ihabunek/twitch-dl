@@ -9,9 +9,10 @@ import re
 from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, List, NamedTuple, Optional
-from xml.etree.ElementTree import Element, ElementTree, SubElement
-
 from wcwidth import wcswidth  # type: ignore
+from xml.etree.ElementTree import Element, ElementTree, SubElement
+from xml.etree.ElementTree import Comment as XMLComment
+from xml.etree.ElementTree import indent  # type: ignore
 
 from twitchdl.chat.utils import (
     USER_COLORS,
@@ -73,22 +74,22 @@ class HorizontalAlignment(Enum):
     Center = "2"
 
 
-# Parametrize
-FOREGROUND_COLOR = "#FEFEFE"
-FOREGROUND_OPACITY = "254"
-BACKGROUND_COLOR = "#FEFEFE"
-BACKGROUND_OPACITY = "0"
-TEXT_EDGE_COLOR = "#000000"
-TEXT_EDGE_TYPE = EdgeType.SoftShadow.value
-FONT_STYLE = FontStyle.MonospacedSansSerif.value
-FONT_SIZE_PERCENT = 0
-TEXT_ALIGNMENT = HorizontalAlignment.Left.value
+class YttOptions(NamedTuple):
+    background_color: str
+    background_opacity: int
+    font_size: int
+    font_style: str
+    foreground_color: str
+    foreground_opacity: int
+    horizontal_offset: int
+    text_align: str
+    text_edge_color: str
+    text_edge_type: str
+    vertical_offset: int
+    vertical_spacing: int
+    line_count: int
+    line_chars: int
 
-HORIZONTAL_MARGIN = 70
-VERTICAL_MARGIN = 0
-VERTICAL_SPACING = -1
-TOTAL_DISPLAY_LINES = 13
-MAX_CHARS_PER_LINE = 25
 
 USERNAME_SEPARATOR = ": "
 
@@ -106,12 +107,12 @@ class Comment(NamedTuple):
     lines: List[str]
 
 
-def render_chat_ytt(id: str, output: str, overwrite: bool):
+def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, pretty: bool):
     format = "ytt"
     video = get_video(id)
     target_path = get_target_path(video, format, output, overwrite)
 
-    all_comments = load_comments(video)
+    all_comments = load_comments(video, options)
     comments_by_start: Dict[int, List[Comment]] = defaultdict(list)
     for comment in all_comments:
         comments_by_start[comment.start].append(comment)
@@ -120,22 +121,26 @@ def render_chat_ytt(id: str, output: str, overwrite: bool):
     head = SubElement(root, "head")
     body = SubElement(root, "body")
 
+    def add_comment(element: Element, text: str):
+        if pretty:
+            element.append(XMLComment(text))
+
     add_comment(head, "Pens")
-    pens = add_pens(head)
+    pens = add_pens(head, options)
 
     workspace_id = 1
     add_comment(head, "Default workspace")
-    sub_element(head, "ws", id=workspace_id, ju=TEXT_ALIGNMENT)
+    sub_element(head, "ws", id=workspace_id, ju=options.text_align)
 
     add_comment(head, "Positions")
-    for index in range(TOTAL_DISPLAY_LINES):
+    for index in range(options.line_count):
         sub_element(
             head,
             "wp",
             id=index,
             ap=AnchorPoint.TopLeft.value,
-            ah=HORIZONTAL_MARGIN,
-            av=VERTICAL_SPACING * index,
+            ah=options.horizontal_offset,
+            av=options.vertical_offset + options.vertical_spacing * index,
         )
 
     lines: List[Line] = []
@@ -152,7 +157,7 @@ def render_chat_ytt(id: str, output: str, overwrite: bool):
                 else:
                     lines.append(Line(None, None, line))
 
-        visible_lines = lines[-TOTAL_DISPLAY_LINES:]
+        visible_lines = lines[-options.line_count :]
         for position, line in enumerate(visible_lines):
             p = sub_element(body, "p", t=start, d=duration, wp=position, ws=workspace_id, p=0)
 
@@ -162,42 +167,52 @@ def render_chat_ytt(id: str, output: str, overwrite: bool):
                 s = sub_element(p, "s", p=pen)
                 s.text = line.username + USERNAME_SEPARATOR
 
-            s = sub_element(p, "s")
-            s.text = line.text
+                # This is a workaround for a bug with multiple spans, see:
+                # https://github.com/Kam1k4dze/SubChat/blob/eb2b399cada48ac7f705fea4f790b30841ff5f65/ytt.ytt#L117-L122
+                if line.text:
+                    s.tail = "\u200b"
+
+            if line.text:
+                s = sub_element(p, "s")
+                s.text = line.text
 
     tree = ElementTree(root)
+    if pretty:
+        indent(tree)
     tree.write(target_path, xml_declaration=True, encoding="utf-8")
 
 
-def load_comments(video: Video):
+def load_comments(video: Video, params: YttOptions):
+    comments = get_all_comments(video)
+
     return [
         Comment(
             start=comment["contentOffsetSeconds"] * 1000,
             username=comment["commenter"]["displayName"],
             color=get_commenter_color(comment["commenter"]),
-            lines=wrap_lines(comment),
+            lines=wrap_lines(comment, params),
         )
-        for comment in get_all_comments(video)
+        for comment in comments
         if comment["commenter"] is not None
     ]
 
 
-def add_pens(head: Element) -> Dict[str, int]:
+def add_pens(head: Element, options: YttOptions) -> Dict[str, int]:
     # Default pen is 0, colors are 1+
-    colors = [FOREGROUND_COLOR] + USER_COLORS
+    colors = [options.foreground_color] + USER_COLORS
     pens: Dict[str, int] = {}
 
     for index, color in enumerate(colors):
         pen_attrs = attrs(
             id=index,
             fc=color,
-            fo=FOREGROUND_OPACITY,
-            bc=BACKGROUND_COLOR,
-            bo=BACKGROUND_OPACITY,
-            ec=TEXT_EDGE_COLOR,
-            et=TEXT_EDGE_TYPE,
-            fs=FONT_STYLE,
-            sz=FONT_SIZE_PERCENT,
+            fo=options.foreground_opacity,
+            bc=options.background_color,
+            bo=options.background_opacity,
+            ec=options.text_edge_color,
+            et=options.text_edge_type,
+            fs=options.font_style,
+            sz=options.font_size,
         )
 
         SubElement(head, "pen", pen_attrs)
@@ -214,13 +229,7 @@ def sub_element(element: Element, name: str, **attr: Any):
     return SubElement(element, name, attrs(**attr))
 
 
-def add_comment(element: Element, text: str):
-    from xml.etree.ElementTree import Comment
-
-    element.append(Comment(text))
-
-
-def wrap_lines(comment: CommentEntitiy) -> List[str]:
+def wrap_lines(comment: CommentEntitiy, options: YttOptions) -> List[str]:
     assert comment["commenter"] is not None
     text = "".join(f["text"] for f in comment["message"]["fragments"])
     words: List[str] = re.split(r"\s+", text)
@@ -233,13 +242,13 @@ def wrap_lines(comment: CommentEntitiy) -> List[str]:
 
     for word in words:
         word_length = wc_width(word) + 1  # for space
-        if line_length + word_length <= MAX_CHARS_PER_LINE:
+        if line_length + word_length <= options.line_chars:
             line_words.append(word)
             line_length += word_length
         else:
             lines.append(" ".join(line_words))
-            line_words = []
-            line_length = 0
+            line_words = [word]
+            line_length = len(word)
 
     if line_words:
         lines.append(" ".join(line_words))
