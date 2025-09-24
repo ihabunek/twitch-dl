@@ -444,17 +444,3 @@ def generate_comments(video_id: str) -> Generator[Comment, None, None]:
         has_next = video["comments"]["pageInfo"]["hasNextPage"]
         cursor = video["comments"]["edges"][-1]["cursor"]
         page += 1
-
-
-def generate_paged_comments(video_id: str) -> Generator[List[Comment], None, None]:
-    page = 1
-    has_next = True
-    cursor = None
-
-    while has_next:
-        video = get_comments(video_id, cursor=cursor)
-        yield [comment["node"] for comment in video["comments"]["edges"]]
-
-        has_next = video["comments"]["pageInfo"]["hasNextPage"]
-        cursor = video["comments"]["edges"][-1]["cursor"]
-        page += 1

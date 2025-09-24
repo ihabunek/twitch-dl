@@ -2,16 +2,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List
+from typing import Generator, List
 
 import click
 
-from twitchdl.chat.video import generate_paged_comments
 from twitchdl.entities import Comment, Video
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import video_filename
 from twitchdl.output import blue, print_found_video, print_log, print_status
-from twitchdl.twitch import get_video, get_video_comments
+from twitchdl.twitch import get_comments, get_video, get_video_comments
 from twitchdl.utils import format_time, parse_video_identifier
 
 
@@ -38,14 +37,8 @@ def render_chat_json(id: str, output: str, overwrite: bool):
     print_log("Loading VideoComments...")
     video_comments = get_video_comments(video["id"])
 
-    comments: List[Comment] = []
-    total_duration = video["lengthSeconds"]
-    for page in generate_paged_comments(video["id"]):
-        if page:
-            comments.extend(page)
-            offset_seconds = page[-1]["contentOffsetSeconds"]
-            progress = _format_progress(offset_seconds, total_duration)
-            print_status(f"Loading Comments {progress}", transient=True, dim=True)
+    print_log("Loading Comments...")
+    comments = load_comments(video)
 
     with open(target_path, "w", encoding="utf8") as f:
         obj = {
@@ -56,6 +49,32 @@ def render_chat_json(id: str, output: str, overwrite: bool):
         json.dump(obj, f)
 
     click.echo(f"Chat saved to: {target_path}")
+
+
+def load_comments(video: Video) -> List[Comment]:
+    comments: List[Comment] = []
+    total_duration = video["lengthSeconds"]
+    for page in _generate_paged_comments(video["id"]):
+        if page:
+            comments.extend(page)
+            offset_seconds = page[-1]["contentOffsetSeconds"]
+            progress = _format_progress(offset_seconds, total_duration)
+            print_status(f"Loading Comments {progress}", transient=True, dim=True)
+    return comments
+
+
+def _generate_paged_comments(video_id: str) -> Generator[List[Comment], None, None]:
+    page = 1
+    has_next = True
+    cursor = None
+
+    while has_next:
+        video = get_comments(video_id, cursor=cursor)
+        yield [comment["node"] for comment in video["comments"]["edges"]]
+
+        has_next = video["comments"]["pageInfo"]["hasNextPage"]
+        cursor = video["comments"]["edges"][-1]["cursor"]
+        page += 1
 
 
 def _format_progress(offset_seconds: int, total_duration: int):
