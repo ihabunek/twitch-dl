@@ -14,14 +14,12 @@ from urllib.parse import urlparse
 import click
 from PIL import Image, ImageDraw
 
-from twitchdl import cache
-from twitchdl.chat.utils import get_commenter_color
+from twitchdl import cache, twitch
+from twitchdl.chat.utils import get_commenter_color, get_target_path, get_video
 from twitchdl.entities import Badge, Comment, Emote
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
-from twitchdl.naming import video_filename
-from twitchdl.output import blue, green, print_found_video, print_log, print_status, yellow
-from twitchdl.twitch import get_comments, get_video, get_video_comments
+from twitchdl.output import blue, green, print_log, print_status, yellow
 from twitchdl.utils import format_time, iterate_with_next, parse_video_identifier
 
 # Use NotoSans for latin, greek, cyrillic
@@ -53,28 +51,18 @@ def render_chat(
     keep: bool,
     no_join: bool,
 ):
+    video = get_video(id)
+
     video_id = parse_video_identifier(id)
     if not video_id:
         raise ConsoleError("Invalid video ID")
 
     print_log("Looking up video...")
     video = get_video(video_id)
-    if not video:
-        raise ConsoleError(f"Video {video_id} not found")
-    print_found_video(video)
-    total_duration = video["lengthSeconds"]
-
-    target_path = Path(video_filename(video, format, output))
-    print_log(f"Target: {blue(target_path)}")
-
-    if not overwrite and target_path.exists():
-        response = click.prompt("File exists. Overwrite? [Y/n]", default="Y", show_default=False)
-        if response.lower().strip() != "y":
-            raise click.Abort()
-        overwrite = True
+    target_path = get_target_path(video, format, output, overwrite)
 
     print_log("Loading video comments...")
-    video_comments = get_video_comments(video_id)
+    video_comments = twitch.get_video_comments(video_id)
     badges_by_id = {badge["id"]: badge for badge in video_comments["badges"]}
 
     fonts = load_fonts(font_size)
@@ -88,6 +76,7 @@ def render_chat(
 
     first = True
     frame_durations: Deque[float] = deque(maxlen=100)
+    total_duration = video["lengthSeconds"]
     for group_index, offset, duration, comments in group_comments(video_id, total_duration):
         if group_index == 0:
             # Save the initial empty frame
@@ -420,7 +409,7 @@ def generate_comments(video_id: str) -> Generator[Comment, None, None]:
     cursor = None
 
     while has_next:
-        video = get_comments(video_id, cursor=cursor)
+        video = twitch.get_comments(video_id, cursor=cursor)
         for comment in video["comments"]["edges"]:
             yield comment["node"]
 
