@@ -29,6 +29,7 @@ dependencies = [
 packages = [
     "twitchdl",
     "twitchdl.commands",
+    "twitchdl.chat",
 ]
 
 [tool.setuptools_scm]

@@ -15,7 +15,7 @@ from twitchdl.cache import get_cache_dir, get_cache_subdirs
 from twitchdl.entities import DownloadOptions
 from twitchdl.exceptions import ConsoleError
 from twitchdl.naming import DEFAULT_CHAT_OUTPUT, DEFAULT_VIDEO_OUTPUT
-from twitchdl.output import print_log, print_table
+from twitchdl.output import print_table, print_warning
 from twitchdl.twitch import ClipsPeriod, VideosSort, VideosType
 from twitchdl.utils import format_size, get_size
 
@@ -490,7 +490,17 @@ def videos(
     )
 
 
-@cli.command()
+@cli.group()
+def chat():
+    """
+    Render chat in various formats (experimental)
+
+    WARNING: These commands are experimental and may change in the future!
+    """
+    pass
+
+
+@chat.command("video")
 @click.argument("id")
 @click.option(
     "-w",
@@ -570,8 +580,7 @@ def videos(
     help="Don't run ffmpeg to join the generated frames, implies --keep.",
     is_flag=True,
 )
-@json_option
-def chat(
+def chat_video(
     id: str,
     width: int,
     height: int,
@@ -585,20 +594,12 @@ def chat(
     overwrite: bool,
     keep: bool,
     no_join: bool,
-    json: bool,
 ):
-    """
-    Render chat for a given video.
-
-    This command is experimental and may change in the future!
-    """
-    print_log("Chat command is still experimental, try it out and report any bugs.")
+    """Render twitch chat as video"""
+    print_warning("Chat commands are still experimental, try them out and report any bugs.")
 
     try:
-        from twitchdl.chat import render_chat
-
-        if json:
-            format = "json"
+        from twitchdl.chat.video import render_chat
 
         render_chat(
             id,
@@ -613,7 +614,6 @@ def chat(
             overwrite,
             keep,
             no_join,
-            json,
         )
     except ModuleNotFoundError as ex:
         raise ConsoleError(
@@ -627,6 +627,27 @@ def chat(
                 https://twitch-dl.bezdomni.net/commands/chat.html
             """)
         )
+
+
+@chat.command("json")
+@click.argument("id")
+@click.option(
+    "-o",
+    "--output",
+    help="Output file name template. See docs for details.",
+    default=DEFAULT_CHAT_OUTPUT,
+)
+@click.option(
+    "--overwrite",
+    help="Overwrite the target file if it already exists without prompting.",
+    is_flag=True,
+)
+def chat_json(id: str, output: str, overwrite: bool):
+    """Render twitch chat as json"""
+    print_warning("Chat commands are still experimental, try them out and report any bugs.")
+    from twitchdl.chat.json import render_chat_json
+
+    render_chat_json(id, output, overwrite)
 
 
 @cli.command

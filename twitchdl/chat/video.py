@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 import shutil
 import subprocess
@@ -16,7 +15,7 @@ import click
 from PIL import Image, ImageDraw
 
 from twitchdl import cache
-from twitchdl.entities import Badge, Comment, Emote, Video
+from twitchdl.entities import Badge, Comment, Emote
 from twitchdl.exceptions import ConsoleError
 from twitchdl.fonts import Font, char_name, load_font, make_group_by_font
 from twitchdl.naming import video_filename
@@ -69,7 +68,6 @@ def render_chat(
     overwrite: bool,
     keep: bool,
     no_join: bool,
-    json: bool,
 ):
     video_id = parse_video_identifier(id)
     if not video_id:
@@ -90,10 +88,6 @@ def render_chat(
         if response.lower().strip() != "y":
             raise click.Abort()
         overwrite = True
-
-    if json:
-        download_chat_json(video, target_path)
-        return
 
     print_log("Loading video comments...")
     video_comments = get_video_comments(video_id)
@@ -151,29 +145,6 @@ def render_chat(
     else:
         print_status("Deleting cache...", dim=True)
         shutil.rmtree(cache_dir)
-
-
-def download_chat_json(video: Video, target_path: Path):
-    print_log("Loading VideoComments...")
-    video_comments = get_video_comments(video["id"])
-
-    comments: List[Comment] = []
-    total_duration = video["lengthSeconds"]
-    for page in generate_paged_comments(video["id"]):
-        if page:
-            comments.extend(page)
-            offset_seconds = page[-1]["contentOffsetSeconds"]
-            print_status(f"Loading Comments {format_time(offset_seconds)}/{format_time(total_duration)}", transient=True, dim=True)
-
-    with open(target_path, "w", encoding="utf8") as f:
-        obj = {
-            "video": video,
-            "video_comments": video_comments,
-            "comments": comments,
-        }
-        json.dump(obj, f)
-
-    click.echo(f"Chat saved to: {target_path}")
 
 
 def load_fonts(font_size: int):
@@ -376,7 +347,7 @@ class Screen:
         emoji_draw.text((0, 0), emoji, font=font.image_font, embedded_color=True)  # type: ignore
 
         # TODO: cache this image so we don't do it every time
-        resized = emoji_image.resize(target_size)
+        resized = emoji_image.resize(target_size)  # type: ignore
         self.image.alpha_composite(resized, (self.x + self.space_size, self.y))
         self.x += target_width + self.space_size
 
