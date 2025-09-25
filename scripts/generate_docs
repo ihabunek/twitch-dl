@@ -13,6 +13,7 @@ import shutil
 import textwrap
 
 from click import Command, Group, Context
+from click.core import UNSET
 
 from twitchdl.cli import cli
 
@@ -135,7 +136,7 @@ def get_options(command: Command):
             help = option.help or ""
             help = re.sub(r"\s+", " ", help)
             help += choices(option)
-            if option.default:
+            if option.default and option.default != UNSET:
                 help += f" [default: `{option.default}`]"
 
             yield opts, help
