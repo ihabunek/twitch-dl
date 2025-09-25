@@ -63,16 +63,6 @@ twitch-dl chat ytt [OPTIONS] ID
 </tr>
 
 <tr>
-    <td class="code">--vertical-spacing INTEGER</td>
-    <td>Spacing between lines [default: <code>4</code>]</td>
-</tr>
-
-<tr>
-    <td class="code">--vertical-spacing INTEGER</td>
-    <td>Spacing between lines [default: <code>4</code>]</td>
-</tr>
-
-<tr>
     <td class="code">--line-count INTEGER</td>
     <td>Number of lines to render [default: <code>13</code>]</td>
 </tr>
