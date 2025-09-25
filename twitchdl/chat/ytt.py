@@ -179,7 +179,7 @@ def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, 
     tree = ElementTree(root)
     if pretty:
         try:
-            from xml.etree.ElementTree import indent
+            from xml.etree.ElementTree import indent  # type: ignore # novermin
 
             indent(tree)
         except ImportError:
