@@ -616,7 +616,17 @@ def chat_video(
     keep: bool,
     no_join: bool,
 ):
-    """Render twitch chat as video"""
+    """
+    Render twitch chat as video
+
+    ### Additional dependencies
+
+    This command requires twitch-dl to be installed with optional "chat" dependencies:
+
+        pipx install "twitch-dl[chat]"
+
+    It is not available if twitch-dl is used from the `pyz` archive.
+    """
     try:
         from twitchdl.chat.video import render_chat
 
@@ -795,9 +805,9 @@ def chat_ytt(
     """
     Render twitch chat as youtube subtitles
 
-    If you upload your twitch VOD to YouTube, you can use this command to
-    generate a ytt file which can be uploaded to the youtube video to show the
-    chat as subtitles.
+    If you upload your Twitch VOD to YouTube, you can use this command to
+    generate a ytt file which can be uploaded alongside the YouTube video to
+    show the chat in subtitles.
     """
     from twitchdl.chat.ytt import render_chat_ytt
 
