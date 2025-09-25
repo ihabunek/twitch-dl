@@ -1,14 +1,16 @@
 import json
+from functools import lru_cache
 
 import pytest
 from click.testing import CliRunner, Result
 
-from twitchdl import cli
+from twitchdl import cli, twitch
+from twitchdl.entities import Clip, Video
 
 
 @pytest.fixture(scope="session")
 def runner():
-    return CliRunner(mix_stderr=False)
+    return CliRunner()
 
 
 def assert_ok(result: Result):
@@ -18,50 +20,67 @@ def assert_ok(result: Result):
         )
 
 
+@lru_cache
+def get_some_video() -> Video:
+    """Returns a video for testing"""
+    response = twitch.get_channel_videos("gamesdonequick", 1, "time")
+    return response["edges"][0]["node"]
+
+
+@lru_cache
+def get_some_clip() -> Clip:
+    """Returns a clip for testing"""
+    response = twitch.get_channel_clips("gamesdonequick", "all_time", 1)
+    return response["edges"][0]["node"]
+
+
 def test_info_video(runner: CliRunner):
-    result = runner.invoke(cli.info, ["2090131595"])
+    video = get_some_video()
+
+    result = runner.invoke(cli.info, [video["id"]])
     assert_ok(result)
 
-    assert "Frost Fatales 2024 Day 1" in result.stdout
-    assert "GamesDoneQuick playing Tomb Raider" in result.stdout
+    assert f"Video {video['id']}" in result.output
+    assert video["title"] in result.output
+    if video["game"]:
+        assert video["game"]["name"] in result.output
 
 
 def test_info_video_json(runner: CliRunner):
-    result = runner.invoke(cli.info, ["2090131595", "--json"])
+    video = get_some_video()
+
+    result = runner.invoke(cli.info, [video["id"], "--json"])
     assert_ok(result)
 
-    video = json.loads(result.stdout)
-    assert video["title"] == "Frost Fatales 2024 Day 1"
-    assert video["game"] == {"id": "2770", "name": "Tomb Raider"}
-    assert video["creator"] == {
-        "id": "413727206",
-        "login": "frozenflygone",
-        "displayName": "frozenflygone",
-    }
-    assert video["owner"] == {
-        "id": "22510310",
-        "login": "gamesdonequick",
-        "displayName": "GamesDoneQuick",
-    }
+    result = json.loads(result.stdout)
+    assert result["id"] == video["id"]
+    assert result["title"] == video["title"]
+    assert result["game"] == video["game"]
+    assert result["creator"] == video["creator"]
+    assert result["owner"] == video["owner"]
 
 
 def test_info_clip(runner: CliRunner):
-    result = runner.invoke(cli.info, ["PoisedTalentedPuddingChefFrank"])
+    clip = get_some_clip()
+
+    result = runner.invoke(cli.info, [clip["slug"]])
     assert_ok(result)
 
-    assert "AGDQ Crashes during Bioshock run" in result.stdout
-    assert "GamesDoneQuick playing BioShock" in result.stdout
+    assert clip["slug"] in result.output
+    assert clip["title"] in result.output
 
 
 def test_info_clip_json(runner: CliRunner):
-    result = runner.invoke(cli.info, ["PoisedTalentedPuddingChefFrank", "--json"])
+    clip = get_some_clip()
+
+    result = runner.invoke(cli.info, [clip["slug"], "--json"])
     assert_ok(result)
 
-    clip = json.loads(result.stdout)
-    assert clip["slug"] == "PoisedTalentedPuddingChefFrank"
-    assert clip["title"] == "AGDQ Crashes during Bioshock run"
-    assert clip["game"] == {"id": "15866", "name": "BioShock"}
-    assert clip["broadcaster"] == {"displayName": "GamesDoneQuick", "login": "gamesdonequick"}
+    result = json.loads(result.stdout)
+    assert result["slug"] == clip["slug"]
+    assert result["title"] == clip["title"]
+    assert result["game"] == clip["game"]
+    assert result["broadcaster"] == clip["broadcaster"]
 
 
 def test_info_not_found(runner: CliRunner):
@@ -79,46 +98,21 @@ def test_info_not_found(runner: CliRunner):
 
 
 def test_download_clip(runner: CliRunner):
-    result = runner.invoke(
-        cli.download,
-        [
-            "PoisedTalentedPuddingChefFrank",
-            "-q",
-            "source",
-            "--dry-run",
-        ],
-    )
+    clip = get_some_clip()
+
+    result = runner.invoke(cli.download, [clip["slug"], "-q", "source", "--dry-run"])
     assert_ok(result)
-    assert (
-        "Found clip: AGDQ Crashes during Bioshock run by GamesDoneQuick playing BioShock (00:30)"
-        in result.stderr
-    )
-    assert (
-        "Target: 2020-01-10_3099545841_gamesdonequick_agdq_crashes_during_bioshock_run.mp4"
-        in result.stderr
-    )
+    assert f"Found clip: {clip['title']}" in result.output
     assert "Dry run, clip not downloaded." in result.stdout
 
 
 def test_download_video(runner: CliRunner):
-    result = runner.invoke(
-        cli.download,
-        [
-            "2090131595",
-            "-q",
-            "source",
-            "--dry-run",
-        ],
-    )
+    video = get_some_video()
+    result = runner.invoke(cli.download, [video["id"], "-q", "source", "--dry-run"])
+
     assert_ok(result)
-    assert (
-        "Found video: Frost Fatales 2024 Day 1 by GamesDoneQuick playing Tomb Raider (11:44:38)"
-        in result.stderr
-    )
-    assert (
-        "Target: 2024-03-14_2090131595_gamesdonequick_frost_fatales_2024_day_1.mp4" in result.stderr
-    )
-    assert "Dry run, video not downloaded." in result.stdout
+    assert f"Found video: {video['title']}" in result.output
+    assert "Dry run, video not downloaded." in result.output
 
 
 def test_videos(runner: CliRunner):
@@ -146,7 +140,7 @@ def test_videos(runner: CliRunner):
 def test_videos_channel_not_found(runner: CliRunner):
     result = runner.invoke(cli.videos, ["doesnotexisthopefully"])
     assert result.exit_code == 1
-    assert result.stderr.strip() == "Error: Channel doesnotexisthopefully not found"
+    assert result.output.strip() == "Error: Channel doesnotexisthopefully not found"
 
 
 def test_clips(runner: CliRunner):

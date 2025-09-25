@@ -236,7 +236,7 @@ def get_channel_clips(
       user(login: "{channel_id}") {{
         clips(
           first: {limit},
-          after: "{after or ''}",
+          after: "{after or ""}",
           criteria: {{
             period: {period.upper()},
             sort: VIEWS_DESC
@@ -328,7 +328,7 @@ def get_channel_videos(
                 first: {limit},
                 type: {type.upper()},
                 sort: {sort.upper()},
-                after: "{after or ''}",
+                after: "{after or ""}",
                 options: {{
                     gameIDs: {game_ids_str}
                 }}
@@ -383,6 +383,8 @@ def channel_videos_generator(
 
     limit = min(max_videos, 100)
     videos = get_channel_videos(channel_id, limit, sort, type, game_ids)
+    if videos is None:
+        raise ConsoleError(f"Channel {channel_id} not found")
     return videos["totalCount"], _generator(videos, max_videos)
 
 
@@ -411,8 +413,8 @@ def get_access_token(video_id: str, auth_token: Optional[str] = None) -> AccessT
         # see: https://github.com/ihabunek/twitch-dl/issues/175
         if access_token is None:
             raise ConsoleError(
-                "Twitch did not return an access token.\n" +
-                "This sometimes happens with fresh VODs. Try again a bit later."
+                "Twitch did not return an access token.\n"
+                + "This sometimes happens with fresh VODs. Try again a bit later."
             )
 
         return access_token
