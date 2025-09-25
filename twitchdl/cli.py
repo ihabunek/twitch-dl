@@ -745,12 +745,6 @@ class HashType(enum.Enum):
 )
 @click.option(
     "--vertical-spacing",
-    type=click.IntRange(0, 50),
-    default=4,
-    help="Spacing between lines",
-)
-@click.option(
-    "--vertical-spacing",
     type=click.IntRange(min=0),
     default=4,
     help="Spacing between lines",
