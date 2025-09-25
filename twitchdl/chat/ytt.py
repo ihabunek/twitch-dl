@@ -12,7 +12,6 @@ from typing import Any, Dict, List, NamedTuple, Optional
 from wcwidth import wcswidth  # type: ignore
 from xml.etree.ElementTree import Element, ElementTree, SubElement
 from xml.etree.ElementTree import Comment as XMLComment
-from xml.etree.ElementTree import indent  # type: ignore
 
 from twitchdl.chat.utils import (
     USER_COLORS,
@@ -23,6 +22,7 @@ from twitchdl.chat.utils import (
 )
 from twitchdl.entities import Comment as CommentEntitiy
 from twitchdl.entities import Video
+from twitchdl.output import print_error
 from twitchdl.utils import iterate_with_next
 
 
@@ -178,7 +178,13 @@ def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, 
 
     tree = ElementTree(root)
     if pretty:
-        indent(tree)
+        try:
+            from xml.etree.ElementTree import indent
+
+            indent(tree)
+        except ImportError:
+            print_error("--pretty option requires python 3.9+")
+
     tree.write(target_path, xml_declaration=True, encoding="utf-8")
 
 
