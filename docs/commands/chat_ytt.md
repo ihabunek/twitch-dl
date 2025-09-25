@@ -86,3 +86,8 @@ twitch-dl chat ytt [OPTIONS] ID
 
 <!-- ------------------- generated docs end ------------------- -->
 
+## Example
+
+Here's an example of the chat shown as youtube subtitles:
+
+![YTT subtitles on YouTube](../images/ytt_subs.jpg)
