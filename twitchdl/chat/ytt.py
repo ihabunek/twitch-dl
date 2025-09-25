@@ -85,7 +85,6 @@ class YttOptions(NamedTuple):
     text_edge_color: str
     text_edge_type: str
     vertical_offset: int
-    vertical_spacing: int
     line_count: int
     line_chars: int
 
@@ -131,16 +130,16 @@ def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, 
     add_comment(head, "Default workspace")
     sub_element(head, "ws", id=workspace_id, ju=options.text_align)
 
-    add_comment(head, "Positions")
-    for index in range(options.line_count):
-        sub_element(
-            head,
-            "wp",
-            id=index,
-            ap=AnchorPoint.TopLeft.value,
-            ah=options.horizontal_offset,
-            av=options.vertical_offset + options.vertical_spacing * index,
-        )
+    position_id = 1
+    add_comment(head, "Position")
+    sub_element(
+        head,
+        "wp",
+        id=position_id,
+        ap=AnchorPoint.TopLeft.value,
+        ah=options.horizontal_offset,
+        av=options.vertical_offset,
+    )
 
     lines: List[Line] = []
     starts = comments_by_start.keys()
@@ -157,8 +156,10 @@ def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, 
                     lines.append(Line(None, None, line))
 
         visible_lines = lines[-options.line_count :]
-        for position, line in enumerate(visible_lines):
-            p = sub_element(body, "p", t=start, d=duration, wp=position, ws=workspace_id, p=0)
+
+        p = sub_element(body, "p", t=start, d=duration, wp=position_id, ws=workspace_id, p=0)
+        for idx, line in enumerate(visible_lines):
+            s = None
 
             if line.username:
                 assert line.username_color is not None
@@ -174,6 +175,9 @@ def render_chat_ytt(id: str, output: str, overwrite: bool, options: YttOptions, 
             if line.text:
                 s = sub_element(p, "s")
                 s.text = line.text
+
+            if s is not None:
+                s.tail = "\n"
 
     tree = ElementTree(root)
     if pretty:

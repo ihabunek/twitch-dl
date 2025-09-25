@@ -744,12 +744,6 @@ class HashType(enum.Enum):
     help="Position of subtitles, distance from top edge",
 )
 @click.option(
-    "--vertical-spacing",
-    type=click.IntRange(min=0),
-    default=4,
-    help="Spacing between lines",
-)
-@click.option(
     "--line-count",
     type=click.IntRange(min=0),
     default=13,
@@ -792,7 +786,6 @@ def chat_ytt(
     pretty: bool,
     horizontal_offset: int,
     vertical_offset: int,
-    vertical_spacing: int,
     line_count: int,
     line_chars: int,
 ):
@@ -820,7 +813,6 @@ def chat_ytt(
         text_edge_color=text_edge_color,
         text_edge_type=EdgeType[text_edge_type].value,
         vertical_offset=vertical_offset,
-        vertical_spacing=vertical_spacing,
         line_count=line_count,
         line_chars=line_chars,
     )
