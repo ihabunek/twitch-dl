@@ -1,3 +1,10 @@
+3.2.0:
+  date: 2025-09-25
+  changes:
+    - "**Requires Python 3.9+**"
+    - "Experimental command `twitch-dl chat` has been split into separte subcommands `twitch-dl chat video` and `twitch-dl chat json`"
+    - "Add `twitch-dl chat ytt` for generating chat as subtitles which can be uploaded to youtube"
+
 3.1.0:
   date: 2025-05-16
   changes:
