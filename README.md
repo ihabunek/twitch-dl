@@ -17,7 +17,7 @@ Resources
 Requirements
 ------------
 
-* Python 3.8 or later
+* Python 3.9 or later
 * [ffmpeg](https://ffmpeg.org/download.html), installed and on the system path
 
 Quick start

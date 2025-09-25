@@ -9,7 +9,7 @@ description = "Quickly download videos from twitch.tv from the comort of your te
 keywords=["twitch", "vod", "video", "download"]
 readme = "README.md"
 license = { file="LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["version"]
 
 classifiers = [
@@ -52,7 +52,7 @@ twitch-dl = "twitchdl.cli:cli"
 
 [tool.pyright]
 typeCheckingMode = "strict"
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 
 [tool.ruff]
 line-length = 100

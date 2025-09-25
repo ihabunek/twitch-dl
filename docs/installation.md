@@ -1,6 +1,6 @@
 # Installation
 
-twitch-dl requires **Python 3.8** or later.
+twitch-dl requires **Python 3.9** or later.
 
 ## Prerequisite: FFmpeg
 
