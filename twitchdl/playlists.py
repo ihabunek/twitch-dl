@@ -197,6 +197,16 @@ def select_playlist_by_name(playlists: List[Playlist], quality: str) -> Playlist
         for playlist in playlists:
             if playlist.is_source:
                 return playlist
+
+        # Some VODs don't have a "chunked" (source) quality group, even
+        # though other qualities are available. Fall back to the highest
+        # available quality instead of failing, matching the default
+        # selection used in interactive mode.
+        if playlists:
+            fallback = min(playlists, key=_playlist_key)
+            print_log(f"Source quality not found, falling back to: {fallback.name}")
+            return fallback
+
         raise click.ClickException("Source quality not found, please report an issue on github.")
 
     for playlist in playlists:
