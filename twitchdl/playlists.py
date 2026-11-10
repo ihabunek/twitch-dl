@@ -60,6 +60,8 @@ def _parse_playlist(playlist: m3u8.Playlist):
         else None
     )
 
+    if not playlist.media:
+        raise ConsoleError("No media found in playlist")
     media = playlist.media[0]
     is_source = media.group_id == "chunked"
 
